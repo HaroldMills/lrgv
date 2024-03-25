@@ -1,0 +1,42 @@
+# pyproject.toml for `dataflow` pip package.
+#
+# To create a Python environment named `dataflow-dev` in which to work on
+# the `dataflow` package:
+#
+#     conda create -n dataflow-dev python=3.11
+#     conda activate dataflow-dev
+#     pip install -e <vesper package dir path>
+#     pip install -e <dataflow package dir path>
+
+
+[build-system]
+requires = ['hatchling']
+build-backend = 'hatchling.build'
+
+[project]
+name = 'dataflow'
+version = '0.0.0'
+description = 'Dataflow processing classes.'
+# readme = 'README.md'
+requires-python = '~=3.11.0'
+# license = {file = 'LICENSE'}
+authors = [
+  {name = 'Harold Mills', email = 'harold.mills@gmail.com'},
+]
+classifiers = [
+    'Programming Language :: Python :: 3',
+    'Operating System :: OS Independent',
+]
+dependencies = [
+]
+
+# [project.urls]
+# 'Bug Tracker' = 'https://github.com/bmvandoren/nighthawk/issues'
+# 'Source Code' = 'https://github.com/bmvandoren/nighthawk'
+
+# [project.scripts]
+# nighthawk = 'nighthawk.run_nighthawk:main'
+# prep_feedback = 'nighthawk.prep_feedback:main'
+
+# [tool.hatch.build]
+# exclude = ["instructions*"]

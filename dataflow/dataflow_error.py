@@ -1,0 +1,2 @@
+class DataflowError(Exception):
+    pass
