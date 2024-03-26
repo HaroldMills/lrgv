@@ -1,4 +1,4 @@
-from dataflow_error import DataflowError
+from dataflow.dataflow_error import DataflowError
 from vesper.util.bunch import Bunch
 
 

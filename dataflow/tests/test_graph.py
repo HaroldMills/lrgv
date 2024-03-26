@@ -1,11 +1,11 @@
-from dataflow import Graph, Processor
+from dataflow import LinearGraph, Processor
 from dataflow.tests.processors import (
     AffineTransformer, CollectingSink, RangeSource, Scaler)
 from dataflow.tests.processor_test_case import ProcessorTestCase
 from vesper.util.bunch import Bunch
 
 
-class TestGraph(Graph):
+class TestGraph(LinearGraph):
 
 
     def __init__(self, name, source_settings, processor):

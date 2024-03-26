@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 
-# It's important to import from `processor` here rather than from
-# `dataflow` to avoid a circular import.
-from processor import Processor
+from dataflow.processor import Processor
 
 
 @dataclass(frozen=True)

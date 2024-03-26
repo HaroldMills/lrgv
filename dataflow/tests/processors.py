@@ -1,4 +1,4 @@
-from dataflow import Data, Graph, InputPort, OutputPort, Processor
+from dataflow import Data, InputPort, LinearGraph, OutputPort, Processor
 from vesper.util.bunch import Bunch
 
 
@@ -126,7 +126,7 @@ class Offsetter(Processor):
         return {'Output': output}
 
 
-class AffineTransformer(Graph):
+class AffineTransformer(LinearGraph):
 
 
     type_name = 'Affine Transformer'

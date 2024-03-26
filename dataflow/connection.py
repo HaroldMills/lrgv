@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from port import Port
+from dataflow.port import Port
 
 
 @dataclass
