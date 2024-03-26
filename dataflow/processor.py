@@ -32,6 +32,8 @@ from vesper.util.bunch import Bunch
 # TODO: Add `Processor.STATE_INTERRUPTED` and implement `interrupt`
 # method.
 
+# TODO: Consider allowing `_process` method of sink to return `None`.
+
 # TODO: Complete docstrings.
 
 # TODO: Write more unit tests.
