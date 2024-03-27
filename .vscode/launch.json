@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Archive Clips",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/archive_clips.py",
+            "python": "/Users/harold/miniconda3/envs/dataflow/bin/python",
+            "console": "integratedTerminal",
+        },
+         {
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
