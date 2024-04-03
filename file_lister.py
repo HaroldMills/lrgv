@@ -1,13 +1,10 @@
 import re
 import time
 
-from dataflow import Data, OutputPort, Processor
+from dataflow import SimpleSource
 
 
-class FileLister(Processor):
-
-
-    type_name = 'File Lister'
+class FileLister(SimpleSource):
 
 
     def __init__(self, name, settings):
@@ -24,11 +21,7 @@ class FileLister(Processor):
         self._file_wait_period = settings.file_wait_period
 
 
-    def _create_output_ports(self):
-        return (OutputPort(self),)
-    
-
-    def _process(self, input_data):
+    def _process_items(self):
 
         # Start with all file paths.
         file_paths = tuple(p for p in self._dir_path.glob('*'))
@@ -48,4 +41,4 @@ class FileLister(Processor):
                 p for p in file_paths
                 if p.stat().st_mtime <= mod_time_threshold)
             
-        return {'Output': Data(file_paths, False)}
+        return file_paths, False

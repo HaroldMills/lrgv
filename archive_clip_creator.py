@@ -6,21 +6,14 @@ from dataflow import SimpleSink
 _logger = logging.getLogger(__name__)
 
 
-class FileMover(SimpleSink):
+class ArchiveClipCreator(SimpleSink):
 
 
-    def __init__(self, name, settings):
-        super().__init__(name, settings)
-        self._destination_dir_path = settings.destination_dir_path
-
-
-    def _process_item(self, file_path, finished):
-
-        new_path = self._destination_dir_path / file_path.name
+    def _process_item(self, clip, finished):
 
         _logger.info(
-            f'Processor "{self.name}" moving file "{file_path}" '
-            f'to "{new_path}"...')
+            f'Processor "{self.name}" received clip '
+            f'"{clip.audio_file_path}"...')
 
         # try:
         #     file_path.replace(new_path)
