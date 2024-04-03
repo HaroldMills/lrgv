@@ -6,9 +6,6 @@ from dataflow.graph import Graph
 class LinearGraph(Graph):
 
 
-    type_name = None
-
-
     def _create_connections(self):
 
         # Convenience method that a subclass can invoke from

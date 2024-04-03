@@ -2,6 +2,14 @@ from dataflow.dataflow_error import DataflowError
 from vesper.util.bunch import Bunch
 
 
+# TODO: Consider implementing `Processor` subclasses for common
+# (input count, output count) cases like (0, 1), (1, 1), and (1, 0).
+# These would define `_create_inputs` and `_create_outputs` as
+# appropriate, and perhaps override `_process` to unwrap input data
+# and wrap output data. The goal is for most `Processor` subclasses
+# to have to implement only the processing method, and for that
+# implementation to be as simple as possible.
+
 # TODO: Consider supporting a variable number of inputs or outputs.
 # For example, multiplexer and demultiplexer signal processors might
 # multiplex and demultiplex arbitrary numbers of signal channels.
@@ -226,8 +234,6 @@ class Processor:
     zero or more input sequences.
     """
 
-
-    type_name = 'Processor'
 
     # In the future, something like the following could specify the
     # settings type of a `Processor` subclass. The settings type could

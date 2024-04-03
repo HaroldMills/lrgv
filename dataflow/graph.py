@@ -87,9 +87,6 @@ connections:
 class Graph(Processor):
 
 
-    type_name = None
-
-
     def __init__(self, name, settings=None):
 
         super().__init__(name, settings)
