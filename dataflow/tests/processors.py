@@ -1,11 +1,10 @@
-from dataflow import Data, InputPort, LinearGraph, OutputPort, Processor
+from dataflow import (
+    LinearGraph, SimpleProcessor, SimpleProcessorMixin, SimpleSink,
+    SimpleSource)
 from vesper.util.bunch import Bunch
 
 
-class RangeSource(Processor):
-
-
-    type_name = 'Integer Range Source'
+class RangeSource(SimpleSource):
 
 
     def __init__(self, name, settings):
@@ -15,31 +14,19 @@ class RangeSource(Processor):
         self._stop_value = settings.stop
 
 
-    def _create_output_ports(self):
-        return (OutputPort(self),)
-
-
-    def _process(self, input_data):
-
+    def _process_items(self):
+    
         start_value = self._next_value
         stop_value = min(start_value + self._chunk_size, self._stop_value)
         items = tuple(range(start_value, stop_value))
 
         self._next_value = stop_value
-
         finished = self._next_value == self._stop_value
 
-        if finished:
-            self._state = Processor.STATE_FINISHED
-
-        output = Data(items, finished)
-        return {'Output': output}
+        return items, finished
     
 
-class CollectingSink(Processor):
-
-
-    type_name = 'CollectingSink'
+class CollectingSink(SimpleSink):
 
 
     def __init__(self, name):
@@ -47,27 +34,16 @@ class CollectingSink(Processor):
         self._items = []
 
 
-    def _create_input_ports(self):
-        return (InputPort(self),)
-
-    
     @property
     def items(self):
         return self._items
     
     
-    def _process(self, input_data):
-        input = input_data['Input']
-        self._items += input.items
-        if input.finished:
-            self._state = Processor.STATE_FINISHED
-        return {}
+    def _process_items(self, items, finished):
+        self._items += items
 
 
-class Scaler(Processor):
-
-
-    type_name = 'Scaler'
+class Scaler(SimpleProcessor):
 
 
     def __init__(self, name, settings):
@@ -75,30 +51,11 @@ class Scaler(Processor):
         self._scale_factor = settings.scale_factor
 
 
-    def _create_input_ports(self):
-        return (InputPort(self),)
-
-    
-    def _create_output_ports(self):
-        return (OutputPort(self),)
+    def _process_item(self, item, finished):
+        return self._scale_factor * item
 
 
-    def _process(self, input_data):
-
-        input = input_data['Input']
-        items = tuple(i * self._scale_factor for i in input.items)
-
-        if input.finished:
-            self._state = Processor.STATE_FINISHED
-
-        output = Data(items, input.finished)
-        return {'Output': output}
-
-
-class Offsetter(Processor):
-
-
-    type_name = 'Offsetter'
+class Offsetter(SimpleProcessor):
 
 
     def __init__(self, name, settings):
@@ -106,38 +63,11 @@ class Offsetter(Processor):
         self._offset = settings.offset
 
 
-    def _create_input_ports(self):
-        return (InputPort(self),)
-
-    
-    def _create_output_ports(self):
-        return (OutputPort(self),)
+    def _process_item(self, item, finished):
+        return item + self._offset
 
 
-    def _process(self, input_data):
-
-        input = input_data['Input']
-        items = tuple(i + self._offset for i in input.items)
-
-        if input.finished:
-            self._state = Processor.STATE_FINISHED
-
-        output = Data(items, input.finished)
-        return {'Output': output}
-
-
-class AffineTransformer(LinearGraph):
-
-
-    type_name = 'Affine Transformer'
-
-
-    def _create_input_ports(self):
-        return (InputPort(self),)
-
-    
-    def _create_output_ports(self):
-        return (OutputPort(self),)
+class AffineTransformer(SimpleProcessorMixin, LinearGraph):
 
 
     def _create_processors(self):
@@ -150,4 +80,4 @@ class AffineTransformer(LinearGraph):
         settings = Bunch(offset=s.offset)
         offsetter = Offsetter('Offsetter', settings)
 
-        return (scaler, offsetter)
+        return scaler, offsetter
