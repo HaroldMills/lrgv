@@ -2,7 +2,7 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        "./dataflow",
+        ".",
         "-p",
         "test_*.py"
     ],

@@ -8,8 +8,8 @@
             "name": "Archive Clips",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/archive_clips.py",
-            "python": "/Users/harold/miniconda3/envs/dataflow/bin/python",
+            "program": "${workspaceFolder}/lrgv/scripts/archive_clips.py",
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
             "console": "integratedTerminal",
         },
          {
@@ -17,6 +17,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
             "console": "integratedTerminal"
         }
     ]

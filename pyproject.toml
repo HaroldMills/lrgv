@@ -14,9 +14,12 @@ requires = ['hatchling']
 build-backend = 'hatchling.build'
 
 [project]
-name = 'dataflow'
+name = 'lrgv'
 version = '0.0.0'
-description = 'Dataflow processing classes.'
+description = """\
+    Software for Old Bird Lower Rio Grande Valley (LRGV) acoustic \
+    monitoring project.\
+    """
 # readme = 'README.md'
 requires-python = '~=3.11.0'
 # license = {file = 'LICENSE'}
