@@ -36,8 +36,8 @@ logger = logging.getLogger(__name__)
 
 
 ROOT_DIR_PATH = Path(__file__).parent
-LOG_FILE_PATH = ROOT_DIR_PATH / 'run_nighthawk.log'
 TAXON_MAPPING_FILE_PATH = ROOT_DIR_PATH / 'species_code_mapping.json'
+LOG_FILE_NAME = 'run_nighthawk.log'
 WAVE_FILE_NAME_EXTENSION = '.wav'
 CSV_FILE_NAME_EXTENSION = '.csv'
 JSON_FILE_NAME_EXTENSION = '.json'
@@ -55,7 +55,8 @@ DETECTOR_NAME = 'Nighthawk 0.3.0 80'
 
 def main():
 
-    logging_utils.configure_logging(logging.INFO, LOG_FILE_PATH)
+    log_file_path = Path.cwd() / LOG_FILE_NAME
+    logging_utils.configure_logging(logging.INFO, log_file_path)
 
     # Get recording and clip directory paths.
     recording_dir_path, clip_dir_path, date = parse_args(sys.argv)

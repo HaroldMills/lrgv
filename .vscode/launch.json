@@ -21,6 +21,7 @@
                 "/Users/harold/Desktop/NFC/LRGV/2024/Nighthawk Runner Test Data/Recordings",
                 "/Users/harold/Desktop/NFC/LRGV/2024/Nighthawk Runner Test Data/Clips",
                 "2024-04-01"],
+            "cwd": "/Users/harold/Desktop/NFC/LRGV/2024/Nighthawk Runner Test Data",
             "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
             "console": "integratedTerminal",
         },
