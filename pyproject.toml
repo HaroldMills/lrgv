@@ -1,12 +1,11 @@
-# pyproject.toml for `dataflow` pip package.
+# pyproject.toml for `lrgv` pip package.
 #
-# To create a Python environment named `dataflow-dev` in which to work on
-# the `dataflow` package:
+# To create a Python environment named `lrgv` in which to work on
+# the `lrgv` package:
 #
-#     conda create -n dataflow-dev python=3.11
-#     conda activate dataflow-dev
-#     pip install -e <vesper package dir path>
-#     pip install -e <dataflow package dir path>
+#     conda create -n lrgv python=3.11
+#     conda activate lrgv
+#     pip install -e <lrgv package dir path>
 
 
 [build-system]
@@ -35,14 +34,4 @@ dependencies = [
 
 [project.scripts]
 run_nighthawk = 'lrgv.nighthawk.run_nighthawk:main'
-
-# [project.urls]
-# 'Bug Tracker' = 'https://github.com/bmvandoren/nighthawk/issues'
-# 'Source Code' = 'https://github.com/bmvandoren/nighthawk'
-
-# [project.scripts]
-# nighthawk = 'nighthawk.run_nighthawk:main'
-# prep_feedback = 'nighthawk.prep_feedback:main'
-
-# [tool.hatch.build]
-# exclude = ["instructions*"]
+archive_clips = 'lrgv.archiver.archive_clips:main'
