@@ -13,6 +13,18 @@
             "console": "integratedTerminal",
         },
         {
+            "name": "Run Nighthawk",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/lrgv/nighthawk/run_nighthawk.py",
+            "args": [
+                "/Users/harold/Desktop/NFC/LRGV/2024/Nighthawk Runner Test Data/Recordings",
+                "/Users/harold/Desktop/NFC/LRGV/2024/Nighthawk Runner Test Data/Clips",
+                "2024-04-01"],
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "console": "integratedTerminal",
+        },
+        {
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
