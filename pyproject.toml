@@ -33,6 +33,9 @@ classifiers = [
 dependencies = [
 ]
 
+[project.scripts]
+run_nighthawk = 'lrgv.nighthawk.run_nighthawk:main'
+
 # [project.urls]
 # 'Bug Tracker' = 'https://github.com/bmvandoren/nighthawk/issues'
 # 'Source Code' = 'https://github.com/bmvandoren/nighthawk'
