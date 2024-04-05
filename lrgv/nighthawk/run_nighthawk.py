@@ -62,14 +62,12 @@ def main():
     recording_dir_path, clip_dir_path, date = parse_args(sys.argv)
     logger.info(f'Recording directory path is "{recording_dir_path}".')
     logger.info(f'Clip directory path is "{clip_dir_path}".')
-    logger.info(f'Date is "{date}".')
 
     taxon_mapping = get_taxon_mapping(TAXON_MAPPING_FILE_PATH)
 
     files = get_recording_files(recording_dir_path, date)
 
-    if len(files) == 0:
-        logger.info(f'No recording files found for date {date}.')
+    log_file_count(len(files), date)
 
     for file in files:
 
@@ -197,6 +195,18 @@ def parse_recording_file_path(path):
     file.start_time = start_time
 
     return file
+
+
+def log_file_count(count, date):
+
+    if count == 0:
+        text = "no recording files"
+    elif count == 1:
+        text = "one recording file"
+    else:
+        text = f'{count} recording files'
+
+    logger.info(f'Found {text} for date {date}.')
 
 
 def run_nighthawk_on_file(file):
