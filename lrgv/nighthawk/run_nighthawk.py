@@ -1,10 +1,12 @@
 """
-Script that runs the Nighthawk NFC detector on recent recording files
-and creates an audio file and a metadata file for each resulting
-detection.
+Script that runs the Nighthawk NFC detector on recording files
+from one night and creates an audio file and a metadata file for
+each resulting detection.
 
-The script takes two command line arguments, a recording directory
-path and a clip directory path.
+The script has two required command line arguments, a recording
+directory path and a clip directory path. It also has an optional
+third argument, the date of the night for which to run the detector.
+The third argument defaults to yesterday's date.
 
 Each LRGV station laptop runs this script every morning after the
 previous night's recording completes to process the recording. Each
@@ -56,16 +58,14 @@ def main():
     logging_utils.configure_logging(logging.INFO, LOG_FILE_PATH)
 
     # Get recording and clip directory paths.
-    recording_dir_path, clip_dir_path = parse_args(sys.argv)
+    recording_dir_path, clip_dir_path, date = parse_args(sys.argv)
     logger.info(f'Recording directory path is "{recording_dir_path}".')
     logger.info(f'Clip directory path is "{clip_dir_path}".')
+    logger.info(f'Date is "{date}".')
 
     taxon_mapping = get_taxon_mapping(TAXON_MAPPING_FILE_PATH)
 
-    today = Date.today()
-    yesterday = Date.fromordinal(today.toordinal() - 1)
-
-    files = get_recording_files(recording_dir_path, yesterday)
+    files = get_recording_files(recording_dir_path, date)
 
     for file in files:
 
@@ -91,10 +91,11 @@ def main():
 
 def parse_args(args):
 
-    if len(args) != 3:
+    if len(args) != 3 and len(args) != 4:
         logger.critical(f'Bad script arguments: {args}')
         logger.critical(
-            'Usage: run_nighthawk <recording_dir_path> <clip_dir_path>')
+            'Usage: run_nighthawk <recording_dir_path> <clip_dir_path> '
+            '[<date>]')
         sys.exit(1)
 
     recording_dir_path = Path(args[1])
@@ -112,7 +113,16 @@ def parse_args(args):
             f'Specified clip directory "{clip_dir_path}" does not exist.')
         sys.exit(1)
 
-    return recording_dir_path, clip_dir_path
+    if len(args) == 4:
+        try:
+            date = Date.fromisoformat(args[3])
+        except Exception:
+            logger.critical(f'Bad date "{args[3]}".')
+            sys.exit(1)
+    else:
+        date = Date.fromordinal(Date.today().toordinal() - 1)
+
+    return recording_dir_path, clip_dir_path, date
 
 
 def get_taxon_mapping(file_path):
