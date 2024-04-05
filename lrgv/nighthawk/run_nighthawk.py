@@ -68,6 +68,9 @@ def main():
 
     files = get_recording_files(recording_dir_path, date)
 
+    if len(files) == 0:
+        logger.info(f'No recording files found for date {date}.')
+
     for file in files:
 
         logger.info(f'Processing recording file "{file.path}"...')
