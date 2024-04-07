@@ -21,5 +21,3 @@ var/
 
 # Archiver
 secrets/
-test/data/
-settings.yaml
