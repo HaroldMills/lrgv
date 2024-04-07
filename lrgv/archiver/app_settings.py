@@ -1,6 +1,8 @@
 from pathlib import Path
 import logging
 
+from environs import Env
+
 from lrgv.util.bunch import Bunch
 
 
@@ -101,6 +103,24 @@ def _get_paths(station_names, detector_names):
         stations=station_paths)
 
 
+def _get_secrets():
+
+    secret_file_path = Path(__file__).parent / 'secrets/secrets.env'
+
+    env = Env()
+    env.read_env(secret_file_path)
+
+    vesper = Bunch(
+        archive_url=env('LRGV_VESPER_ARCHIVE_URL'),
+        username=env('LRGV_VESPER_USERNAME'),
+        password=env('LRGV_VESPER_PASSWORD')
+    )
+
+    return Bunch(
+        vesper=vesper
+    )
+
+
 app_settings = Bunch(
     logging_level=_logging_level,
     station_names=_station_names,
@@ -109,4 +129,5 @@ app_settings = Bunch(
     old_bird_detector_name=_old_bird_detector_name,
     old_bird_clip_file_name_re=_old_bird_clip_file_name_re,
     clip_file_name_re=_clip_file_name_re,
-    clip_file_wait_period=_clip_file_wait_period)
+    clip_file_wait_period=_clip_file_wait_period,
+    secrets=_get_secrets())
