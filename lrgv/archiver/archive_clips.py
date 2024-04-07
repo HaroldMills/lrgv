@@ -3,8 +3,8 @@ import time
 
 from lrgv.archiver.app_settings import app_settings
 from lrgv.archiver.archive_clip_creator import ArchiveClipCreator
-from lrgv.archiver.file_system_clip_source import FileSystemClipSource
-from lrgv.archiver.old_bird_clip_mover import OldBirdClipMover
+from lrgv.archiver.clip_lister import ClipLister
+from lrgv.archiver.old_bird_clip_converter import OldBirdClipConverter
 from lrgv.dataflow import Graph, LinearGraph
 from lrgv.util.bunch import Bunch
 import lrgv.util.logging_utils as logging_utils
@@ -26,19 +26,19 @@ logger = logging.getLogger(__name__)
 #
 #       DetectorClipArchiver
 #
-#       ArchiveClipCreator
+#       DetectorClipCreator
 #           For each clip audio file in "Incoming" clip folder:
 #               * Create clip in archive database
 #               * Move clip audio file to "Created" clip folder, renaming
 #                 according to clip ID.
 #               * Delete clip metadata file from "Incoming" clip folder.
 #
-#       ClipAudioFileS3Uploader
+#       DetectorClipUploader
 #           For each clip audio file in "Created" clip folder:
 #               * Upload file to S3.
 #               * Delete file from "Created" clip folder.
 #
-#       OldBirdClipMover
+#       OldBirdClipConverter
 #           For each clip audio file in Old Bird clip folder:
 #               * Get clip start time.
 #               * Move clip audio file to "Incoming" clip folder, renaming
@@ -86,37 +86,37 @@ class StationClipArchiver(Graph):
 
     def _create_processors(self):
 
-        old_bird_clip_mover = self._create_old_bird_clip_mover()
+        old_bird_clip_converter = self._create_old_bird_clip_converter()
 
         detector_clip_archivers = tuple(
             self._create_detector_clip_archiver(n)
             for n in app_settings.detector_names)
 
-        return (old_bird_clip_mover,) + detector_clip_archivers
+        return (old_bird_clip_converter,) + detector_clip_archivers
 
 
-    def _create_old_bird_clip_mover(self):
+    def _create_old_bird_clip_converter(self):
         
         station_name = self.settings.station_name
 
-        name = f'{station_name} Old Bird Clip Mover'
+        name = f'{station_name} Old Bird Clip Converter'
 
         s = app_settings
 
         station_paths = s.paths.stations[station_name]
-        source_dir_path = station_paths.old_bird_clip_dir_path
+        clip_dir_path = station_paths.old_bird_clip_dir_path
 
         detector_paths = station_paths.detectors[s.old_bird_detector_name]
         destination_dir_path = detector_paths.incoming_clip_dir_path
 
         settings = Bunch(
             station_name=station_name,
-            source_dir_path=source_dir_path,
+            clip_dir_path=clip_dir_path,
             clip_file_name_re=s.old_bird_clip_file_name_re,
             clip_file_wait_period=s.clip_file_wait_period,
             destination_dir_path=destination_dir_path)
         
-        return OldBirdClipMover(name, settings)
+        return OldBirdClipConverter(name, settings)
     
 
     def _create_detector_clip_archiver(self, detector_name):
@@ -144,16 +144,16 @@ class DetectorClipArchiver(LinearGraph):
 
         name = f'{self.name} - Clip Source'
         settings = Bunch(
-            source_dir_path=s.paths.incoming_clip_dir_path,
+            clip_dir_path=s.paths.incoming_clip_dir_path,
             clip_file_name_re=s.clip_file_name_re,
             clip_file_wait_period=s.clip_file_wait_period)
-        clip_source = FileSystemClipSource(name, settings)
+        clip_lister = ClipLister(name, settings)
 
         name = f'{self.name} - Clip Creator'
         settings = Bunch()
         clip_creator = ArchiveClipCreator(name, settings)
 
-        return clip_source, clip_creator
+        return clip_lister, clip_creator
 
 
 if __name__ == '__main__':
