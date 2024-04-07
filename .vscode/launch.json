@@ -8,7 +8,7 @@
             "name": "Archive Clips",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/lrgv/scripts/archive_clips.py",
+            "program": "${workspaceFolder}/lrgv/archiver/archive_clips.py",
             "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
             "console": "integratedTerminal",
         },
