@@ -16,6 +16,9 @@ computer to put the clips into a Vesper cloud archive.
 """
 
 
+# TODO: Add command line argument for Nighthawk output directory.
+
+
 from collections import defaultdict
 from datetime import (
     date as Date, datetime as DateTime, timedelta as TimeDelta)
