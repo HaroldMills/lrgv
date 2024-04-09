@@ -20,43 +20,9 @@ _station_names = (
     'Rio Hondo',
 )
 
-_old_bird_detector_name = 'Dick'
-
-_old_bird_clip_file_name_re = (
-    r'^'
-    r'Dick_'
-    r'(?P<year>\d\d\d\d)-(?P<month>\d\d)-(?P<day>\d\d)'
-    r'_'
-    r'(?P<hour>\d\d)\.(?P<minute>\d\d)\.(?P<second>\d\d)'
-    r'_'
-    r'(?P<num>\d\d)'
-    r'\.(?:wav|WAV)'
-    r'$')
-
-_nighthawk_detector_name = 'Nighthawk'
-
-_clip_file_name_re = (
-    r'^'
-    r'(?P<station_name>.+)'
-    f'_'
-    r'(?P<year>\d\d\d\d)-(?P<month>\d\d)-(?P<day>\d\d)'
-    r'_'
-    r'(?P<hour>\d\d)\.(?P<minute>\d\d)\.(?P<second>\d\d).(?P<millis>\d\d\d)'
-    r'_'
-    r'Z'
-    r'_'
-    r'(?P<num>\d\d)'
-    r'\.(?:wav|WAV)'
-    r'$')
-
+_detector_names = ('Dick', 'Nighthawk')
 
 _clip_file_wait_period = 10         # seconds
-
-
-_detector_names = (
-    _old_bird_detector_name,
-    _nighthawk_detector_name,
-)
 
 
 def _get_paths(station_names, detector_names):
@@ -86,7 +52,6 @@ def _get_paths(station_names, detector_names):
 
         return Bunch(
             station_dir_path=station_dir_path,
-            old_bird_clip_dir_path=station_dir_path,
             clip_dir_path=clip_dir_path,
             code_dir_path=station_dir_path / 'Code',
             log_dir_path=station_dir_path / 'Logs',
@@ -103,21 +68,17 @@ def _get_paths(station_names, detector_names):
         stations=station_paths)
 
 
-def _get_secrets():
+def _get_vesper_settings():
 
     secret_file_path = Path(__file__).parent / 'secrets/secrets.env'
 
     env = Env()
     env.read_env(secret_file_path)
 
-    vesper = Bunch(
+    return Bunch(
         archive_url=env('LRGV_VESPER_ARCHIVE_URL'),
         username=env('LRGV_VESPER_USERNAME'),
         password=env('LRGV_VESPER_PASSWORD')
-    )
-
-    return Bunch(
-        vesper=vesper
     )
 
 
@@ -126,8 +87,5 @@ app_settings = Bunch(
     station_names=_station_names,
     detector_names=_detector_names,
     paths=_get_paths(_station_names, _detector_names),
-    old_bird_detector_name=_old_bird_detector_name,
-    old_bird_clip_file_name_re=_old_bird_clip_file_name_re,
-    clip_file_name_re=_clip_file_name_re,
     clip_file_wait_period=_clip_file_wait_period,
-    secrets=_get_secrets())
+    vesper=_get_vesper_settings())

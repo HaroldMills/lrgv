@@ -102,20 +102,14 @@ class StationClipArchiver(Graph):
         name = f'{station_name} Old Bird Clip Converter'
 
         s = app_settings
-
         station_paths = s.paths.stations[station_name]
-        clip_dir_path = station_paths.old_bird_clip_dir_path
-
-        detector_paths = station_paths.detectors[s.old_bird_detector_name]
-        destination_dir_path = detector_paths.incoming_clip_dir_path
 
         settings = Bunch(
             station_name=station_name,
-            clip_dir_path=clip_dir_path,
-            clip_file_name_re=s.old_bird_clip_file_name_re,
+            clip_dir_path=station_paths.station_dir_path,
             clip_file_wait_period=s.clip_file_wait_period,
-            destination_dir_path=destination_dir_path)
-        
+            station_paths=station_paths)
+            
         return OldBirdClipConverter(name, settings)
     
 
@@ -129,7 +123,6 @@ class StationClipArchiver(Graph):
 
         settings = Bunch(
             paths=s.paths.stations[station_name].detectors[detector_name],
-            clip_file_name_re=s.clip_file_name_re,
             clip_file_wait_period=s.clip_file_wait_period)
         
         return DetectorClipArchiver(name, settings)
@@ -145,7 +138,6 @@ class DetectorClipArchiver(LinearGraph):
         name = f'{self.name} - Clip Source'
         settings = Bunch(
             clip_dir_path=s.paths.incoming_clip_dir_path,
-            clip_file_name_re=s.clip_file_name_re,
             clip_file_wait_period=s.clip_file_wait_period)
         clip_lister = ClipLister(name, settings)
 
