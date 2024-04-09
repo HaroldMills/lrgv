@@ -44,10 +44,14 @@ LOG_FILE_NAME = 'run_nighthawk.log'
 WAVE_FILE_NAME_EXTENSION = '.wav'
 CSV_FILE_NAME_EXTENSION = '.csv'
 JSON_FILE_NAME_EXTENSION = '.json'
-STATION_NAME_CORRECTIONS = {
-    'HAR': 'Harlingen',
-    'RIOH': 'Rio Hondo',
-    'RioH': 'Rio Hondo',
+RECORDING_FILE_STATION_NAMES = {
+    'DHS': 'Donna',
+    'DOHS': 'Donna',
+    'HHSS': 'Harlingen',
+    'PIJHS': 'Port Isabel',
+    'RBMS': 'Roma RBMS',
+    'RHHS': 'Rio Hondo',
+    'ROHS': 'Roma HS',
 }
 STATION_TIME_ZONE = ZoneInfo('US/Central')
 UTC_TIME_ZONE = ZoneInfo('UTC')
@@ -281,7 +285,7 @@ def process_detections(recording_file, taxon_mapping, clip_dir_path):
     logger.info(f'    Processing detection file "{detection_file_path}"...')
 
     station_name = recording_file.station_name
-    station_name = STATION_NAME_CORRECTIONS.get(station_name, station_name)
+    station_name = RECORDING_FILE_STATION_NAMES.get(station_name, station_name)
 
     # Get recording sensors.
     sensor_name = SENSOR_NAME_FORMAT.format(station_name=station_name)
