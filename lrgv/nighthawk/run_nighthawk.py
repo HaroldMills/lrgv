@@ -59,6 +59,9 @@ RECORDING_FILE_STATION_NAMES = {
     'ROHS': 'Roma HS',
 }
 
+# INCLUDED_CLASSIFICATIONS = None
+INCLUDED_CLASSIFICATIONS = frozenset(['Call.DICK'])
+
 
 def main():
 
@@ -92,7 +95,9 @@ def main():
         if result:
 
             try:
-                process_detections(file, taxon_mapping, clip_dir_path)
+                process_detections(
+                    file, taxon_mapping, nighthawk_output_dir_path,
+                    clip_dir_path)
             except Exception as e:
                 logger.warning(
                     f'Attempt to process Nighthawk detections for '
@@ -289,9 +294,12 @@ def log_process_output_stream(stream_text, stream_name):
             logger.info(f'        {line}')
 
 
-def process_detections(recording_file, taxon_mapping, clip_dir_path):
+def process_detections(
+        recording_file, taxon_mapping, nighthawk_output_dir_path,
+        clip_dir_path):
 
-    detection_file_path = get_detection_file_path(recording_file.path)
+    detection_file_path = get_detection_file_path(
+        recording_file.path, nighthawk_output_dir_path)
     logger.info(f'    Processing detection file "{detection_file_path}"...')
 
     station_name = recording_file.station_name
@@ -336,6 +344,16 @@ def process_detections(recording_file, taxon_mapping, clip_dir_path):
             
         for detection in csv_reader:
 
+            # Get file line from which `detection` was created.
+            csv_line = text_file.readline().strip()
+
+            annotations = get_clip_annotations(
+                detection, taxon_mapping, csv_line)
+
+            classification = annotations['Classification']
+            if not classification_included(classification):
+                continue
+
             # Get detection start and end offsets.
             start_offset = float(detection['start_sec'])
             end_offset = float(detection['end_sec'])
@@ -356,16 +374,10 @@ def process_detections(recording_file, taxon_mapping, clip_dir_path):
             create_clip_audio_file(
                 clip_audio_file_path, wave_reader, start_offset, end_offset)
 
-            # Get file line from which `detection` was created.
-            csv_line = text_file.readline().strip()
-
             duration = end_offset - start_offset
             start_time = \
                 format_start_time(clip_start_time, timespec='milliseconds')
             length = s2f(duration, sample_rate)
-
-            annotations = get_clip_annotations(
-                detection, taxon_mapping, csv_line)
 
             clips = [{
                 'recording': recording_name,
@@ -389,9 +401,9 @@ def process_detections(recording_file, taxon_mapping, clip_dir_path):
                 json.dump(clip_metadata, json_file, indent=4)
 
 
-def get_detection_file_path(input_file_path):
+def get_detection_file_path(input_file_path, nighthawk_output_dir_path):
     detection_file_name = f'{input_file_path.stem}_detections.csv'
-    return input_file_path.parent / detection_file_name
+    return nighthawk_output_dir_path / detection_file_name
     
     
 def get_clip_metadata_file_path(input_file_path, clip_dir_path):
@@ -402,6 +414,43 @@ def get_clip_metadata_file_path(input_file_path, clip_dir_path):
 def format_start_time(start_time, sep=' ', **kwargs):
     start_time = start_time.isoformat(sep=sep, **kwargs)
     return start_time[:-TIME_ZONE_OFFSET_LENGTH] + f'{sep}Z'
+
+
+def get_clip_annotations(detection, taxon_mapping, csv_line):
+
+    d = detection
+
+    species = map_taxon(d['species'], taxon_mapping)
+    predicted_category = map_taxon(d['predicted_category'], taxon_mapping)
+
+    classification = 'Call.' + predicted_category
+    score = str(100 * float(d['prob']))
+
+    return {
+        'Detector Score': score,
+        'Classification': classification,
+        'Classifier Score': score,
+        'Nighthawk Order': d['order'],
+        'Nighthawk Order Probability': d['prob_order'],
+        'Nighthawk Family': d['family'],
+        'Nighthawk Family Probability': d['prob_family'],
+        'Nighthawk Group': d['group'],
+        'Nighthawk Group Probability': d['prob_group'],
+        'Nighthawk Species': species,
+        'Nighthawk Species Probability': d['prob_species'],
+        'Nighthawk Predicted Category': predicted_category,
+        'Nighthawk Probability': d['prob'],
+        'Nighthawk Output File Line': csv_line,
+    }
+
+
+def map_taxon(taxon, taxon_mapping):
+    return taxon_mapping.get(taxon, taxon)
+
+
+def classification_included(classification):
+    return INCLUDED_CLASSIFICATIONS is None or \
+        classification in INCLUDED_CLASSIFICATIONS
 
 
 def create_file_path(dir_path, file_name_stem, file_name_extension):
@@ -439,37 +488,6 @@ def create_clip_audio_file(file_path, wave_reader, start_offset, end_offset):
 def s2f(time, sample_rate):
     return int(round(time * sample_rate))
 
-
-def get_clip_annotations(detection, taxon_mapping, csv_line):
-
-    d = detection
-
-    species = map_taxon(d['species'], taxon_mapping)
-    predicted_category = map_taxon(d['predicted_category'], taxon_mapping)
-
-    classification = 'Call.' + predicted_category
-    score = str(100 * float(d['prob']))
-
-    return {
-        'Detector Score': score,
-        'Classification': classification,
-        'Classifier Score': score,
-        'Nighthawk Order': d['order'],
-        'Nighthawk Order Probability': d['prob_order'],
-        'Nighthawk Family': d['family'],
-        'Nighthawk Family Probability': d['prob_family'],
-        'Nighthawk Group': d['group'],
-        'Nighthawk Group Probability': d['prob_group'],
-        'Nighthawk Species': species,
-        'Nighthawk Species Probability': d['prob_species'],
-        'Nighthawk Predicted Category': predicted_category,
-        'Nighthawk Probability': d['prob'],
-        'Nighthawk Output File Line': csv_line,
-    }
-
-
-def map_taxon(taxon, taxon_mapping):
-    return taxon_mapping.get(taxon, taxon)
 
 
 if __name__ == '__main__':
