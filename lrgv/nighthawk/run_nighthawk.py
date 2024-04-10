@@ -16,9 +16,6 @@ computer to put the clips into a Vesper cloud archive.
 """
 
 
-# TODO: Add command line argument for Nighthawk output directory.
-
-
 from collections import defaultdict
 from datetime import (
     date as Date, datetime as DateTime, timedelta as TimeDelta)
@@ -40,10 +37,18 @@ logger = logging.getLogger(__name__)
 
 ROOT_DIR_PATH = Path(__file__).parent
 TAXON_MAPPING_FILE_PATH = ROOT_DIR_PATH / 'species_code_mapping.json'
-LOG_FILE_NAME = 'run_nighthawk.log'
-WAVE_FILE_NAME_EXTENSION = '.wav'
+LOG_FILE_PATH = Path.cwd() / 'run_nighthawk.log'
+
 CSV_FILE_NAME_EXTENSION = '.csv'
+AUDIO_FILE_NAME_EXTENSION = '.wav'
 JSON_FILE_NAME_EXTENSION = '.json'
+
+STATION_TIME_ZONE = ZoneInfo('US/Central')
+UTC_TIME_ZONE = ZoneInfo('UTC')
+TIME_ZONE_OFFSET_LENGTH = 6
+SENSOR_NAME_FORMAT = '{station_name} 21c'
+DETECTOR_NAME = 'Nighthawk 0.3.0 80'
+
 RECORDING_FILE_STATION_NAMES = {
     'DHS': 'Donna',
     'DOHS': 'Donna',
@@ -53,21 +58,18 @@ RECORDING_FILE_STATION_NAMES = {
     'RHHS': 'Rio Hondo',
     'ROHS': 'Roma HS',
 }
-STATION_TIME_ZONE = ZoneInfo('US/Central')
-UTC_TIME_ZONE = ZoneInfo('UTC')
-TIME_ZONE_OFFSET_LENGTH = 6
-SENSOR_NAME_FORMAT = '{station_name} 21c'
-DETECTOR_NAME = 'Nighthawk 0.3.0 80'
 
 
 def main():
 
-    log_file_path = Path.cwd() / LOG_FILE_NAME
-    logging_utils.configure_logging(logging.INFO, log_file_path)
+    logging_utils.configure_logging(logging.INFO, LOG_FILE_PATH)
 
     # Get recording and clip directory paths.
-    recording_dir_path, clip_dir_path, date = parse_args(sys.argv)
+    recording_dir_path, nighthawk_output_dir_path, clip_dir_path, date = \
+        parse_args(sys.argv)
     logger.info(f'Recording directory path is "{recording_dir_path}".')
+    logger.info(
+        f'Nighthawk output directory path is "{nighthawk_output_dir_path}".')
     logger.info(f'Clip directory path is "{clip_dir_path}".')
 
     taxon_mapping = get_taxon_mapping(TAXON_MAPPING_FILE_PATH)
@@ -81,7 +83,7 @@ def main():
         logger.info(f'Processing recording file "{file.path}"...')
 
         try:
-            result = run_nighthawk_on_file(file)
+            result = run_nighthawk_on_file(file, nighthawk_output_dir_path)
         except Exception as e:
             logger.warning(
                 f'Attempt to run Nighthawk on recording file '
@@ -100,11 +102,11 @@ def main():
 
 def parse_args(args):
 
-    if len(args) != 3 and len(args) != 4:
+    if len(args) != 4 and len(args) != 5:
         logger.critical(f'Bad script arguments: {args}')
         logger.critical(
-            'Usage: run_nighthawk <recording_dir_path> <clip_dir_path> '
-            '[<date>]')
+            'Usage: run_nighthawk <recording_dir_path> '
+            '<nighthawk_output_dir_path> <clip_dir_path> [<date>]')
         sys.exit(1)
 
     recording_dir_path = Path(args[1])
@@ -115,23 +117,31 @@ def parse_args(args):
             f'not exist.')
         sys.exit(1)
 
-    clip_dir_path = Path(args[2])
+    nighthawk_output_dir_path = Path(args[2])
+
+    if not nighthawk_output_dir_path.exists():
+        logger.critical(
+            f'Specified Nighthawk output directory "{recording_dir_path}" '
+            f'does not exist.')
+        sys.exit(1)
+
+    clip_dir_path = Path(args[3])
 
     if not clip_dir_path.exists():
         logger.critical(
             f'Specified clip directory "{clip_dir_path}" does not exist.')
         sys.exit(1)
 
-    if len(args) == 4:
+    if len(args) == 5:
         try:
-            date = Date.fromisoformat(args[3])
+            date = Date.fromisoformat(args[4])
         except Exception:
-            logger.critical(f'Bad date "{args[3]}".')
+            logger.critical(f'Bad date "{args[4]}".')
             sys.exit(1)
     else:
         date = Date.fromordinal(Date.today().toordinal() - 1)
 
-    return recording_dir_path, clip_dir_path, date
+    return recording_dir_path, nighthawk_output_dir_path, clip_dir_path, date
 
 
 def get_taxon_mapping(file_path):
@@ -216,7 +226,7 @@ def log_file_count(count, date):
     logger.info(f'Found {text} for date {date}.')
 
 
-def run_nighthawk_on_file(file):
+def run_nighthawk_on_file(file, nighthawk_output_dir_path):
 
     # return True
 
@@ -225,7 +235,7 @@ def run_nighthawk_on_file(file):
     module_name = 'nighthawk.run_nighthawk'
     
     # Build list of command line arguments.
-    args = [str(file.path)]
+    args = ['--output-dir', str(nighthawk_output_dir_path), str(file.path)]
     
     environment_name = f'nighthawk-0.3.0'
     
@@ -340,7 +350,7 @@ def process_detections(recording_file, taxon_mapping, clip_dir_path):
             clip_num = clip_counts[key]
             clip_file_name_stem = f'{station_name}_{start_time}_{clip_num:02}'
             clip_audio_file_path = create_file_path(
-                clip_dir_path, clip_file_name_stem, WAVE_FILE_NAME_EXTENSION)
+                clip_dir_path, clip_file_name_stem, AUDIO_FILE_NAME_EXTENSION)
             clip_counts[key] += 1
  
             create_clip_audio_file(
