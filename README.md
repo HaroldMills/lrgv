@@ -22,7 +22,8 @@ To install the `lrgv` package and related software onto a station laptop:
    package software assumes that the files will appear there.
 
 1. Copy the contents of the SugarSync
-   `My Sugarsync/LRGV Station Laptop Software` directory into `C:\Temp\calls`.
+   `My Sugarsync/LRGV Station Laptop Software` directory (i.e. its
+   `App` and `Code` subdirectories) into `C:\Temp\calls`.
 
 2. Install Miniconda into the `miniconda3` subdirectory of the user
    directory (e.g. `C:\Users\wreva`).
@@ -39,7 +40,7 @@ To install the `lrgv` package and related software onto a station laptop:
    from the "-e" that precedes it by a space. You can cut and paste
    the above command to help be sure to get it right.
 
-5. Create a Conda environment called `nighthawk-0.3.0` by issuing the
+4. Create a Conda environment called `nighthawk-0.3.0` by issuing the
    following commands at an Anaconda Prompt:
 
        conda create -n nighthawk-0.3.0 python=3.10
