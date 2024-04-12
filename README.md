@@ -74,7 +74,6 @@ For a station that will also run the Vesper Recorder:
        conda activate vesper-latest
        conda install -c conda-forge python-sounddevice
        cd C:\Temp\calls\Apps\Code\Python\Vesper
-       pip install -r requirements.txt
        pip install -e .
 
    This installation make take several minutes, since the Vesper
