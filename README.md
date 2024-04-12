@@ -67,7 +67,13 @@ For a station that will also run the Vesper Recorder:
    directory. The Vesper Recorder will write audio files to
    this directory.
 
-7. Create a Conda environment called `vesper-latest` by issuing the
+7. Edit the file
+   `C:\Temp\calls\Apps\Vesper Recorder\Vesper Recorder Settings.yaml`.
+   Change the station name `Ludlow` to the full name of your station
+   (e.g. `Port Isabel`) in the two places in the file where it occurs.
+   Note that there's no need to quote the station name in the file.
+
+8. Create a Conda environment called `vesper-latest` by issuing the
    following commands at an Anaconda Prompt:
 
        conda create -n vesper-latest python=3.11
@@ -79,7 +85,7 @@ For a station that will also run the Vesper Recorder:
    This installation make take several minutes, since the Vesper
    package has many dependencies.
 
-8. Use the Windows Task Scheduler to create a daily task that runs
+9. Use the Windows Task Scheduler to create a daily task that runs
    the `C:\Temp\calls\Apps\Vesper Recorder\Start Vesper Recorder.bat`
    batch file every day at noon (i.e. 12 PM). The batch file runs
    the Vesper Recorder, configured to record to the
