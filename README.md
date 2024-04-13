@@ -33,7 +33,7 @@ To install the `lrgv` package and related software onto a station laptop:
 
        conda create -n lrgv python=3.11
        conda activate lrgv
-       cd C:\Documents\My SugarSync\LRGV Station Software\To Share\Python\lrgv-2024
+       cd "C:\Users\wreva\Documents\My SugarSync\LRGV Station Software\To Share\Python\lrgv-2024"
        pip install -e .
 
    Note that the last command includes a "." at the end, separated
@@ -79,7 +79,7 @@ For a station that will also run the Vesper Recorder:
        conda create -n vesper-latest python=3.11
        conda activate vesper-latest
        conda install -c conda-forge python-sounddevice
-       cd C:\Documents\My SugarSync\LRGV Station Software\To Share\Python\Vesper
+       cd "C:\Users\wreva\Documents\My SugarSync\LRGV Station Software\To Share\Python\Vesper"
        pip install -e .
 
    This installation make take several minutes, since the Vesper
