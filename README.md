@@ -1,6 +1,6 @@
 Note that in the following the term *user directory* refers to the
 home directory of the user thaat runs the LRGV software, e.g.
-C:\Users\wreva.
+`C:\Users\wreva`.
 
 The `lrgv` Python package is software for the Old Bird Lower Rio Grande
 Valley (LRGV) acoustic monitoring project. The software includes a
@@ -22,8 +22,8 @@ To install the `lrgv` package and related software onto a station laptop:
    package software assumes that the files will appear there.
 
 1. Copy the contents of the SugarSync
-   `My Sugarsync/LRGV Station Laptop Software` directory (i.e. its
-   `App` and `Code` subdirectories) into `C:\Temp\calls`.
+   `My Sugarsync\LRGV Station Laptop Software\To Copy` directory (i.e.
+   its `Apps` and `Clips` subdirectories) into `C:\Temp\calls`.
 
 2. Install Miniconda into the `miniconda3` subdirectory of the user
    directory (e.g. `C:\Users\wreva`).
@@ -33,7 +33,7 @@ To install the `lrgv` package and related software onto a station laptop:
 
        conda create -n lrgv python=3.11
        conda activate lrgv
-       cd C:\Temp\calls\Apps\Code\Python\lrgv-2024
+       cd C:\Documents\My SugarSync\LRGV Station Software\To Share\Python\lrgv-2024
        pip install -e .
 
    Note that the last command includes a "." at the end, separated
@@ -79,7 +79,7 @@ For a station that will also run the Vesper Recorder:
        conda create -n vesper-latest python=3.11
        conda activate vesper-latest
        conda install -c conda-forge python-sounddevice
-       cd C:\Temp\calls\Apps\Code\Python\Vesper
+       cd C:\Documents\My SugarSync\LRGV Station Software\To Share\Python\Vesper
        pip install -e .
 
    This installation make take several minutes, since the Vesper
