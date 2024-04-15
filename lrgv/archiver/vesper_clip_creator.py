@@ -6,7 +6,7 @@ from lrgv.dataflow import SimpleSink
 _logger = logging.getLogger(__name__)
 
 
-class ArchiveClipCreator(SimpleSink):
+class VesperClipCreator(SimpleSink):
 
 
     def _process_item(self, clip, finished):

@@ -1,4 +1,4 @@
-from lrgv.archiver.archive_clip_creator import ArchiveClipCreator
+from lrgv.archiver.vesper_clip_creator import VesperClipCreator
 from lrgv.archiver.file_lister import FileLister
 from lrgv.dataflow import LinearGraph
 from lrgv.util.bunch import Bunch
@@ -18,11 +18,11 @@ class ClipArchiver(LinearGraph):
             file_wait_period=s.clip_file_wait_period)
         lister = FileLister(name, settings)
 
-        name = f'{s.station_name} {s.detector_name} Clip Creator'
+        name = f'{s.station_name} {s.detector_name} Vesper Clip Creator'
         settings = Bunch(
             archive_url=s.archive_url,
             username=s.username,
             password=s.password)
-        creator = ArchiveClipCreator(name, settings)
+        creator = VesperClipCreator(name, settings)
 
         return lister, creator

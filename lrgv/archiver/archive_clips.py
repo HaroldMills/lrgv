@@ -2,9 +2,9 @@ import logging
 import time
 
 from lrgv.archiver.app_settings import app_settings
-from lrgv.archiver.archive_clip_creator import ArchiveClipCreator
 from lrgv.archiver.clip_lister import ClipLister
 from lrgv.archiver.old_bird_clip_converter import OldBirdClipConverter
+from lrgv.archiver.vesper_clip_creator import VesperClipCreator
 from lrgv.dataflow import Graph, LinearGraph
 from lrgv.util.bunch import Bunch
 import lrgv.util.logging_utils as logging_utils
@@ -141,9 +141,9 @@ class DetectorClipArchiver(LinearGraph):
             clip_file_wait_period=s.clip_file_wait_period)
         clip_lister = ClipLister(name, settings)
 
-        name = f'{self.name} - Clip Creator'
+        name = f'{self.name} - Vesper Clip Creator'
         settings = Bunch()
-        clip_creator = ArchiveClipCreator(name, settings)
+        clip_creator = VesperClipCreator(name, settings)
 
         return clip_lister, clip_creator
 
