@@ -50,15 +50,15 @@ SENSOR_NAME_FORMAT = '{station_name} 21c'
 DETECTOR_NAME = 'Nighthawk 0.3.0 80'
 
 RECORDING_FILE_STATION_NAMES = {
-    'DHS': 'Donna',
-    'DOHS': 'Donna',
-    'HARS': 'Harlingen',
-    'HHSS': 'Harlingen',
-    'PIJHS': 'Port Isabel',
-    'RBMS': 'Roma RBMS',
-    'RHHS': 'Rio Hondo',
-    'RIOH': 'Rio Hondo',
-    'ROHS': 'Roma HS',
+    'dhs': 'Donna',
+    'dohs': 'Donna',
+    'hars': 'Harlingen',
+    'hhss': 'Harlingen',
+    'pijhs': 'Port Isabel',
+    'rbms': 'Roma RBMS',
+    'rhhs': 'Rio Hondo',
+    'rioh': 'Rio Hondo',
+    'rohs': 'Roma HS',
 }
 
 # INCLUDED_CLASSIFICATIONS = None
@@ -305,7 +305,8 @@ def process_detections(
     logger.info(f'    Processing detection file "{detection_file_path}"...')
 
     station_name = recording_file.station_name
-    station_name = RECORDING_FILE_STATION_NAMES.get(station_name, station_name)
+    key = station_name.lower()
+    station_name = RECORDING_FILE_STATION_NAMES.get(key, station_name)
 
     # Get recording sensors.
     sensor_name = SENSOR_NAME_FORMAT.format(station_name=station_name)
