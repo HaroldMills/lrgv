@@ -6,23 +6,23 @@ from environs import Env
 from lrgv.util.bunch import Bunch
 
 
-# _root_dir_path = Path('/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024')
-_root_dir_path = \
+# _ROOT_DIR_PATH = Path('/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024')
+_ROOT_DIR_PATH = \
     Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Clip Folders')
 
-_log_file_path = None
-# _log_file_path = _root_dir_path / 'archive_clips.log'
+_LOG_FILE_PATH = None
+# _LOG_FILE_PATH = _root_dir_path / 'archive_clips.log'
 
-_logging_level = logging.INFO
+_LOGGING_LEVEL = logging.INFO
 
-_station_names = (
+_STATION_NAMES = (
     'Alamo',
     'Rio Hondo',
 )
 
-_detector_names = ('Dick', 'Nighthawk')
+_DETECTOR_NAMES = ('Dick', 'Nighthawk')
 
-_clip_file_wait_period = 10         # seconds
+_CLIP_FILE_WAIT_PERIOD = 10         # seconds
 
 
 def _get_paths(station_names, detector_names):
@@ -42,7 +42,7 @@ def _get_paths(station_names, detector_names):
 
     def get_station_paths(station_name, detector_names):
 
-        station_dir_path = _root_dir_path / station_name
+        station_dir_path = _ROOT_DIR_PATH / station_name
         clip_dir_path = station_dir_path / 'Clips'
 
         detector_paths = {
@@ -63,8 +63,8 @@ def _get_paths(station_names, detector_names):
     }
     
     return Bunch(
-        root_dir_path=_root_dir_path,
-        log_file_path=_log_file_path,
+        root_dir_path=_ROOT_DIR_PATH,
+        log_file_path=_LOG_FILE_PATH,
         stations=station_paths)
 
 
@@ -83,9 +83,9 @@ def _get_vesper_settings():
 
 
 app_settings = Bunch(
-    logging_level=_logging_level,
-    station_names=_station_names,
-    detector_names=_detector_names,
-    paths=_get_paths(_station_names, _detector_names),
-    clip_file_wait_period=_clip_file_wait_period,
+    logging_level=_LOGGING_LEVEL,
+    station_names=_STATION_NAMES,
+    detector_names=_DETECTOR_NAMES,
+    paths=_get_paths(_STATION_NAMES, _DETECTOR_NAMES),
+    clip_file_wait_period=_CLIP_FILE_WAIT_PERIOD,
     vesper=_get_vesper_settings())
