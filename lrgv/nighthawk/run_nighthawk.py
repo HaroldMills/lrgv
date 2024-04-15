@@ -52,10 +52,12 @@ DETECTOR_NAME = 'Nighthawk 0.3.0 80'
 RECORDING_FILE_STATION_NAMES = {
     'DHS': 'Donna',
     'DOHS': 'Donna',
+    'HARS': 'Harlingen',
     'HHSS': 'Harlingen',
     'PIJHS': 'Port Isabel',
     'RBMS': 'Roma RBMS',
     'RHHS': 'Rio Hondo',
+    'RIOH': 'Rio Hondo',
     'ROHS': 'Roma HS',
 }
 
