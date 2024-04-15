@@ -14,12 +14,12 @@ class FileMover(SimpleSink):
         self._destination_dir_path = settings.destination_dir_path
 
 
-    def _process_item(self, file_path, finished):
+    def _process_item(self, file, finished):
 
-        new_path = self._destination_dir_path / file_path.name
+        new_path = self._destination_dir_path / file.path.name
 
         _logger.info(
-            f'Processor "{self.name}" moving file "{file_path}" '
+            f'Processor "{self.name}" moving file "{file.path}" '
             f'to "{new_path}"...')
 
         # try:

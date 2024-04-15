@@ -2,6 +2,7 @@ import re
 import time
 
 from lrgv.dataflow import SimpleSource
+from lrgv.util.bunch import Bunch
 
 
 class FileLister(SimpleSource):
@@ -28,17 +29,36 @@ class FileLister(SimpleSource):
 
         # If indicated, output only files whose names are matched by
         # `self._file_name_re`.
-        if self._file_name_re is not None:
-            file_paths = tuple(
-                p for p in file_paths
-                if self._file_name_re.match(p.name) is not None)
+        files = self._get_matching_files(file_paths)
 
         # If indicated, output only files that were last modified at
         # least `self._wait_period` seconds ago.
         if self._file_wait_period is not None:
             mod_time_threshold = time.time() - self._file_wait_period
-            file_paths = tuple(
-                p for p in file_paths
-                if p.stat().st_mtime <= mod_time_threshold)
+            files = tuple(
+                f for f in files
+                if f.path.stat().st_mtime <= mod_time_threshold)
             
-        return file_paths, False
+        return files, False
+    
+
+    def _get_matching_files(self, file_paths):
+
+        if self._file_name_re is None:
+            # not filtering files by name
+
+            return tuple(Bunch(path=p, name_match=None) for p in file_paths)
+        
+        else:
+            # filtering files by name
+
+            files = []
+
+            for p in file_paths:
+
+                m = self._file_name_re.match(p.name)
+
+                if m is not None:
+                    files.append(Bunch(path=p, name_match=m))
+
+            return tuple(files)
