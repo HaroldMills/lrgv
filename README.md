@@ -69,9 +69,35 @@ For a station that will also run the Vesper Recorder:
 
 7. Edit the file
    `C:\Temp\calls\Apps\Vesper Recorder\Vesper Recorder Settings.yaml`.
-   Change the station name `Ludlow` to the full name of your station
-   (e.g. `Port Isabel`) in the two places in the file where it occurs.
-   Note that there's no need to quote the station name in the file.
+
+   a. Change the station name `Ludlow` to the full name of your station
+      (e.g. `Port Isabel`) in the two places in the file where it occurs.
+      Note that there's no need to quote the station name in the file.
+
+   b. Change the input device name `USB Audio Device` to the name of
+      your audio input device if needed. The name you should use
+      depends on your device. If you don't know what the name is, you
+      can defer this step until after step 9 below. At that point you
+      can run the Vesper Recorder and one of two things will happen.
+      If the default device name `USB Audio Device` is not a valid
+      device name for your hardware, the recorder will write an error
+      message to its log file and quit. The error message will contain
+      a complete list of the audio devices available to the recorder
+      and you can choose one of them to specify in your settings file.
+      If, on the other hand, `USB Audio Device` is a valid device name
+      for your hardware (and there's nothing else wrong with your
+      settings file), the recorder will start without incident. In
+      that case you can point a web browser to the URL `localhost:8000`
+      to view the recorder's user interface and choose a device name
+      from the `Available Input Devices` section. Be sure to specify
+      the name of a device that uses the `MME` host API. Note that
+      you don't necessarily have to specify the full device name
+      (some of them are rather long): it suffices to specify a portion
+      of the name that uniquely identifies the device. For example, if
+      there's an MME device with the name
+      `Microphone (Turtle Beach USB Audio)`, it suffices to specify
+      `Turtle Beach USB` as long as there are no other MME devices
+      whose names include that string.
 
 8. Create a Conda environment called `vesper-latest` by issuing the
    following commands at an Anaconda Prompt:
