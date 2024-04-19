@@ -1,0 +1,2 @@
+class ArchiverError(Exception):
+    pass

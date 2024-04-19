@@ -1,9 +1,5 @@
-import logging
-
+from lrgv.archiver.archiver_error import ArchiverError
 from lrgv.dataflow import SimpleSink
-
-
-_logger = logging.getLogger(__name__)
 
 
 class FileMover(SimpleSink):
@@ -18,14 +14,10 @@ class FileMover(SimpleSink):
 
         new_path = self._destination_dir_path / file.path.name
 
-        _logger.info(
-            f'Processor "{self.name}" moving file "{file.path}" '
-            f'to "{new_path}"...')
-
-        # try:
-        #     file_path.replace(new_path)
-        # except Exception as e:
-        #     _logger.warning(
-        #         f'File mover "{self.name}" could not move file '
-        #         f'"{file_path}" to "{new_path}". Error message '
-        #         f'was: {e}')
+        try:
+            file.path.rename(new_path)
+        except Exception as e:
+            raise ArchiverError(
+                f'File mover "{self.name}" could not move file '
+                f'"{file.path}" to "{new_path}". Error message '
+                f'was: {e}')

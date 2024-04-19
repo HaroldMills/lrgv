@@ -1,3 +1,13 @@
+"""
+Convenience interface for clip data stored in a WAVE audio file and a
+JSON metadata file.
+
+The metadata file format provides for the description of metadata for
+any number of clips, but this class assumes that each file describes
+exactly one clip.
+"""
+
+
 import json
 import wave
 
@@ -17,7 +27,7 @@ class Clip:
         self._sample_rate = None
         self._length = None
         self._audio_file_contents = None
-        self._metadata = None
+        self._metadata_file_contents = None
 
 
     @property
@@ -77,18 +87,31 @@ class Clip:
 
 
     @property
-    def metadata(self):
+    def metadata_file_contents(self):
         
-        if self._metadata is None:
+        if self._metadata_file_contents is None:
             with open(self.metadata_file_path, newline='') as file:
-                self._metadata = json.load(file)
+                self._metadata_file_contents = json.load(file)
 
-        return self._metadata
+        return self._metadata_file_contents
     
+
+    @property
+    def metadata(self):
+       return self.metadata_file_contents['clips'][0]
+
+
+    @property
+    def id(self):
+        try:
+            return self.metadata['id']
+        except Exception:
+            return None
+        
 
     @property
     def classification(self):
         try:
-            return self.metadata['clips'][0]['annotations']['Classification']
+            return self.metadata['annotations']['Classification']
         except Exception:
             return None

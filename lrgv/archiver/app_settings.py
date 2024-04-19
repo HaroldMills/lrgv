@@ -6,12 +6,15 @@ from environs import Env
 from lrgv.util.bunch import Bunch
 
 
-# _ROOT_DIR_PATH = Path('/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024')
-_ROOT_DIR_PATH = \
+# _STATION_DATA_DIR_PATH = \
+#     Path('/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024')
+_STATION_DATA_DIR_PATH = \
     Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Clip Folders')
 
+_ARCHIVE_DIR_PATH = Path('/Users/harold/Desktop/NFC/LRGV/2024/Test Archive')
+
 _LOG_FILE_PATH = None
-# _LOG_FILE_PATH = _root_dir_path / 'archive_clips.log'
+# _LOG_FILE_PATH = _STATION_DATA_DIR_PATH / 'archive_clips.log'
 
 _LOGGING_LEVEL = logging.INFO
 
@@ -35,14 +38,13 @@ def _get_paths(station_names, detector_names):
         return Bunch(
             detector_dir_path=detector_dir_path,
             archived_clip_dir_path=detector_dir_path / 'Archived',
-            deferred_clip_dir_path=detector_dir_path / 'Deferred',
-            incoming_clip_dir_path=detector_dir_path / 'Incoming',
-            outside_clip_dir_path=detector_dir_path / 'Outside')
+            created_clip_dir_path=detector_dir_path / 'Created',
+            incoming_clip_dir_path=detector_dir_path / 'Incoming')
 
 
     def get_station_paths(station_name, detector_names):
 
-        station_dir_path = _ROOT_DIR_PATH / station_name
+        station_dir_path = _STATION_DATA_DIR_PATH / station_name
         clip_dir_path = station_dir_path / 'Clips'
 
         detector_paths = {
@@ -63,7 +65,8 @@ def _get_paths(station_names, detector_names):
     }
     
     return Bunch(
-        root_dir_path=_ROOT_DIR_PATH,
+        station_data_dir_path=_STATION_DATA_DIR_PATH,
+        archive_dir_path=_ARCHIVE_DIR_PATH,
         log_file_path=_LOG_FILE_PATH,
         stations=station_paths)
 

@@ -2,7 +2,9 @@ import logging
 import time
 
 from lrgv.archiver.app_settings import app_settings
+from lrgv.archiver.clip_audio_file_copier import ClipAudioFileCopier
 from lrgv.archiver.clip_lister import ClipLister
+from lrgv.archiver.clip_mover import ClipMover
 from lrgv.archiver.old_bird_clip_converter import OldBirdClipConverter
 from lrgv.archiver.vesper_clip_creator import VesperClipCreator
 from lrgv.dataflow import Graph, LinearGraph
@@ -120,33 +122,98 @@ class StationClipArchiver(Graph):
         name = f'{station_name} {detector_name} Clip Archiver'
 
         s = app_settings
+        station_paths = s.paths.stations[station_name]
+        detector_paths = station_paths.detectors[detector_name]
 
         settings = Bunch(
-            paths=s.paths.stations[station_name].detectors[detector_name],
-            clip_file_wait_period=s.clip_file_wait_period)
+            detector_paths=detector_paths,
+            clip_file_wait_period=s.clip_file_wait_period,
+            vesper=s.vesper)
         
         return DetectorClipArchiver(name, settings)
 
 
-class DetectorClipArchiver(LinearGraph):
+class DetectorClipArchiver(Graph):
 
 
     def _create_processors(self):
 
         s = self.settings
 
-        name = f'{self.name} - Clip Source'
+        name = f'{self.name} - Detector Vesper Clip Creator'
+        vesper_clip_creator = DetectorVesperClipCreator(name, s)
+
+        name = f'{self.name} - Detector Clip Audio File Copier'
         settings = Bunch(
-            clip_dir_path=s.paths.incoming_clip_dir_path,
+            detector_paths=s.detector_paths,
+            clip_file_wait_period=s.clip_file_wait_period,
+            archive_dir_path=app_settings.paths.archive_dir_path)
+        audio_file_copier = DetectorClipAudioFileCopier(name, settings)
+
+        return vesper_clip_creator, audio_file_copier
+
+    
+    def _process(self, input_data):
+
+        # If any of our subprocessors raises an exception for a clip,
+        # we catch it here and log an error message. This keeps the
+        # exception from interfering with the processing of subsequent
+        # clips.
+
+        try:
+            return super()._process(input_data)
+        except Exception as e:
+            logger.warning(
+                f'Detector clip archiver "{self.name}" raised exception. '
+                f'Message was: {e}')
+
+
+class DetectorVesperClipCreator(LinearGraph):
+
+
+    def _create_processors(self):
+
+        s = self.settings
+
+        name = f'{self.name} - Clip Lister'
+        settings = Bunch(
+            clip_dir_path=s.detector_paths.incoming_clip_dir_path,
             clip_file_wait_period=s.clip_file_wait_period)
         clip_lister = ClipLister(name, settings)
 
         name = f'{self.name} - Vesper Clip Creator'
-        settings = Bunch()
+        settings = Bunch(
+            vesper=s.vesper,
+            created_clip_dir_path=s.detector_paths.created_clip_dir_path)
         clip_creator = VesperClipCreator(name, settings)
 
         return clip_lister, clip_creator
 
+
+class DetectorClipAudioFileCopier(LinearGraph):
+
+
+    def _create_processors(self):
+
+        s = self.settings
+
+        name = f'{self.name} - Clip Lister'
+        settings = Bunch(
+            clip_dir_path=s.detector_paths.created_clip_dir_path,
+            clip_file_wait_period=s.clip_file_wait_period)
+        clip_lister = ClipLister(name, settings)
+
+        name = f'{self.name} - Clip Audio File Copier'
+        settings = Bunch(archive_dir_path=s.archive_dir_path)
+        audio_file_copier = ClipAudioFileCopier(name, settings)
+
+        name = f'{self.name} - Clip Mover'
+        settings = Bunch(
+            destination_dir_path=s.detector_paths.archived_clip_dir_path)
+        clip_mover = ClipMover(name, settings)
+
+        return clip_lister, audio_file_copier, clip_mover
+            
 
 if __name__ == '__main__':
     main()
