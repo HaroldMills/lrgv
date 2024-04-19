@@ -27,7 +27,7 @@ STATION_CLIP_DIR_NAME = 'Clips'
 
 INCOMING_DIR_NAME = 'Incoming'
 
-DETECTOR_CLIP_DIR_NAMES = (INCOMING_DIR_NAME,)
+DETECTOR_CLIP_DIR_NAMES = (INCOMING_DIR_NAME, 'Created', 'Archived')
 
 STATION_NAMES = ['Alamo', 'Rio Hondo']
 
@@ -106,10 +106,10 @@ def detect_clip(audio_file_path):
         CLIP_FOLDER_DIR_PATH / station_name / STATION_CLIP_DIR_NAME / \
             detector_name / INCOMING_DIR_NAME
     
-    shutil.copy(audio_file_path, to_dir_path)
+    shutil.copy2(audio_file_path, to_dir_path)
 
     metadata_file_path = audio_file_path.with_suffix('.json')
-    shutil.copy(metadata_file_path, to_dir_path)
+    shutil.copy2(metadata_file_path, to_dir_path)
 
 
 if __name__ == '__main__':
