@@ -27,6 +27,12 @@ _DETECTOR_NAMES = ('Dick', 'Nighthawk')
 
 _CLIP_FILE_WAIT_PERIOD = 10         # seconds
 
+_SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets.env'
+
+
+env = Env()
+env.read_env(_SECRET_FILE_PATH)
+
 
 def _get_paths(station_names, detector_names):
 
@@ -72,17 +78,19 @@ def _get_paths(station_names, detector_names):
 
 
 def _get_vesper_settings():
-
-    secret_file_path = Path(__file__).parent / 'secrets/secrets.env'
-
-    env = Env()
-    env.read_env(secret_file_path)
-
     return Bunch(
         archive_url=env('LRGV_VESPER_ARCHIVE_URL'),
         username=env('LRGV_VESPER_USERNAME'),
-        password=env('LRGV_VESPER_PASSWORD')
-    )
+        password=env('LRGV_VESPER_PASSWORD'))
+
+
+def _get_aws_settings():
+    return Bunch(
+        access_key_id=env('LRGV_AWS_ACCESS_KEY_ID'),
+        secret_access_key=env('LRGV_AWS_SECRET_ACCESS_KEY'),
+        region_name=env('LRGV_AWS_REGION_NAME'),
+        s3_clip_bucket_name='old-bird-lrgv',
+        s3_clip_folder_path='Test Clips/')
 
 
 app_settings = Bunch(
@@ -91,4 +99,5 @@ app_settings = Bunch(
     detector_names=_DETECTOR_NAMES,
     paths=_get_paths(_STATION_NAMES, _DETECTOR_NAMES),
     clip_file_wait_period=_CLIP_FILE_WAIT_PERIOD,
-    vesper=_get_vesper_settings())
+    vesper=_get_vesper_settings(),
+    aws=_get_aws_settings())

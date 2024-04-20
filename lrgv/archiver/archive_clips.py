@@ -3,6 +3,7 @@ import time
 
 from lrgv.archiver.app_settings import app_settings
 from lrgv.archiver.clip_audio_file_copier import ClipAudioFileCopier
+from lrgv.archiver.clip_audio_file_s3_uploader import ClipAudioFileS3Uploader
 from lrgv.archiver.clip_lister import ClipLister
 from lrgv.archiver.clip_mover import ClipMover
 from lrgv.archiver.old_bird_clip_converter import OldBirdClipConverter
@@ -128,7 +129,8 @@ class StationClipArchiver(Graph):
         settings = Bunch(
             detector_paths=detector_paths,
             clip_file_wait_period=s.clip_file_wait_period,
-            vesper=s.vesper)
+            vesper=s.vesper,
+            aws=s.aws)
         
         return DetectorClipArchiver(name, settings)
 
@@ -143,14 +145,21 @@ class DetectorClipArchiver(Graph):
         name = f'{self.name} - Detector Vesper Clip Creator'
         vesper_clip_creator = DetectorVesperClipCreator(name, s)
 
-        name = f'{self.name} - Detector Clip Audio File Copier'
+        # name = f'{self.name} - Detector Clip Audio File Copier'
+        # settings = Bunch(
+        #     detector_paths=s.detector_paths,
+        #     clip_file_wait_period=s.clip_file_wait_period,
+        #     archive_dir_path=app_settings.paths.archive_dir_path)
+        # audio_file_copier = DetectorClipAudioFileCopier(name, settings)
+
+        name = f'{self.name} - Detector Clip Audio File S3 Uploader'
         settings = Bunch(
             detector_paths=s.detector_paths,
             clip_file_wait_period=s.clip_file_wait_period,
-            archive_dir_path=app_settings.paths.archive_dir_path)
-        audio_file_copier = DetectorClipAudioFileCopier(name, settings)
+            aws=s.aws)
+        audio_file_uploader = DetectorClipAudioFileS3Uploader(name, settings)
 
-        return vesper_clip_creator, audio_file_copier
+        return vesper_clip_creator, audio_file_uploader
 
     
     def _process(self, input_data):
@@ -189,6 +198,31 @@ class DetectorVesperClipCreator(LinearGraph):
 
         return clip_lister, clip_creator
 
+
+class DetectorClipAudioFileS3Uploader(LinearGraph):
+
+
+    def _create_processors(self):
+
+        s = self.settings
+
+        name = f'{self.name} - Clip Lister'
+        settings = Bunch(
+            clip_dir_path=s.detector_paths.created_clip_dir_path,
+            clip_file_wait_period=s.clip_file_wait_period)
+        clip_lister = ClipLister(name, settings)
+
+        name = f'{self.name} - Clip Audio File S3 Uploader'
+        settings = Bunch(aws=s.aws)
+        audio_file_uploader = ClipAudioFileS3Uploader(name, settings)
+
+        name = f'{self.name} - Clip Mover'
+        settings = Bunch(
+            destination_dir_path=s.detector_paths.archived_clip_dir_path)
+        clip_mover = ClipMover(name, settings)
+
+        return clip_lister, audio_file_uploader, clip_mover
+    
 
 class DetectorClipAudioFileCopier(LinearGraph):
 
