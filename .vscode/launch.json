@@ -21,6 +21,17 @@
             "console": "integratedTerminal",
         },
         {
+            "name": "Vesper Server",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/Users/harold/miniconda3/envs/vesper-dev/bin/vesper_admin",
+            "args": ["runserver"],
+            "python": "/Users/harold/miniconda3/envs/vesper-dev/bin/python",
+            "envFile": "/Users/harold/Desktop/NFC/LRGV/2024/Test Archive/Environment Variables.env",
+            "cwd": "/Users/harold/Desktop/NFC/LRGV/2024/Test Archive",
+            "console": "integratedTerminal",
+        },
+        {
             "name": "Run Nighthawk",
             "type": "debugpy",
             "request": "launch",
