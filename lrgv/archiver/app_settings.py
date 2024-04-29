@@ -6,15 +6,19 @@ from environs import Env
 from lrgv.util.bunch import Bunch
 
 
+# `True` if archiver should work with a remote archive, or `False` if it
+# should work with a local one. 
+_ARCHIVE_REMOTE = True
+
+# The archiver only uses the following when working with a local archive,
+# i.e. when `_ARCHIVE_REMOTE` is `False`. It does not use it when working
+# with a remote archive.
+_ARCHIVE_DIR_PATH = Path('/Users/harold/Desktop/NFC/LRGV/2024/Test Archive')
+
 # _STATION_DATA_DIR_PATH = \
 #     Path('/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024')
 _STATION_DATA_DIR_PATH = \
     Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Clip Folders')
-
-# The archiver only uses the following when archiving to a local achive
-# (specifically, in the `ClipAudioFileCopier` class). It does not use it
-# when archiving to a cloud archive.
-_ARCHIVE_DIR_PATH = Path('/Users/harold/Desktop/NFC/LRGV/2024/Test Archive')
 
 _LOG_FILE_PATH = None
 # _LOG_FILE_PATH = _STATION_DATA_DIR_PATH / 'archive_clips.log'
@@ -81,10 +85,16 @@ def _get_paths(station_names, detector_names):
 
 
 def _get_vesper_settings():
-    return Bunch(
-        archive_url=env('LRGV_VESPER_ARCHIVE_URL'),
-        username=env('LRGV_VESPER_USERNAME'),
-        password=env('LRGV_VESPER_PASSWORD'))
+    if _ARCHIVE_REMOTE:
+        return Bunch(
+            archive_url=env('LRGV_REMOTE_ARCHIVE_URL'),
+            username=env('LRGV_REMOTE_ARCHIVE_USERNAME'),
+            password=env('LRGV_REMOTE_ARCHIVE_PASSWORD'))
+    else:
+        return Bunch(
+            archive_url=env('LRGV_LOCAL_ARCHIVE_URL'),
+            username=env('LRGV_LOCAL_ARCHIVE_USERNAME'),
+            password=env('LRGV_LOCAL_ARCHIVE_PASSWORD'))
 
 
 def _get_aws_settings():
@@ -92,15 +102,18 @@ def _get_aws_settings():
         access_key_id=env('LRGV_AWS_ACCESS_KEY_ID'),
         secret_access_key=env('LRGV_AWS_SECRET_ACCESS_KEY'),
         region_name=env('LRGV_AWS_REGION_NAME'),
-        s3_clip_bucket_name='old-bird-lrgv-2024',
-        s3_clip_folder_path='Clips/')
+        s3_clip_bucket_name=env('LRGV_AWS_S3_CLIP_BUCKET_NAME'),
+        s3_clip_folder_path=env('LRGV_AWS_S3_CLIP_FOLDER_PATH'))
 
 
 app_settings = Bunch(
+    archive_remote=_ARCHIVE_REMOTE,
     logging_level=_LOGGING_LEVEL,
     station_names=_STATION_NAMES,
     detector_names=_DETECTOR_NAMES,
     paths=_get_paths(_STATION_NAMES, _DETECTOR_NAMES),
     clip_file_wait_period=_CLIP_FILE_WAIT_PERIOD,
-    vesper=_get_vesper_settings(),
-    aws=_get_aws_settings())
+    vesper=_get_vesper_settings())
+
+if _ARCHIVE_REMOTE:
+    app_settings.aws=_get_aws_settings()

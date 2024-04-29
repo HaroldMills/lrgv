@@ -127,11 +127,14 @@ class StationClipArchiver(Graph):
         detector_paths = station_paths.detectors[detector_name]
 
         settings = Bunch(
+            archive_remote=s.archive_remote,
             detector_paths=detector_paths,
             clip_file_wait_period=s.clip_file_wait_period,
-            vesper=s.vesper,
-            aws=s.aws)
+            vesper=s.vesper)
         
+        if s.archive_remote:
+            settings.aws = s.aws
+       
         return DetectorClipArchiver(name, settings)
 
 
@@ -145,21 +148,27 @@ class DetectorClipArchiver(Graph):
         name = f'{self.name} - Detector Vesper Clip Creator'
         vesper_clip_creator = DetectorVesperClipCreator(name, s)
 
-        # name = f'{self.name} - Detector Clip Audio File Copier'
-        # settings = Bunch(
-        #     detector_paths=s.detector_paths,
-        #     clip_file_wait_period=s.clip_file_wait_period,
-        #     archive_dir_path=app_settings.paths.archive_dir_path)
-        # audio_file_copier = DetectorClipAudioFileCopier(name, settings)
+        if s.archive_remote:
 
-        name = f'{self.name} - Detector Clip Audio File S3 Uploader'
-        settings = Bunch(
-            detector_paths=s.detector_paths,
-            clip_file_wait_period=s.clip_file_wait_period,
-            aws=s.aws)
-        audio_file_uploader = DetectorClipAudioFileS3Uploader(name, settings)
+            name = f'{self.name} - Detector Clip Audio File S3 Uploader'
+            settings = Bunch(
+                detector_paths=s.detector_paths,
+                clip_file_wait_period=s.clip_file_wait_period,
+                aws=s.aws)
+            audio_file_handler = \
+                DetectorClipAudioFileS3Uploader(name, settings)
+            
+        else:
+            # archive local
 
-        return vesper_clip_creator, audio_file_uploader
+            name = f'{self.name} - Detector Clip Audio File Copier'
+            settings = Bunch(
+                detector_paths=s.detector_paths,
+                clip_file_wait_period=s.clip_file_wait_period,
+                archive_dir_path=app_settings.paths.archive_dir_path)
+            audio_file_handler = DetectorClipAudioFileCopier(name, settings)
+
+        return vesper_clip_creator, audio_file_handler
 
     
     def _process(self, input_data):
