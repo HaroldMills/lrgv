@@ -11,6 +11,9 @@ from lrgv.util.bunch import Bunch
 _STATION_DATA_DIR_PATH = \
     Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Clip Folders')
 
+# The archiver only uses the following when archiving to a local achive
+# (specifically, in the `ClipAudioFileCopier` class). It does not use it
+# when archiving to a cloud archive.
 _ARCHIVE_DIR_PATH = Path('/Users/harold/Desktop/NFC/LRGV/2024/Test Archive')
 
 _LOG_FILE_PATH = None
@@ -89,8 +92,8 @@ def _get_aws_settings():
         access_key_id=env('LRGV_AWS_ACCESS_KEY_ID'),
         secret_access_key=env('LRGV_AWS_SECRET_ACCESS_KEY'),
         region_name=env('LRGV_AWS_REGION_NAME'),
-        s3_clip_bucket_name='old-bird-lrgv',
-        s3_clip_folder_path='Test Clips/')
+        s3_clip_bucket_name='old-bird-lrgv-2024',
+        s3_clip_folder_path='Clips/')
 
 
 app_settings = Bunch(
