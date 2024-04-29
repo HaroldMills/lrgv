@@ -24,8 +24,8 @@ class FileLister(SimpleSource):
 
     def _process_items(self):
 
-        # Start with all file paths.
-        file_paths = tuple(p for p in self._dir_path.glob('*'))
+        # Start with all file paths, sorted lexicographically.
+        file_paths = tuple(sorted(p for p in self._dir_path.glob('*')))
 
         # If indicated, output only files whose names are matched by
         # `self._file_name_re`.
