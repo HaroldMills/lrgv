@@ -16,9 +16,9 @@ _ARCHIVE_REMOTE = True
 _ARCHIVE_DIR_PATH = Path('/Users/harold/Desktop/NFC/LRGV/2024/Test Archive')
 
 # _STATION_DATA_DIR_PATH = \
-#     Path('/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024')
+#     Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Clip Folders')
 _STATION_DATA_DIR_PATH = \
-    Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Clip Folders')
+    Path('/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024')
 
 _LOG_FILE_PATH = None
 # _LOG_FILE_PATH = _STATION_DATA_DIR_PATH / 'archive_clips.log'
@@ -27,7 +27,12 @@ _LOGGING_LEVEL = logging.INFO
 
 _STATION_NAMES = (
     'Alamo',
+    'Donna',
+    'Harlingen',
+    'Port Isabel',
     'Rio Hondo',
+    'Roma HS',
+    'Roma RBMS'
 )
 
 _DETECTOR_NAMES = ('Dick', 'Nighthawk')
