@@ -16,8 +16,19 @@ import lrgv.util.logging_utils as logging_utils
 logger = logging.getLogger(__name__)
 
 
-# RESUME:
-#
+# TODO: Add clip file retirement.
+# TODO: Log per-clip message from clip audio file S3 uploader.
+# TODO: Log per-clip message from clip audio file copier.
+# TODO: Don't attempt to process clip for which audio and metadata files
+#       are not both present.
+# TODO: Don't stop processing clips for a station and detector if the
+#       processing of one clip raises an exception: just move on to
+#       the next clip.
+# TODO: Consider uploading clip audio file *before* adding clip to archive
+#       so users don't see blank spectrograms in clip albums.
+# TODO: Add Dick-r clip archiving.
+
+
 # * In top level processor, create one processor per station. The processor
 #   for a station will include one processor per detector for that station.
 #   If we will run the Old Bird Dickcissel detector at the station it will
@@ -94,9 +105,15 @@ class StationClipArchiver(Graph):
         detector_clip_archivers = tuple(
             self._create_detector_clip_archiver(n)
             for n in app_settings.detector_names)
+        
+        detector_clip_retirers = tuple(
+            self._create_detector_clip_retirer(n)
+            for n in app_settings.detector_names)
 
-        return (old_bird_clip_converter,) + detector_clip_archivers
-
+        return \
+            (old_bird_clip_converter,) + detector_clip_archivers + \
+            detector_clip_retirers
+    
 
     def _create_old_bird_clip_converter(self):
         
@@ -136,6 +153,23 @@ class StationClipArchiver(Graph):
             settings.aws = s.aws
        
         return DetectorClipArchiver(name, settings)
+
+
+    def _create_detector_clip_retirer(self, detector_name):
+
+        station_name = self.settings.station_name
+
+        name = f'{station_name} {detector_name} Clip Retirer'
+
+        s = app_settings
+        station_paths = s.paths.stations[station_name]
+        detector_paths = station_paths.detectors[detector_name]
+
+        settings = Bunch(
+            detector_paths=detector_paths,
+            clip_file_wait_period=s.clip_file_retirement_wait_period)
+        
+        return DetectorClipRetirer(name, settings)
 
 
 class DetectorClipArchiver(Graph):
@@ -257,6 +291,27 @@ class DetectorClipAudioFileCopier(LinearGraph):
 
         return clip_lister, audio_file_copier, clip_mover
             
+
+class DetectorClipRetirer(LinearGraph):
+
+
+    def _create_processors(self):
+        
+        s = self.settings
+
+        name = f'{self.name} - Clip Lister'
+        settings = Bunch(
+            clip_dir_path=s.detector_paths.archived_clip_dir_path,
+            clip_file_wait_period=s.clip_file_wait_period)
+        clip_lister = ClipLister(name, settings)
+
+        name = f'{self.name} - Clip Mover'
+        settings = Bunch(
+            destination_dir_path=s.detector_paths.retired_clip_dir_path)
+        clip_mover = ClipMover(name, settings)
+
+        return clip_lister, clip_mover
+
 
 if __name__ == '__main__':
     main()

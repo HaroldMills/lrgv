@@ -12,16 +12,24 @@ import time
 TEST_CLIP_DIR_PATH = \
     Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Clips')
 
-# The clip folder directory hierarchy parallels the station laptop
-# clip folder hierarchy and looks like:
+# The active and retired station files directory hierarchies parallel
+# the laptop station files directory hierarchy and look like:
 #
-#     <clip folder>
+#     <station files dir>
 #         <station name>
 #             Clips
 #                 <detector name>
 #                     Incoming
-CLIP_FOLDER_DIR_PATH = \
-    Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Clip Folders')
+
+TEST_STATION_FILE_DIR_PATH = Path(
+    '/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Station Files')
+
+ACTIVE_STATION_FILE_DIR_PATH = TEST_STATION_FILE_DIR_PATH / 'Active'
+
+RETIRED_STATION_FILE_DIR_PATH = TEST_STATION_FILE_DIR_PATH / 'Retired'
+
+STATION_FILE_DIR_PATHS = (
+    ACTIVE_STATION_FILE_DIR_PATH, RETIRED_STATION_FILE_DIR_PATH)
 
 STATION_CLIP_DIR_NAME = 'Clips'
 
@@ -69,21 +77,24 @@ def main():
 def clear_dirs():
 
     def clear_dir(dir_path):
-        for file_path in dir_path.glob('*'):
-            file_path.unlink()
+        if dir_path.exists():
+            for file_path in dir_path.glob('*'):
+                file_path.unlink()
         
-    for station_name in STATION_NAMES:
+    for file_dir_path in STATION_FILE_DIR_PATHS:
 
-        station_dir_path = \
-            CLIP_FOLDER_DIR_PATH / station_name / STATION_CLIP_DIR_NAME
-        
-        for detector_name in DETECTOR_NAMES:
+        for station_name in STATION_NAMES:
 
-            detector_dir_path = station_dir_path / detector_name
+            station_dir_path = \
+                file_dir_path / station_name / STATION_CLIP_DIR_NAME
+            
+            for detector_name in DETECTOR_NAMES:
 
-            for dir_name in DETECTOR_CLIP_DIR_NAMES:
-                dir_path = detector_dir_path / dir_name
-                clear_dir(dir_path)
+                detector_dir_path = station_dir_path / detector_name
+
+                for dir_name in DETECTOR_CLIP_DIR_NAMES:
+                    dir_path = detector_dir_path / dir_name
+                    clear_dir(dir_path)
 
 
 def get_clip_audio_file_paths():
@@ -103,8 +114,8 @@ def detect_clip(audio_file_path):
     detector_name = audio_file_path.parent.name
 
     to_dir_path = \
-        CLIP_FOLDER_DIR_PATH / station_name / STATION_CLIP_DIR_NAME / \
-            detector_name / INCOMING_DIR_NAME
+        ACTIVE_STATION_FILE_DIR_PATH / station_name / \
+            STATION_CLIP_DIR_NAME / detector_name / INCOMING_DIR_NAME
     
     shutil.copy2(audio_file_path, to_dir_path)
 
