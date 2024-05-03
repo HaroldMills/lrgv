@@ -46,6 +46,23 @@ from lrgv.util.bunch import Bunch
 
 # TODO: Write more unit tests.
 
+# TODO: Consider giving each processor a default name derived from
+# its class name.
+
+# TODO: Consider adding a `path` processor attribute that indicates
+# the processor and all of its ancestors. The attribute value might
+# be a tuple of processors, a tuple of processor names, or a
+# single string comprising joined processor names. In conjunction
+# with this I suspect we would want to add a `parent` processor
+# attribute whose value is the parent processor of a processor,
+# or `None` if there is none.
+
+# TODO: Make it easier for a graph to log a message for each
+# item (e.g. file path or clip) it processes.
+
+# TODO: Consider using typed object classes (e.g. Pydantic models)
+# for settings instead of `Bunch`.
+
 
 '''
 A processor *finishes* when it finishes all of its processing and
