@@ -16,17 +16,16 @@ import lrgv.util.logging_utils as logging_utils
 logger = logging.getLogger(__name__)
 
 
-# TODO: Add clip file retirement.
-# TODO: Log per-clip message from clip audio file S3 uploader.
-# TODO: Log per-clip message from clip audio file copier.
+# TODO: Add Old Bird clip archiving.
 # TODO: Don't attempt to process clip for which audio and metadata files
 #       are not both present.
-# TODO: Don't stop processing clips for a station and detector if the
-#       processing of one clip raises an exception: just move on to
-#       the next clip.
 # TODO: Consider uploading clip audio file *before* adding clip to archive
 #       so users don't see blank spectrograms in clip albums.
-# TODO: Add Dick-r clip archiving.
+# TODO: Don't stop processing clips for a station and detector if the
+#       processing of one clip raises an exception: just move on to the
+#       next clip. This will require modifications to dataflow package.
+# TODO: Log per-clip messages from station/detector processors.
+#       This will require modifications to dataflow package.
 
 
 # * In top level processor, create one processor per station. The processor
