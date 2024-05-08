@@ -347,61 +347,93 @@ def process_detections(
             
         for detection in csv_reader:
 
-            # Get file line from which `detection` was created.
-            csv_line = text_file.readline().strip()
-
-            annotations = get_clip_annotations(
-                detection, taxon_mapping, csv_line)
-
-            classification = annotations['Classification']
-            if not classification_included(classification):
-                continue
-
             # Get detection start and end offsets.
             start_offset = float(detection['start_sec'])
             end_offset = float(detection['end_sec'])
 
-            # Get clip file name stem.
+            # Get clip start time.
             start_delta = TimeDelta(seconds=start_offset)
-            clip_start_time = recording_file.start_time + start_delta
-            start_time = format_start_time(
-                clip_start_time, sep='_', timespec='milliseconds')
-            start_time = start_time.replace(':', '.')
+            start_time = recording_file.start_time + start_delta
+
+            # Get clip serial number. We assign a serial number to
+            # each clip to distinguish clips with the same start time.
+            # The serial numbers for a given start time are zero
+            # through n - 1, where n is the number of clips with that
+            # start time. The combination of start time and serial
+            # number is unique over all clips.
+            #
+            # We use the serial numbers for two purposes. First, we
+            # use them to create unique clip file names. Second, the
+            # Django view that creates LRGV clips in a Vesper archive
+            # uses them to create unique clip start times. (The Vesper
+            # archive database requires that the combination of
+            # recording channel, start time, and creating processor be
+            # unique across all clips. See the
+            # `vesper.django.old_bird.views.CreateLrgvClipsView` Django
+            # view for more on this.)
             key = (station_name, start_time)
-            clip_num = clip_counts[key]
-            clip_file_name_stem = f'{station_name}_{start_time}_{clip_num:02}'
-            clip_audio_file_path = create_file_path(
-                clip_dir_path, clip_file_name_stem, AUDIO_FILE_NAME_EXTENSION)
+            serial_num = clip_counts[key]
             clip_counts[key] += 1
  
-            create_clip_audio_file(
-                clip_audio_file_path, wave_reader, start_offset, end_offset)
+            # Get file line from which `detection` was created.
+            csv_line = text_file.readline().strip()
 
+            # Get clip annotations.
+            annotations = get_clip_annotations(
+                detection, taxon_mapping, csv_line)
+
+            # Skip the rest of this loop body if clip's classification
+            # is not included.
+            classification = annotations['Classification']
+            if not classification_included(classification):
+                continue
+
+            # Format start time for metadata file content.
+            start_time_text = \
+                format_start_time(start_time, timespec='milliseconds')
+            
+            # Get clip length in samples.
             duration = end_offset - start_offset
-            start_time = \
-                format_start_time(clip_start_time, timespec='milliseconds')
             length = s2f(duration, sample_rate)
 
+            # Collect clip metadata for metadata file.
             clips = [{
                 'recording': recording_name,
                 'sensor': sensor_name,
                 'detector': DETECTOR_NAME,
-                'start_time': start_time,
+                'start_time': start_time_text,
+                'serial_num': serial_num,
                 'length': length,
                 'annotations': annotations
             }]
-            
             clip_metadata = {
                 'recordings': recordings,
                 'recording_sensors': recording_sensors,
                 'clips': clips
             }
 
+            # Get clip file name stem.
+            start_time_text = format_start_time(
+                start_time, sep='_', timespec='milliseconds')
+            start_time_text = start_time_text.replace(':', '.')
+            clip_file_name_stem = \
+                f'{station_name}_{start_time_text}_{serial_num:02}'
+
+            # Get metadata file path.
             clip_metadata_file_path = create_file_path(
                 clip_dir_path, clip_file_name_stem, JSON_FILE_NAME_EXTENSION)
 
+            # Write metadata file.
             with open(clip_metadata_file_path, 'wt') as json_file:
                 json.dump(clip_metadata, json_file, indent=4)
+
+            # Get audio file path.
+            clip_audio_file_path = create_file_path(
+                clip_dir_path, clip_file_name_stem, AUDIO_FILE_NAME_EXTENSION)
+            
+            # Write audio file.
+            create_clip_audio_file(
+                clip_audio_file_path, wave_reader, start_offset, end_offset)
 
 
 def get_detection_file_path(input_file_path, nighthawk_output_dir_path):
