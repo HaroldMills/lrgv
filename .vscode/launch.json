@@ -38,7 +38,7 @@
             "program": "${workspaceFolder}/lrgv/nighthawk/run_nighthawk.py",
             "args": [
                 "/Users/harold/Desktop/NFC/LRGV/2024/Nighthawk Runner Test Data/Recordings",
-                "/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024/Ludlow/Clips/Nighthawk/Nighthawk Output",
+                "/Users/harold/Desktop/NFC/LRGV/2024/Nighthawk Runner Test Data/Nighthawk Output",
                 "/Users/harold/Desktop/NFC/LRGV/2024/Nighthawk Runner Test Data/Clips",
                 "2024-04-01"],
             "cwd": "/Users/harold/Desktop/NFC/LRGV/2024/Nighthawk Runner Test Data",
