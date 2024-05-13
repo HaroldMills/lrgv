@@ -1,4 +1,3 @@
-from datetime import datetime as DateTime
 from zoneinfo import ZoneInfo
 
 from lrgv.archiver.clip import Clip
@@ -7,7 +6,7 @@ from lrgv.dataflow import LinearGraph, SimpleProcessor, SimpleSourceMixin
 from lrgv.util.bunch import Bunch
 
 
-_CLIP_FILE_NAME_RE = (
+_CLIP_METADATA_FILE_NAME_RE = (
     r'^'
     r'(?P<station_name>.+)'
     f'_'
@@ -18,7 +17,7 @@ _CLIP_FILE_NAME_RE = (
     r'Z'
     r'_'
     r'(?P<num>\d\d)'
-    r'\.(?:wav|WAV)'
+    r'\.(?:json|JSON)'
     r'$')
 
 
@@ -27,39 +26,8 @@ _UTC = ZoneInfo('UTC')
 
 class _ClipCreator(SimpleProcessor):
 
-    def _process_item(self, audio_file, finished):
-
-        audio_file_path = audio_file.path
-
-        match = audio_file.name_match
-        station_name = match.group('station_name')
-        start_time = _get_clip_start_time(match)
-
-        return Clip(audio_file_path, station_name, start_time)
-
-
-def _get_clip_start_time(match):
-
-    group = match.group
-
-    def get(field_name):
-        return int(group(field_name))
-
-    year = get('year')
-    month = get('month')
-    day = get('day')
-    hour = get('hour')
-    minute = get('minute')
-    second = get('second')
-    millis = get('millis')
-    num = get('num')
-
-    micros = 1000 * (millis + num)
-
-    start_time = DateTime(
-        year, month, day, hour, minute, second, micros, _UTC)
-
-    return start_time
+    def _process_item(self, metadata_file, finished):
+        return Clip(metadata_file.path)
 
 
 class ClipLister(SimpleSourceMixin, LinearGraph):
@@ -72,7 +40,7 @@ class ClipLister(SimpleSourceMixin, LinearGraph):
         name = f'{self.name} - File Lister'
         settings = Bunch(
             dir_path=s.clip_dir_path,
-            file_name_re=_CLIP_FILE_NAME_RE,
+            file_name_re=_CLIP_METADATA_FILE_NAME_RE,
             file_wait_period=s.clip_file_wait_period)
         lister = FileLister(name, settings)
 

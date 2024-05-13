@@ -1,0 +1,39 @@
+{
+    "recordings": {
+        "Alamo 2024-05-09 02:00:00 Z": {
+            "sensors": "Alamo",
+            "start_time": "2024-05-09 02:00:00 Z",
+            "length": 634606648,
+            "sample_rate": 22050
+        }
+    },
+    "recording_sensors": {
+        "Alamo": [
+            "Alamo 21c"
+        ]
+    },
+    "clips": [
+        {
+            "recording": "Alamo 2024-05-09 02:00:00 Z",
+            "sensor": "Alamo 21c",
+            "detector": "Nighthawk 0.3.0 80",
+            "start_time": "2024-05-09 02:15:05.400 Z",
+            "length": 30870,
+            "annotations": {
+                "Detector Score": "99.74367022514343",
+                "Classifier Score": "99.74367022514343",
+                "Nighthawk Order": "Passeriformes",
+                "Nighthawk Order Probability": "0.97218317",
+                "Nighthawk Family": "Cardinalidae",
+                "Nighthawk Family Probability": "0.99454767",
+                "Nighthawk Group": "",
+                "Nighthawk Group Probability": "",
+                "Nighthawk Species": "DICK",
+                "Nighthawk Species Probability": "0.9974367",
+                "Nighthawk Predicted Category": "DICK",
+                "Nighthawk Probability": "0.9974367022514343",
+                "Nighthawk Output File Line": "905.4000000000001,906.8000000000001,Alamo-2024-05-08-21-00-00.wav,C:\\Users\\o\\Desktop\\i-Sound Audio\\Alamo-2024-05-08-21-00-00.wav,Passeriformes,0.97218317,Cardinalidae,0.99454767,,,dickci,0.9974367,dickci,0.9974367022514343"
+            }
+        }
+    ]
+}
