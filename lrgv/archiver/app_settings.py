@@ -6,40 +6,51 @@ from environs import Env
 from lrgv.util.bunch import Bunch
 
 
-# `True` if archiver should work with a remote archive, or `False` if it
-# should work with a local one. 
-_ARCHIVE_REMOTE = True
+# App mode, either 'Test' or 'Production'.
+_MODE = 'Test'
+# _MODE = 'Production'
 
-# The archiver only uses the following when working with a local archive,
-# i.e. when `_ARCHIVE_REMOTE` is `False`. It does not use it when working
-# with a remote archive.
-_ARCHIVE_DIR_PATH = Path('/Users/harold/Desktop/NFC/LRGV/2024/Test Archive')
 
-# _ACTIVE_STATION_FILES_DIR_PATH = Path(
-#     '/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Station Files/Active')
-_ACTIVE_STATION_FILES_DIR_PATH = \
-    Path('/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024')
+if _MODE == 'Test':
 
-# _RETIRED_STATION_FILES_DIR_PATH = Path(
-#     '/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Station Files/Retired')
-_RETIRED_STATION_FILES_DIR_PATH = \
-    Path('/Users/harold/Desktop/NFC/LRGV/2024/Station Files/Retired')
+    _ARCHIVE_DIR_PATH = \
+        Path('/Users/harold/Desktop/NFC/LRGV/2024/Test Archive')
+    
+    _ACTIVE_DATA_DIR_PATH = Path(
+        '/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Data/Active')
+    
+    _RETIRED_DATA_DIR_PATH = Path(
+        '/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Data/Retired')
+    
+    _STATION_NAMES = ('Alamo', 'Rio Hondo')
+
+elif _MODE == 'Production':
+
+    _ARCHIVE_DIR_PATH = None
+
+    _ACTIVE_DATA_DIR_PATH = \
+        Path('/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024')
+    
+    _RETIRED_DATA_DIR_PATH = \
+        Path('/Users/harold/Desktop/NFC/LRGV/2024/Station Data/Retired')
+    
+    # _STATION_NAMES = ('Alamo',)
+    _STATION_NAMES = (
+        'Alamo',
+        'Donna',
+        'Harlingen',
+        'Port Isabel',
+        'Rio Hondo',
+        'Roma HS',
+        'Roma RBMS'
+    )
+    
+_ARCHIVE_REMOTE = _ARCHIVE_DIR_PATH is None
 
 _LOG_FILE_PATH = None
 # _LOG_FILE_PATH = _STATION_DATA_DIR_PATH / 'archive_clips.log'
 
 _LOGGING_LEVEL = logging.INFO
-
-# _STATION_NAMES = ('Alamo', 'Rio Hondo')
-_STATION_NAMES = (
-    'Alamo',
-    'Donna',
-    'Harlingen',
-    'Port Isabel',
-    'Rio Hondo',
-    'Roma HS',
-    'Roma RBMS'
-)
 
 _DETECTOR_NAMES = ('Dick', 'Nighthawk')
 
@@ -72,11 +83,11 @@ def _get_paths(station_names, detector_names):
 
     def get_station_paths(station_name, detector_names):
 
-        active_dir_path = _ACTIVE_STATION_FILES_DIR_PATH / station_name
-        active_clip_dir_path = active_dir_path / 'Clips'
+        station_dir_path = _ACTIVE_DATA_DIR_PATH / station_name
+        active_clip_dir_path = station_dir_path / 'Clips'
 
         retired_clip_dir_path = \
-            _RETIRED_STATION_FILES_DIR_PATH / station_name / 'Clips'
+            _RETIRED_DATA_DIR_PATH / station_name / 'Clips'
 
         detector_paths = {
             detector_name: get_detector_paths(
@@ -85,7 +96,7 @@ def _get_paths(station_names, detector_names):
         }
 
         return Bunch(
-            station_dir_path=active_dir_path,
+            station_dir_path=station_dir_path,
             detectors=detector_paths)
 
     station_paths = {

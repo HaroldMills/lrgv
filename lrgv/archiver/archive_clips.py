@@ -125,7 +125,6 @@ class StationClipArchiver(Graph):
 
         settings = Bunch(
             station_name=station_name,
-            clip_dir_path=station_paths.station_dir_path,
             clip_file_wait_period=s.clip_file_wait_period,
             station_paths=station_paths)
             
