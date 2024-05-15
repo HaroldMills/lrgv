@@ -4,59 +4,55 @@ import shutil
 import time
 
 
-# The test clip directory hierarchy looks like:
+# The source, active, and retired test data directory hierarchies parallel
+# the laptop data directory hierarchy and look like:
 #
-#     <test data directory>
-#         <station name>
-#             <detector name>
-TEST_CLIP_DIR_PATH = \
-    Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Clips')
-
-# The active and retired station files directory hierarchies parallel
-# the laptop station files directory hierarchy and look like:
-#
-#     <station files dir>
+#     <root dir>
 #         <station name>
 #             Clips
 #                 <detector name>
 #                     Incoming
+#                     Created
+#                     Archived
+#
+# For a given station, Old Bird detector clips appear in the station
+# directory <station name>, while other detector clips appear in the
+# `Incoming` directory.
 
-TEST_STATION_FILE_DIR_PATH = Path(
-    '/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Station Files')
 
-ACTIVE_STATION_FILE_DIR_PATH = TEST_STATION_FILE_DIR_PATH / 'Active'
+DATA_SOURCE_DIR_PATH = \
+    Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Data Source')
 
-RETIRED_STATION_FILE_DIR_PATH = TEST_STATION_FILE_DIR_PATH / 'Retired'
+DATA_DIR_PATH = Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Data')
 
-STATION_FILE_DIR_PATHS = (
-    ACTIVE_STATION_FILE_DIR_PATH, RETIRED_STATION_FILE_DIR_PATH)
+ACTIVE_DATA_DIR_PATH = DATA_DIR_PATH / 'Active'
 
-STATION_CLIP_DIR_NAME = 'Clips'
+RETIRED_DATA_DIR_PATH = DATA_DIR_PATH / 'Retired'
+
+DATA_DIR_PATHS = (ACTIVE_DATA_DIR_PATH, RETIRED_DATA_DIR_PATH)
+
+CLIP_DIR_NAME = 'Clips'
 
 INCOMING_DIR_NAME = 'Incoming'
 
 DETECTOR_CLIP_DIR_NAMES = (INCOMING_DIR_NAME, 'Created', 'Archived')
 
-STATION_NAMES = ['Alamo', 'Rio Hondo']
+STATION_NAMES = ('Alamo', 'Rio Hondo')
 
-DETECTOR_NAMES = ['Nighthawk']
+DETECTOR_NAMES = ('Dick', 'Nighthawk')
 
-CLEARING_SLEEP_PERIOD = 5
 DETECTION_SLEEP_PERIOD = 2
 
 MAX_CLIP_COUNT = None
 
 
 chain = itertools.chain.from_iterable
-product = itertools.product
 
 
 def main():
 
-    print(f'Clearing clip folders...')
+    print(f'Clearing test data directories...')
     clear_dirs()
-
-    time.sleep(CLEARING_SLEEP_PERIOD)
 
     clip_count = 0
 
@@ -65,7 +61,8 @@ def main():
         if MAX_CLIP_COUNT is not None and clip_count == MAX_CLIP_COUNT:
             break
 
-        print(f'Detected "{audio_file_path.name}...')
+        relative_path = audio_file_path.relative_to(DATA_SOURCE_DIR_PATH)
+        print(f'Detected "{relative_path}...')
 
         detect_clip(audio_file_path)
 
@@ -78,19 +75,23 @@ def clear_dirs():
 
     def clear_dir(dir_path):
         if dir_path.exists():
-            for file_path in dir_path.glob('*'):
-                file_path.unlink()
+            for path in dir_path.glob('*'):
+                if path.is_file():
+                    path.unlink()
         
-    for file_dir_path in STATION_FILE_DIR_PATHS:
+    for data_dir_path in DATA_DIR_PATHS:
 
         for station_name in STATION_NAMES:
 
-            station_dir_path = \
-                file_dir_path / station_name / STATION_CLIP_DIR_NAME
+            station_dir_path = data_dir_path / station_name
+            
+            clear_dir(station_dir_path)
+
+            clip_dir_path = station_dir_path / CLIP_DIR_NAME
             
             for detector_name in DETECTOR_NAMES:
 
-                detector_dir_path = station_dir_path / detector_name
+                detector_dir_path = clip_dir_path / detector_name
 
                 for dir_name in DETECTOR_CLIP_DIR_NAMES:
                     dir_path = detector_dir_path / dir_name
@@ -98,29 +99,44 @@ def clear_dirs():
 
 
 def get_clip_audio_file_paths():
+    old_bird_paths = get_old_bird_clip_audio_file_paths()
+    other_paths = get_other_clip_audio_file_paths()
+    path_lists = old_bird_paths + other_paths
+    zipped_paths = list(itertools.zip_longest(*path_lists))
+    return [p for p in chain(zipped_paths) if p is not None]
+
+
+def get_old_bird_clip_audio_file_paths():
+
+    def get_clips_aux(station_name):
+        dir_path = DATA_SOURCE_DIR_PATH / station_name
+        return sorted(p for p in dir_path.glob('*.wav'))
+    
+    return [get_clips_aux(n) for n in STATION_NAMES]
+
+
+def get_other_clip_audio_file_paths():
 
     def get_clips_aux(station_name, detector_name):
-        dir_path = TEST_CLIP_DIR_PATH / station_name / detector_name
+        dir_path = \
+            DATA_SOURCE_DIR_PATH / station_name / CLIP_DIR_NAME / \
+            detector_name / INCOMING_DIR_NAME
         return sorted(p for p in dir_path.glob('*.wav'))
 
-    cases = product(STATION_NAMES, DETECTOR_NAMES)
-    clip_tuples = zip(*(get_clips_aux(s, d) for s, d in cases))
-    return chain(clip_tuples)
+    cases = itertools.product(STATION_NAMES, DETECTOR_NAMES)
+    return [get_clips_aux(s, d) for s, d in cases]
 
 
 def detect_clip(audio_file_path):
 
-    station_name = audio_file_path.parent.parent.name
-    detector_name = audio_file_path.parent.name
+    relative_path = audio_file_path.relative_to(DATA_SOURCE_DIR_PATH)
+    to_dir_path = ACTIVE_DATA_DIR_PATH / relative_path.parent
 
-    to_dir_path = \
-        ACTIVE_STATION_FILE_DIR_PATH / station_name / \
-            STATION_CLIP_DIR_NAME / detector_name / INCOMING_DIR_NAME
-    
     shutil.copy2(audio_file_path, to_dir_path)
 
     metadata_file_path = audio_file_path.with_suffix('.json')
-    shutil.copy2(metadata_file_path, to_dir_path)
+    if metadata_file_path.exists():
+        shutil.copy2(metadata_file_path, to_dir_path)
 
 
 if __name__ == '__main__':
