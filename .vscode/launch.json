@@ -21,7 +21,7 @@
             "console": "integratedTerminal",
         },
         {
-            "name": "Vesper Server",
+            "name": "Serve Test Archive",
             "type": "debugpy",
             "request": "launch",
             "program": "/Users/harold/miniconda3/envs/vesper-dev/bin/vesper_admin",
@@ -32,7 +32,7 @@
             "console": "integratedTerminal",
         },
         {
-            "name": "Run Nighthawk",
+            "name": "Test Nighthawk Runner",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/lrgv/nighthawk/run_nighthawk.py",
