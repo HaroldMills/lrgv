@@ -33,7 +33,6 @@ _RECORDING_DURATION = 8             # hours
 _SENSOR_NAME_FORMAT = '{station_name} 21c'
 _TIME_ZONE_OFFSET_LENGTH = 6
 _METADATA_DETECTOR_NAME = 'Old Bird Dickcissel Detector 1.0'
-_CLIP_CLASSIFICATION = 'Call.DICK'
 
 _AUDIO_FILE_NAME_EXTENSION = '.wav'
 _METADATA_FILE_NAME_EXTENSION = '.json'
@@ -51,7 +50,7 @@ class OldBirdClipConverter(LinearGraph):
 
         name = f'{s.station_name} Old Bird Clip Lister'
         settings = Bunch(
-            dir_path=s.station_paths.station_dir_path,
+            dir_path=s.source_clip_dir_path,
             file_name_re=_CLIP_FILE_NAME_RE,
             file_wait_period=s.clip_file_wait_period)
         lister = FileLister(name, settings)
@@ -60,7 +59,8 @@ class OldBirdClipConverter(LinearGraph):
         paths = s.station_paths.detectors[_DETECTOR_NAME]
         settings = Bunch(
             station_name=s.station_name,
-            destination_dir_path=paths.incoming_clip_dir_path)
+            destination_dir_path=paths.incoming_clip_dir_path,
+            clip_classification=s.clip_classification)
         mover = _ClipFileMover(name, settings)
 
         return lister, mover
@@ -90,10 +90,12 @@ class _ClipFileMover(SimpleSink):
         recording_length = int(round(_RECORDING_DURATION * 3600 * sample_rate))
 
         # Get clip annotations.
-        clip_annotations = {}
-        # clip_annotations = {
-        #     'Classification': _CLIP_CLASSIFICATION
-        # }
+        if s.clip_classification is None:
+            clip_annotations = {}
+        else:
+            clip_annotations = {
+                'Classification': s.clip_classification
+            }
 
         # Get metadata.
         metadata = create_clip_metadata(

@@ -16,7 +16,6 @@ import lrgv.util.logging_utils as logging_utils
 logger = logging.getLogger(__name__)
 
 
-# TODO: Add Old Bird clip archiving.
 # TODO: Don't attempt to process clip for which audio and metadata files
 #       are not both present.
 # TODO: Consider uploading clip audio file *before* adding clip to archive
@@ -74,6 +73,8 @@ def main():
 
 def create_archiver():
     archiver = ClipArchiver('Clip Archiver')
+    # archiver = \
+    #     ClassifiedOldBirdClipArchiver('Classified Old Bird Clip Archiver')
     archiver.connect()
     archiver.start()
     return archiver
@@ -125,8 +126,10 @@ class StationClipArchiver(Graph):
 
         settings = Bunch(
             station_name=station_name,
+            source_clip_dir_path=station_paths.station_dir_path,
             clip_file_wait_period=s.clip_file_wait_period,
-            station_paths=station_paths)
+            station_paths=station_paths,
+            clip_classification=None)
             
         return OldBirdClipConverter(name, settings)
     
