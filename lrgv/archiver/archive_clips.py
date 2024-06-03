@@ -105,7 +105,7 @@ class StationClipArchiver(Graph):
 
     def _create_processors(self):
 
-        old_bird_clip_converter = self._create_old_bird_clip_converter()
+        # old_bird_clip_converter = self._create_old_bird_clip_converter()
 
         detector_clip_archivers = tuple(
             self._create_detector_clip_archiver(n)
@@ -115,9 +115,10 @@ class StationClipArchiver(Graph):
             self._create_detector_clip_retirer(n)
             for n in app_settings.detector_names)
 
-        return \
-            (old_bird_clip_converter,) + detector_clip_archivers + \
-            detector_clip_retirers
+        # return \
+        #     (old_bird_clip_converter,) + detector_clip_archivers + \
+        #     detector_clip_retirers
+        return detector_clip_archivers + detector_clip_retirers
     
 
     def _create_old_bird_clip_converter(self):
