@@ -16,6 +16,11 @@ import lrgv.util.logging_utils as logging_utils
 logger = logging.getLogger(__name__)
 
 
+# TODO: A Dick-r clip that starts at or after the end of the recording
+#       period for a night (e.g. 10:00:00 UTC) causes the Dick Clip
+#       Archiver to try to create a duplicate recording. Decide what
+#       should happen and implement. Perhaps we should log a warning
+#       and move the clip files to an Outside directory.
 # TODO: Don't attempt to process clip for which audio and metadata files
 #       are not both present.
 # TODO: Consider uploading clip audio file *before* adding clip to archive
