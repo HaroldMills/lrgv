@@ -62,7 +62,9 @@ RECORDING_FILE_STATION_NAMES = {
 }
 
 # INCLUDED_CLASSIFICATIONS = None
-INCLUDED_CLASSIFICATIONS = frozenset(['Call.DICK'])
+INCLUDED_CLASSIFICATIONS = frozenset(['Call.BAWW', 'Call.DICK'])
+# INCLUDED_CLASSIFICATIONS = \
+#     frozenset(['Call.BAWW', 'Call.DICK', 'Call.LESA', 'Call.UPSA'])
 
 
 def main():
