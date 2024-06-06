@@ -29,7 +29,7 @@ elif _MODE == 'Production':
     _ARCHIVE_DIR_PATH = None
 
     _ACTIVE_DATA_DIR_PATH = \
-        Path('/Users/harold/Desktop/NFC/LRGV/Synced Folders 2024')
+        Path('/Users/harold/Desktop/NFC/LRGV/2024/Station Data/Active')
     
     _RETIRED_DATA_DIR_PATH = \
         Path('/Users/harold/Desktop/NFC/LRGV/2024/Station Data/Retired')
