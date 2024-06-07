@@ -31,7 +31,7 @@ To install the `lrgv` package and related software onto a station laptop:
 3. Create a Conda environment called `lrgv` by issuing the following
    commands at an Anaconda Prompt:
 
-       conda create -n lrgv python=3.11
+       conda create -n lrgv python=3.12
        conda activate lrgv
        cd "C:\Users\wreva\Documents\My SugarSync\LRGV Station Software\To Share\Python\lrgv-2024"
        pip install -e .
