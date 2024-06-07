@@ -3,7 +3,7 @@
 # To create a Python environment named `lrgv` in which to work on
 # the `lrgv` package:
 #
-#     conda create -n lrgv python=3.11
+#     conda create -n lrgv python=3.12
 #     conda activate lrgv
 #     pip install -e <lrgv package dir path>
 
@@ -20,7 +20,7 @@ description = """\
     monitoring project.\
     """
 # readme = 'README.md'
-requires-python = '~=3.11.0'
+requires-python = '~=3.12.0'
 # license = {file = 'LICENSE'}
 authors = [
     {name = 'Harold Mills', email = 'harold.mills@gmail.com'},
@@ -30,7 +30,9 @@ classifiers = [
     'Operating System :: OS Independent',
 ]
 dependencies = [
-    'environs'
+    'boto3',
+    'environs',
+    'requests'
 ]
 
 [project.scripts]
