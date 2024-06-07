@@ -1,7 +1,3 @@
-Note that in the following the term *user directory* refers to the
-home directory of the user thaat runs the LRGV software, e.g.
-`C:\Users\wreva`.
-
 The `lrgv` Python package is software for the Old Bird Lower Rio Grande
 Valley (LRGV) acoustic monitoring project. The software includes a
 program called `run_nighthawk` that runs the Nighthawk nocturnal flight
@@ -10,10 +6,14 @@ that adds detected clips to a Vesper archive. `run_nighthawk` is
 also known as the *Nighthawk runner* and `archive_clips` is also known
 as the *archiver*. As of this writing, the Nighthawk runner runs on
 monitoring station laptops, while the archiver runs on a separate
-computer in Lansing, NY dedicated to maintaining the station laptops
-(to the extent possible via the SugarSync file synchronization utility)
-and archiving their detections. In the future, the archiver may run
-on the station laptops instead.
+computer located near Ithaca, NY and dedicated to maintaining the
+station laptops (to the extent possible via the SugarSync file
+synchronization utility) and archiving their detections. In the future,
+the archiver may run on the station laptops instead.
+
+Note that in the following the term *user directory* refers to the
+home directory of the user that runs the LRGV software, e.g.
+`C:\Users\wreva`.
 
 To install the `lrgv` package and related software onto a station laptop:
 
