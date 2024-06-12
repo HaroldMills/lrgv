@@ -29,8 +29,6 @@ class SimpleSink(SimpleSinkMixin, Processor):
 
             if input.finished:
                 self._state = Processor.STATE_FINISHED
-
-        return {}
     
 
     def _process_items(self, items, finished):

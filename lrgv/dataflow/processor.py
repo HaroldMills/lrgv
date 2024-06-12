@@ -2,13 +2,26 @@ from lrgv.dataflow.dataflow_error import DataflowError
 from lrgv.util.bunch import Bunch
 
 
-# TODO: Consider implementing `Processor` subclasses for common
-# (input count, output count) cases like (0, 1), (1, 1), and (1, 0).
-# These would define `_create_inputs` and `_create_outputs` as
-# appropriate, and perhaps override `_process` to unwrap input data
-# and wrap output data. The goal is for most `Processor` subclasses
-# to have to implement only the processing method, and for that
-# implementation to be as simple as possible.
+# TODO: Consider giving each processor a default name derived from
+# its class name.
+
+# TODO: Consider adding a `path` processor attribute that indicates
+# the processor and all of its ancestors. The attribute value might
+# be a tuple of processors, a tuple of processor names, or a
+# single string comprising joined processor names. In conjunction
+# with this I suspect we would want to add a `parent` processor
+# attribute whose value is the parent processor of a processor,
+# or `None` if there is none.
+
+# TODO: Make it easier for a graph to log a message for each
+# item (e.g. file path or clip) it processes.
+
+# TODO: Consider using typed object classes (e.g. Pydantic models)
+# for settings instead of `Bunch`.
+
+# TODO: Write more docstrings.
+
+# TODO: Write more unit tests.
 
 # TODO: Consider supporting a variable number of inputs or outputs.
 # For example, multiplexer and demultiplexer signal processors might
@@ -31,7 +44,7 @@ from lrgv.util.bunch import Bunch
 # This would require unfreezing port objects.
 
 # TODO: Consider keeping track of whether input and output are
-# finished in port objects. This would require unfreezing pott objects.
+# finished in port objects. This would require unfreezing port objects.
 
 # TODO: Consider allowing `_process` method to read input items
 # from input port objects, and write output items to output port
@@ -39,29 +52,6 @@ from lrgv.util.bunch import Bunch
 
 # TODO: Add `Processor.STATE_INTERRUPTED` and implement `interrupt`
 # method.
-
-# TODO: Consider allowing `_process` method of sink to return `None`.
-
-# TODO: Complete docstrings.
-
-# TODO: Write more unit tests.
-
-# TODO: Consider giving each processor a default name derived from
-# its class name.
-
-# TODO: Consider adding a `path` processor attribute that indicates
-# the processor and all of its ancestors. The attribute value might
-# be a tuple of processors, a tuple of processor names, or a
-# single string comprising joined processor names. In conjunction
-# with this I suspect we would want to add a `parent` processor
-# attribute whose value is the parent processor of a processor,
-# or `None` if there is none.
-
-# TODO: Make it easier for a graph to log a message for each
-# item (e.g. file path or clip) it processes.
-
-# TODO: Consider using typed object classes (e.g. Pydantic models)
-# for settings instead of `Bunch`.
 
 
 '''
@@ -505,7 +495,9 @@ class Processor:
         
         self._check_input_data(input_data)
                 
-        return self._process(input_data)
+        output_data = self._process(input_data)
+
+        return self._check_output_data(output_data)
 
 
     def _check_input_data(self, input_data):
@@ -518,14 +510,14 @@ class Processor:
                 if len(data.items) != 0:
                     # input data includes new items
                      
-                    raise ValueError(
+                    raise DataflowError(
                         f'Input items received for processor "{self.name}" '
                         f'input "{name}" after input finished.')
                 
                 if not data.finished:
                     # input data indicates that input is not finished
 
-                    raise ValueError(
+                    raise DataflowError(
                         f'Input data for processor "{self.name}" '
                         f'input port "{name}" indicate that input is not '
                         f'finished, but previous input data indicated '
@@ -563,3 +555,25 @@ class Processor:
         """
 
         pass
+    
+
+    def _check_output_data(self, output_data):
+        
+        if output_data is None:
+            
+            if len(self.output_ports) == 0:
+                # processor has no output ports
+
+                output_data = {}
+
+            else:
+                # processor has one or more output ports
+
+                raise DataflowError(
+                    f'Method "_process" of processor {self.name} did '
+                    f'not return an output data dictionary. That method '
+                    f'must always return an output data dictionary for '
+                    f'a processor that has outputs, even if the '
+                    f'dictionary is empty.')
+            
+        return output_data
