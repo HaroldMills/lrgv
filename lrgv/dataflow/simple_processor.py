@@ -14,7 +14,9 @@ class SimpleProcessor(SimpleProcessorMixin, Processor):
     from the default implementation of the `_process` method, and
     `_process_item` is invoked from the default implementation of the
     `_process_items` method. A subclass will typically override either
-    `_process_items` or `_process_item` but not both.
+    `_process_items` or `_process_item` but not both. A subclass can
+    also elect to ignore these methods, however, and simply override
+    `_process`.
     """
 
 
