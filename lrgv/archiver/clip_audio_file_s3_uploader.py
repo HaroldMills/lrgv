@@ -11,9 +11,9 @@ import lrgv.util.vesper_utils as vesper_utils
 class ClipAudioFileS3Uploader(SimpleProcessor):
 
 
-    def __init__(self, name, settings):
+    def __init__(self, settings, parent=None, name=None):
 
-        super().__init__(name, settings)
+        super().__init__(settings, parent, name)
 
         aws = self.settings.aws
 
@@ -36,17 +36,17 @@ class ClipAudioFileS3Uploader(SimpleProcessor):
             obj = self._s3.Object(self._clip_bucket_name, object_key)
         except Exception as e:
             raise ArchiverError(
-                f'Could not create boto3 S3 object for bucket '
-                f'"{self._clip_bucket_name}", object key "{object_key}". '
-                f'Exception message was: {e}')
+                f'Processor "{self.path}" not create boto3 S3 object for '
+                f'bucket "{self._clip_bucket_name}", object key '
+                f'"{object_key}". Exception message was: {e}')
         
         try:
             obj.put(Body=file_contents)
         except Exception as e:
             raise ArchiverError(
-                f'Could not put boto3 S3 object to bucket '
-                f'"{self._clip_bucket_name}", object key "{object_key}". '
-                f'Exception message was: {e}')
+                f'Processor "{self.path}" could not put boto3 S3 object to '
+                f'bucket "{self._clip_bucket_name}", object key '
+                f'"{object_key}". Exception message was: {e}')
         
         return clip
 

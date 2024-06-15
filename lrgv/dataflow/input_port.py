@@ -10,4 +10,4 @@ class InputPort(Port):
     connection_required: bool = True
 
     def __str__(self):
-        return f'Processor "{self.processor.name}" input port "{self.name}"'
+        return f'Processor "{self.processor.path}" input port "{self.name}"'

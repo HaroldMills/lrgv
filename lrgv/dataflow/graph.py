@@ -87,9 +87,9 @@ connections:
 class Graph(Processor):
 
 
-    def __init__(self, name, settings=None):
+    def __init__(self, settings=None, parent=None, name=None):
 
-        super().__init__(name, settings)
+        super().__init__(settings, parent, name)
 
         # Sequence of processor objects, of type `Processor`. The
         # processors must be ordered so that no processor follows
@@ -97,11 +97,6 @@ class Graph(Processor):
         self._processors = tuple(self._create_processors())
 
         self._check_processors()
-
-        # Get mapping from processor name to processor, including this
-        # graph.
-        self._processors_by_name = {p.name: p for p in self._processors}
-        self._processors_by_name[self.name] = self
 
         # Get connections for this graph.
         self._connections = tuple(self._create_connections())
@@ -133,6 +128,9 @@ class Graph(Processor):
         # Processor requirements:
         #
         # * The names of a graph and its processors must all be unique.
+        #   This allows connections between processors of the graph
+        #   (including between graph ports and processor ports) to be
+        #   specified in terms of the names.
 
         names = set()
 
@@ -215,26 +213,26 @@ class Graph(Processor):
             if c.source not in all_sources:
                 raise DataflowError(
                     f'Unrecognized connection source "{c.source}" '
-                    f'for processor graph "{self.name}".')
+                    f'for processor graph "{self.path}".')
             
             if c.destination not in all_destinations:
                 raise DataflowError(
                     f'Unrecognized connection destination "{c.destination}" '
-                    f'for processor graph "{self.name}".')
+                    f'for processor graph "{self.path}".')
             
             if c.source.processor is self and c.destination.processor is self:
                 raise DataflowError(
                     f'Direct connection specified from input port '
                     f'"{c.source.name}" to output port '
                     f'"{c.destination.name}" for processor graph '
-                    f'"{self.name}". Such connections are not currently '
+                    f'"{self.path}". Such connections are not currently '
                     f'supported.')
             
             if c.source.processor is c.destination.processor and \
                     c.source.processor is not self:
                 raise DataflowError(
                     f'Connection specified from processor '
-                    f'"{c.source.processor.name}" output port '
+                    f'"{c.source.processor.path}" output port '
                     f'"{c.source.name}" to input port '
                     f'"{c.destination.name}" of same processor. '
                     f'A processor output port can only be connected '
@@ -244,7 +242,7 @@ class Graph(Processor):
                 raise DataflowError(
                     f'Connection destination "{c.destination}" specified '
                     f'in more than one connection for processor graph '
-                    f'"{self.name}". A given destination can be specified '
+                    f'"{self.path}". A given destination can be specified '
                     f'for only one connection.')
             
             connected_destinations.add(c.destination)
@@ -260,7 +258,7 @@ class Graph(Processor):
             raise DataflowError(
                 f'Required connection destinations '
                 f'{destinations} are unconnected '
-                f'for processor graph "{self.name}". All processor '
+                f'for processor graph "{self.path}". All processor '
                 f'input ports that require input and all graph output '
                 f'ports must be connected.')
 

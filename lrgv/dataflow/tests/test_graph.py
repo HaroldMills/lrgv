@@ -8,14 +8,14 @@ from lrgv.util.bunch import Bunch
 class TestGraph(LinearGraph):
 
 
-    def __init__(self, name, source_settings, processor):
+    def __init__(self, source_settings, processor):
         self._processor = processor
-        super().__init__(name, source_settings)
+        super().__init__(source_settings)
 
 
     def _create_processors(self):
-        source = RangeSource('Source', self.settings)
-        sink = CollectingSink('Sink')
+        source = RangeSource(self.settings)
+        sink = CollectingSink()
         return source, self._processor, sink
     
 
@@ -34,9 +34,9 @@ class ProcessorGraphTests(ProcessorTestCase):
         scale_factor = 2
 
         scaler_settings = Bunch(scale_factor=scale_factor)
-        scaler = Scaler('Scaler', scaler_settings)
+        scaler = Scaler(scaler_settings)
         
-        graph = TestGraph('Test Graph', source_settings, scaler)
+        graph = TestGraph(source_settings, scaler)
 
         s = source_settings
         expected_items = \
@@ -70,12 +70,10 @@ class ProcessorGraphTests(ProcessorTestCase):
         scale_factor = 2
         offset = 1
         
-        transformer_settings = Bunch(
-            scale_factor=scale_factor,
-            offset=offset)
-        transformer = AffineTransformer('Transformer', transformer_settings)
+        transformer_settings = Bunch(scale_factor=scale_factor, offset=offset)
+        transformer = AffineTransformer(transformer_settings)
 
-        graph = TestGraph('Test Graph', source_settings, transformer)
+        graph = TestGraph(source_settings, transformer)
 
         s = source_settings
         start = s.start + offset

@@ -9,4 +9,4 @@ class OutputPort(Port):
     name: str = 'Output'
 
     def __str__(self):
-        return f'Processor "{self.processor.name}" output port "{self.name}"'
+        return f'Processor "{self.processor.path}" output port "{self.name}"'

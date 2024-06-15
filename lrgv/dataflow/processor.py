@@ -2,17 +2,6 @@ from lrgv.dataflow.dataflow_error import DataflowError
 from lrgv.util.bunch import Bunch
 
 
-# TODO: Consider giving each processor a default name derived from
-# its class name.
-
-# TODO: Consider adding a `path` processor attribute that indicates
-# the processor and all of its ancestors. The attribute value might
-# be a tuple of processors, a tuple of processor names, or a
-# single string comprising joined processor names. In conjunction
-# with this I suspect we would want to add a `parent` processor
-# attribute whose value is the parent processor of a processor,
-# or `None` if there is none.
-
 # TODO: Make it easier for a graph to log a message for each
 # item (e.g. file path or clip) it processes.
 
@@ -260,14 +249,26 @@ class Processor:
         raise NotImplementedError()
 
 
-    def __init__(self, name, settings=None):
+    def __init__(self, settings=None, parent=None, name=None):
         
-        self._name = name
-
         if settings is None:
             self._settings = Bunch()
         else:
             self._settings = settings
+
+        self._parent = parent
+
+        if name is None:
+            self._name = self.__class__.__name__
+        else:
+            self._name = name
+
+        # self._name = name
+
+        # if settings is None:
+        #     self._settings = Bunch()
+        # else:
+        #     self._settings = settings
 
         self._input_ports = self._create_input_ports()
 
@@ -304,15 +305,28 @@ class Processor:
     
 
     @property
+    def settings(self):
+        return self._settings
+    
+
+    @property
+    def parent(self):
+        return self._parent
+    
+
+    @property
     def name(self):
         return self._name
     
 
     @property
-    def settings(self):
-        return self._settings
-    
+    def path(self):
+        if self.parent is None:
+            return f'/{self.name}'
+        else:
+            return f'{self.parent.path}/{self.name}'
 
+    
     @property
     def input_ports(self):
         return self._input_ports

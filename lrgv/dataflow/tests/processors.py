@@ -7,8 +7,8 @@ from lrgv.util.bunch import Bunch
 class RangeSource(SimpleSource):
 
 
-    def __init__(self, name, settings):
-        super().__init__(name, settings)
+    def __init__(self, settings, parent=None, name=None):
+        super().__init__(settings, parent, name)
         self._chunk_size = settings.chunk_size
         self._next_value = settings.start
         self._stop_value = settings.stop
@@ -29,8 +29,8 @@ class RangeSource(SimpleSource):
 class CollectingSink(SimpleSink):
 
 
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, settings=None, parent=None, name=None):
+        super().__init__(None, parent, name)
         self._items = []
 
 
@@ -46,8 +46,8 @@ class CollectingSink(SimpleSink):
 class Scaler(SimpleProcessor):
 
 
-    def __init__(self, name, settings):
-        super().__init__(name, settings)
+    def __init__(self, settings, parent=None, name=None):
+        super().__init__(settings, parent, name)
         self._scale_factor = settings.scale_factor
 
 
@@ -58,8 +58,8 @@ class Scaler(SimpleProcessor):
 class Offsetter(SimpleProcessor):
 
 
-    def __init__(self, name, settings):
-        super().__init__(name, settings)
+    def __init__(self, settings, parent=None, name=None):
+        super().__init__(settings, parent, name)
         self._offset = settings.offset
 
 
@@ -75,9 +75,9 @@ class AffineTransformer(SimpleProcessorMixin, LinearGraph):
         s = self.settings
 
         settings = Bunch(scale_factor=s.scale_factor)
-        scaler = Scaler('Scaler', settings)
+        scaler = Scaler(settings, self)
 
         settings = Bunch(offset=s.offset)
-        offsetter = Offsetter('Offsetter', settings)
+        offsetter = Offsetter(settings, self)
 
         return scaler, offsetter

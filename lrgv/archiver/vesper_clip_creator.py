@@ -22,9 +22,9 @@ _CREATE_CLIPS_URL_SUFFIX = 'create-lrgv-clips/'
 class VesperClipCreator(SimpleSink):
 
 
-    def __init__(self, name, settings):
+    def __init__(self, settings, parent=None, name=None):
 
-        super().__init__(name, settings)
+        super().__init__(settings, parent, name)
 
         s = settings
 
@@ -51,7 +51,7 @@ class VesperClipCreator(SimpleSink):
         self._create_clip(clip)
 
         _logger.info(
-            f'Processor "{self.name}" created Vesper clip {clip.id} '
+            f'Processor "{self.path}" created Vesper clip {clip.id} '
             f'for station "{clip.station_name}", start time '
             f'{clip.start_time}.')
 

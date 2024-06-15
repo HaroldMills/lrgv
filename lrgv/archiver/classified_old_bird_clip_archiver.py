@@ -115,8 +115,6 @@ def get_dir_path_date(dir_path):
 def _create_old_bird_clip_converter(
         station_name, clip_dir_path, classification):
     
-    name = f'Old Bird Clip Converter for {clip_dir_path}'
-
     s = app_settings
     station_paths = s.paths.stations[station_name]
 
@@ -127,4 +125,6 @@ def _create_old_bird_clip_converter(
         station_paths=station_paths,
         clip_classification=classification)
         
-    return OldBirdClipConverter(name, settings)
+    name = f'Old Bird Clip Converter for {clip_dir_path}'
+
+    return OldBirdClipConverter(settings, None, name)

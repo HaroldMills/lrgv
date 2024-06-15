@@ -37,14 +37,12 @@ class ClipLister(SimpleSourceMixin, LinearGraph):
 
         s = self.settings
 
-        name = f'{self.name} - File Lister'
         settings = Bunch(
             dir_path=s.clip_dir_path,
             file_name_re=_CLIP_METADATA_FILE_NAME_RE,
             file_wait_period=s.clip_file_wait_period)
-        lister = FileLister(name, settings)
+        lister = FileLister(settings, self)
 
-        name = f'{self.name} - Clip Object Creator'
-        creator = _ClipCreator(name)
+        creator = _ClipCreator(parent=self)
 
         return lister, creator

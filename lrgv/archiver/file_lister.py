@@ -8,9 +8,9 @@ from lrgv.util.bunch import Bunch
 class FileLister(SimpleSource):
 
 
-    def __init__(self, name, settings):
+    def __init__(self, settings, parent=None, name=None):
 
-        super().__init__(name, settings)
+        super().__init__(settings, parent, name)
 
         self._dir_path = settings.dir_path
 

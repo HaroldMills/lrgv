@@ -48,20 +48,18 @@ class OldBirdClipConverter(LinearGraph):
 
         s = self.settings
 
-        name = f'{s.station_name} Old Bird Clip Lister'
         settings = Bunch(
             dir_path=s.source_clip_dir_path,
             file_name_re=_CLIP_FILE_NAME_RE,
             file_wait_period=s.clip_file_wait_period)
-        lister = FileLister(name, settings)
+        lister = FileLister(settings, self)
 
-        name = f'{s.station_name} Old Bird Clip Mover'
         paths = s.station_paths.detectors[_DETECTOR_NAME]
         settings = Bunch(
             station_name=s.station_name,
             destination_dir_path=paths.incoming_clip_dir_path,
             clip_classification=s.clip_classification)
-        mover = _ClipFileMover(name, settings)
+        mover = _ClipFileMover(settings, self)
 
         return lister, mover
 
@@ -71,7 +69,8 @@ class _ClipFileMover(SimpleSink):
 
     def _process_item(self, audio_file, finished):
 
-        _logger.info(f'{self.name} processing file "{audio_file.path}"...')
+        _logger.info(
+            f'Processor "{self.path}" processing file "{audio_file.path}"...')
 
         s = self.settings
 
@@ -120,7 +119,7 @@ class _ClipFileMover(SimpleSink):
             audio_file.path.rename(new_audio_file_path)
         except Exception as e:
             raise ArchiverError(
-                f'Old Bird "{self.name}" could not move file '
+                f'Processor "{self.path}" could not move file '
                 f'"{audio_file.path}" to "{new_audio_file_path}". '
                 f'Error message was: {e}')
 

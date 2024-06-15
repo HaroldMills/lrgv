@@ -21,7 +21,7 @@ class LinearGraph(Graph):
         def handle_error(message):
             raise DataflowError(
                 f'Cannot create linear connections for processor '
-                f'graph "{self.name}". {message}')
+                f'graph "{self.path}". {message}')
 
 
         processors = self._processors

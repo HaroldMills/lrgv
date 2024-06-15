@@ -9,12 +9,15 @@ class ProcessorTests(ProcessorTestCase):
     
     def test_initialization(self):
 
-        name = 'Bobo'
         settings = Bunch(scale_factor=2)
-        p = Scaler(name, settings)
+        parent = None
+        name = 'Bobo'
+        p = Scaler(settings, parent, name)
 
-        self.assertEqual(p.name, name)
         self.assertEqual(p.settings, settings)
+        self.assertIsNone(p.parent)
+        self.assertEqual(p.name, name)
+        self.assertEqual(p.path, '/Bobo')
         self.assertEqual(len(p.input_ports), 1)
         self.assertEqual(len(p.output_ports), 1)
         self._assert_state(p, Processor.STATE_UNCONNECTED)
@@ -28,10 +31,10 @@ class ProcessorTests(ProcessorTestCase):
         scale_factor = 2
 
         settings = Bunch(start=start, stop=stop, chunk_size=chunk_size)
-        source = RangeSource('Source', settings)
+        source = RangeSource(settings, None, 'Source')
 
         settings = Bunch(scale_factor=scale_factor)
-        scaler = Scaler('Scaler', settings)
+        scaler = Scaler(settings, None, 'Scaler')
 
         sink = CollectingSink('Sink')
 

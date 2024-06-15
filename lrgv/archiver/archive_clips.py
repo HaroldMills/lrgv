@@ -16,6 +16,8 @@ import lrgv.util.logging_utils as logging_utils
 logger = logging.getLogger(__name__)
 
 
+# TODO: Create an app setting that controls whether or not we archive
+#       Old Bird detector clips.
 # TODO: A Dick-r clip that starts at or after the end of the recording
 #       period for a night (e.g. 10:00:00 UTC) causes the Dick Clip
 #       Archiver to try to create a duplicate recording. Decide what
@@ -63,6 +65,29 @@ logger = logging.getLogger(__name__)
 #               * Create clip metadata file in "Incoming" clip folder.
 
 
+'''
+LRGV
+    Alamo
+        OldBirdClipConverter
+        Dick
+            DetectorVesperClipCreator
+                ClipLister
+                    FileLister
+                    ClipObjectCreator
+                VesperClipCreator
+            DetectorClipAudioFileS3Uploader
+                ClipLister
+                    FileLister
+                    ClipObjectCreator
+                DetectorClipAudioFileCopier
+                    ClipLister
+                        FileLister
+                        ClipObjectCreator
+                    ClipAudioFileCopier
+                    ClipMover
+'''
+
+
 def main():
 
     s = app_settings
@@ -77,9 +102,7 @@ def main():
 
 
 def create_archiver():
-    archiver = ClipArchiver('Clip Archiver')
-    # archiver = \
-    #     ClassifiedOldBirdClipArchiver('Classified Old Bird Clip Archiver')
+    archiver = ClipArchiver(name='LRGV')
     archiver.connect()
     archiver.start()
     return archiver
@@ -95,9 +118,8 @@ class ClipArchiver(Graph):
     
 
     def _create_station_clip_archiver(self, station_name):
-        name = f'{station_name} Station Clip Archiver'
         settings = Bunch(station_name=station_name)
-        return StationClipArchiver(name, settings)
+        return StationClipArchiver(settings, self, station_name)
 
 
 class StationClipArchiver(Graph):
@@ -123,11 +145,8 @@ class StationClipArchiver(Graph):
 
     def _create_old_bird_clip_converter(self):
         
-        station_name = self.settings.station_name
-
-        name = f'{station_name} Old Bird Clip Converter'
-
         s = app_settings
+        station_name = self.settings.station_name
         station_paths = s.paths.stations[station_name]
 
         settings = Bunch(
@@ -137,16 +156,13 @@ class StationClipArchiver(Graph):
             station_paths=station_paths,
             clip_classification=None)
             
-        return OldBirdClipConverter(name, settings)
+        return OldBirdClipConverter(settings, self)
     
 
     def _create_detector_clip_archiver(self, detector_name):
 
-        station_name = self.settings.station_name
-
-        name = f'{station_name} {detector_name} Clip Archiver'
-
         s = app_settings
+        station_name = self.settings.station_name
         station_paths = s.paths.stations[station_name]
         detector_paths = station_paths.detectors[detector_name]
 
@@ -159,16 +175,15 @@ class StationClipArchiver(Graph):
         if s.archive_remote:
             settings.aws = s.aws
        
-        return DetectorClipArchiver(name, settings)
+        name = f'{detector_name}'
+
+        return DetectorClipArchiver(settings, self, name)
 
 
     def _create_detector_clip_retirer(self, detector_name):
 
-        station_name = self.settings.station_name
-
-        name = f'{station_name} {detector_name} Clip Retirer'
-
         s = app_settings
+        station_name = self.settings.station_name
         station_paths = s.paths.stations[station_name]
         detector_paths = station_paths.detectors[detector_name]
 
@@ -176,7 +191,9 @@ class StationClipArchiver(Graph):
             detector_paths=detector_paths,
             clip_file_wait_period=s.clip_file_retirement_wait_period)
         
-        return DetectorClipRetirer(name, settings)
+        name = f'{detector_name} Clip Retirer'
+
+        return DetectorClipRetirer(settings, self, name)
 
 
 class DetectorClipArchiver(Graph):
@@ -186,28 +203,26 @@ class DetectorClipArchiver(Graph):
 
         s = self.settings
 
-        name = f'{self.name} - Detector Vesper Clip Creator'
-        vesper_clip_creator = DetectorVesperClipCreator(name, s)
+        vesper_clip_creator = DetectorVesperClipCreator(s, self)
 
         if s.archive_remote:
 
-            name = f'{self.name} - Detector Clip Audio File S3 Uploader'
             settings = Bunch(
                 detector_paths=s.detector_paths,
                 clip_file_wait_period=s.clip_file_wait_period,
                 aws=s.aws)
             audio_file_handler = \
-                DetectorClipAudioFileS3Uploader(name, settings)
+                DetectorClipAudioFileS3Uploader(settings, self)
             
         else:
             # archive local
 
-            name = f'{self.name} - Detector Clip Audio File Copier'
             settings = Bunch(
                 detector_paths=s.detector_paths,
                 clip_file_wait_period=s.clip_file_wait_period,
                 archive_dir_path=app_settings.paths.archive_dir_path)
-            audio_file_handler = DetectorClipAudioFileCopier(name, settings)
+            audio_file_handler = \
+                DetectorClipAudioFileCopier(settings, self)
 
         return vesper_clip_creator, audio_file_handler
 
@@ -234,17 +249,15 @@ class DetectorVesperClipCreator(LinearGraph):
 
         s = self.settings
 
-        name = f'{self.name} - Clip Lister'
         settings = Bunch(
             clip_dir_path=s.detector_paths.incoming_clip_dir_path,
             clip_file_wait_period=s.clip_file_wait_period)
-        clip_lister = ClipLister(name, settings)
+        clip_lister = ClipLister(settings, self)
 
-        name = f'{self.name} - Vesper Clip Creator'
         settings = Bunch(
             vesper=s.vesper,
             created_clip_dir_path=s.detector_paths.created_clip_dir_path)
-        clip_creator = VesperClipCreator(name, settings)
+        clip_creator = VesperClipCreator(settings, self)
 
         return clip_lister, clip_creator
 
@@ -256,20 +269,17 @@ class DetectorClipAudioFileS3Uploader(LinearGraph):
 
         s = self.settings
 
-        name = f'{self.name} - Clip Lister'
         settings = Bunch(
             clip_dir_path=s.detector_paths.created_clip_dir_path,
             clip_file_wait_period=s.clip_file_wait_period)
-        clip_lister = ClipLister(name, settings)
+        clip_lister = ClipLister(settings, self)
 
-        name = f'{self.name} - Clip Audio File S3 Uploader'
         settings = Bunch(aws=s.aws)
-        audio_file_uploader = ClipAudioFileS3Uploader(name, settings)
+        audio_file_uploader = ClipAudioFileS3Uploader(settings, self)
 
-        name = f'{self.name} - Clip Mover'
         settings = Bunch(
             destination_dir_path=s.detector_paths.archived_clip_dir_path)
-        clip_mover = ClipMover(name, settings)
+        clip_mover = ClipMover(settings, self)
 
         return clip_lister, audio_file_uploader, clip_mover
     
@@ -281,20 +291,17 @@ class DetectorClipAudioFileCopier(LinearGraph):
 
         s = self.settings
 
-        name = f'{self.name} - Clip Lister'
         settings = Bunch(
             clip_dir_path=s.detector_paths.created_clip_dir_path,
             clip_file_wait_period=s.clip_file_wait_period)
-        clip_lister = ClipLister(name, settings)
+        clip_lister = ClipLister(settings, self)
 
-        name = f'{self.name} - Clip Audio File Copier'
         settings = Bunch(archive_dir_path=s.archive_dir_path)
-        audio_file_copier = ClipAudioFileCopier(name, settings)
+        audio_file_copier = ClipAudioFileCopier(settings, self)
 
-        name = f'{self.name} - Clip Mover'
         settings = Bunch(
             destination_dir_path=s.detector_paths.archived_clip_dir_path)
-        clip_mover = ClipMover(name, settings)
+        clip_mover = ClipMover(settings, self)
 
         return clip_lister, audio_file_copier, clip_mover
             
@@ -306,16 +313,14 @@ class DetectorClipRetirer(LinearGraph):
         
         s = self.settings
 
-        name = f'{self.name} - Clip Lister'
         settings = Bunch(
             clip_dir_path=s.detector_paths.archived_clip_dir_path,
             clip_file_wait_period=s.clip_file_wait_period)
-        clip_lister = ClipLister(name, settings)
+        clip_lister = ClipLister(settings, self)
 
-        name = f'{self.name} - Clip Mover'
         settings = Bunch(
             destination_dir_path=s.detector_paths.retired_clip_dir_path)
-        clip_mover = ClipMover(name, settings)
+        clip_mover = ClipMover(settings, self)
 
         return clip_lister, clip_mover
 
