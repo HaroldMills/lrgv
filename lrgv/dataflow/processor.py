@@ -408,7 +408,7 @@ class Processor:
     def _check_state(self, operation, required_state):
         if self.state != required_state:
             raise DataflowError(
-                f'Attempt to {operation} processor "{self.name}" in '
+                f'Attempt to {operation} processor "{self.path}" in '
                 f'"{self.state}" state. Processor must be in '
                 f'"{required_state}" state.')
 
@@ -421,7 +421,7 @@ class Processor:
             if not port_name in valid_port_names:
                 raise ValueError(
                     f'Unrecognized input port name "{port_name}" in '
-                    f'input settings for processor "{self.name}".')
+                    f'input settings for processor "{self.path}".')
             
         required_port_names = tuple(
             p.name for p in self.input_ports if p.connection_required)
@@ -432,7 +432,7 @@ class Processor:
             if not port_name in specified_port_names:
                 raise ValueError(
                     f'Input settings not specified for processor '
-                    f'"{self.name}" port "{port_name}" for which '
+                    f'"{self.path}" port "{port_name}" for which '
                     f'connection is required.')
             
 
@@ -525,14 +525,14 @@ class Processor:
                     # input data includes new items
                      
                     raise DataflowError(
-                        f'Input items received for processor "{self.name}" '
+                        f'Input items received for processor "{self.path}" '
                         f'input "{name}" after input finished.')
                 
                 if not data.finished:
                     # input data indicates that input is not finished
 
                     raise DataflowError(
-                        f'Input data for processor "{self.name}" '
+                        f'Input data for processor "{self.path}" '
                         f'input port "{name}" indicate that input is not '
                         f'finished, but previous input data indicated '
                         f'that it was.')
@@ -584,7 +584,7 @@ class Processor:
                 # processor has one or more output ports
 
                 raise DataflowError(
-                    f'Method "_process" of processor {self.name} did '
+                    f'Method "_process" of processor {self.path} did '
                     f'not return an output data dictionary. That method '
                     f'must always return an output data dictionary for '
                     f'a processor that has outputs, even if the '

@@ -27,19 +27,6 @@ from lrgv.dataflow.processor import Processor
 #     [Offsetter, [Affine Transformer, Output]]
 # ]''')
 
-# TODO: Consider relaxing uniqueness requirement for processor names.
-# It can be difficult to ensure when there are lots of processors and
-# when there are nested graphs. It allows processors to be represented
-# by name in connections, which is helpful, but this is not always
-# needed. It also helps ensure clear log messages.
-
-# TODO: Consider moving linear connection to a new `LinearGraph`
-# subclass of `Graph`.
-
-# TODO: Consider implementing a `GraphSet` subclass of `Graph` that
-# allows a set of closed (i.e. with no inputs or outputs) graphs to
-# be manipulated as a unit.
-
 # TODO: Complete docstrings.
 
 # TODO: Implement more unit tests.
@@ -127,7 +114,7 @@ class Graph(Processor):
 
         # Processor requirements:
         #
-        # * The names of a graph and its processors must all be unique.
+        # * The names of a graph and its processors must be unique.
         #   This allows connections between processors of the graph
         #   (including between graph ports and processor ports) to be
         #   specified in terms of the names.
@@ -140,15 +127,15 @@ class Graph(Processor):
 
             if name == self.name:
                 raise DataflowError(
-                    f'Processor "{name}" has same name as processor '
-                    f'graph of which it would be a part. The names of a '
-                    f'graph and its processors must all be unique.')
+                    f'Processor "{p.name}" of processor graph "{self.path}" '
+                    f'has same name as graph. The names of a graph and its '
+                    f'processors must be unique.')
             
             elif name in names:
                 raise DataflowError(
-                    f'Two processors for processor graph "{self.name}" '
+                    f'Two processors for processor graph "{self.path}" '
                     f'have the same name "{name}". The names of a '
-                    f'graph and its processors must all be unique.')
+                    f'graph and its processors must be unique.')
             
             names.add(name)
 

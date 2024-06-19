@@ -238,8 +238,8 @@ class DetectorClipArchiver(Graph):
             return super()._process(input_data)
         except Exception as e:
             logger.warning(
-                f'Detector clip archiver "{self.name}" raised exception. '
-                f'Message was: {e}')
+                f'Processor "{self.path}" raised exception. Message '
+                f'was: {e}')
 
 
 class DetectorVesperClipCreator(LinearGraph):
