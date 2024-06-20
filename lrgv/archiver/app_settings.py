@@ -21,9 +21,11 @@ from lrgv.util.bunch import Bunch
 #
 # 5. Rename the file of step 4 to "Archive Database.sqlite".
 #
-# 6. Run `simulate_detection.py`.
+# 6. Start Vesper Server for test archive.
 #
-# 7. Run `archive_clips.py`.
+# 7. Run `simulate_detection.py`.
+#
+# 8. Run `archive_clips.py`.
 
 
 # App mode, either 'Test' or 'Production'.
