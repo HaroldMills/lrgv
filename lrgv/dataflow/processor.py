@@ -263,13 +263,6 @@ class Processor:
         else:
             self._name = name
 
-        # self._name = name
-
-        # if settings is None:
-        #     self._settings = Bunch()
-        # else:
-        #     self._settings = settings
-
         self._input_ports = self._create_input_ports()
 
         self._input_ports_by_name = {p.name: p for p in self._input_ports}
