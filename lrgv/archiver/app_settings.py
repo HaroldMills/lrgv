@@ -52,7 +52,7 @@ _LOG_FILE_PATH = None
 
 _LOGGING_LEVEL = logging.INFO
 
-_DETECTOR_NAMES = ('Dick', 'Nighthawk')
+_DETECTOR_NAMES = ('Nighthawk',)
 
 _CLIP_FILE_WAIT_PERIOD = 10                   # seconds
 # _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 10        # seconds
