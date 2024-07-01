@@ -7,6 +7,7 @@ from lrgv.archiver.clip_audio_file_s3_uploader import ClipAudioFileS3Uploader
 from lrgv.archiver.clip_lister import ClipLister
 from lrgv.archiver.clip_mover import ClipMover
 from lrgv.archiver.old_bird_clip_converter import OldBirdClipConverter
+from lrgv.archiver.old_bird_clip_deleter import OldBirdClipDeleter
 from lrgv.archiver.vesper_clip_creator import VesperClipCreator
 from lrgv.dataflow import Graph, LinearGraph
 from lrgv.util.bunch import Bunch
@@ -22,22 +23,18 @@ logger = logging.getLogger(__name__)
 #    `_MODE = 'Production'`.
 #
 # 2. Edit `archive_clips.StationClipArchiver._create_processors` according
-#    to whether or not you want to archive Old Bird detector clips.
+#    to how you want to process Old Bird detector clips.
 #
-# 3. Open a terminal and cd to "Desktop/NFC/LRGV/2024/Test Archive".
+# 3. Open a terminal and cd to
+#    "/Users/haroldDesktop/NFC/LRGV/2024/Test Archive".
 #
-# 4. Initialize the test archive database with:
+# 4. Initialize and server the test archive with:
 #
-#        ./init_test_archive_database.bash
+#        ./init_and_server_test_archive.bash
 #
-# 5. Start the Vesper Server with:
+# 5. Run `simulate_detection.py`.
 #
-#        conda activate vesper-dev
-#        vesper_admin runserver
-#
-# 6. Run `simulate_detection.py`.
-#
-# 7. Run `archive_clips.py`.
+# 6. Run `archive_clips.py`.
 
 
 # TODO: Create an app setting that controls whether or not we archive
@@ -158,6 +155,8 @@ class StationClipArchiver(Graph):
 
         # old_bird_clip_converter = self._create_old_bird_clip_converter()
 
+        old_bird_clip_deleter = self._create_old_bird_clip_deleter()
+
         detector_clip_archivers = tuple(
             self._create_detector_clip_archiver(n)
             for n in app_settings.detector_names)
@@ -169,24 +168,40 @@ class StationClipArchiver(Graph):
         # return \
         #     (old_bird_clip_converter,) + detector_clip_archivers + \
         #     detector_clip_retirers
-        return detector_clip_archivers + detector_clip_retirers
+        return \
+            (old_bird_clip_deleter,) + detector_clip_archivers + \
+            detector_clip_retirers
+        # return detector_clip_archivers + detector_clip_retirers
     
+
+    def _create_old_bird_clip_deleter(self):
+            
+            s = app_settings
+            station_name = self.settings.station_name
+            station_paths = s.paths.stations[station_name]
+
+            settings = Bunch(
+                source_clip_dir_path=station_paths.station_dir_path,
+                clip_file_wait_period=s.clip_file_wait_period)
+                
+            return OldBirdClipDeleter(settings, self)
+        
 
     def _create_old_bird_clip_converter(self):
-        
-        s = app_settings
-        station_name = self.settings.station_name
-        station_paths = s.paths.stations[station_name]
-
-        settings = Bunch(
-            station_name=station_name,
-            source_clip_dir_path=station_paths.station_dir_path,
-            clip_file_wait_period=s.clip_file_wait_period,
-            station_paths=station_paths,
-            clip_classification=None)
             
-        return OldBirdClipConverter(settings, self)
-    
+            s = app_settings
+            station_name = self.settings.station_name
+            station_paths = s.paths.stations[station_name]
+
+            settings = Bunch(
+                station_name=station_name,
+                source_clip_dir_path=station_paths.station_dir_path,
+                clip_file_wait_period=s.clip_file_wait_period,
+                station_paths=station_paths,
+                clip_classification=None)
+                
+            return OldBirdClipConverter(settings, self)
+        
 
     def _create_detector_clip_archiver(self, detector_name):
 
