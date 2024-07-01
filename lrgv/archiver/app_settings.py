@@ -6,28 +6,6 @@ from environs import Env
 from lrgv.util.bunch import Bunch
 
 
-# To test the archiver:
-#
-# 1. Uncomment `_MODE = 'Test'` below and comment out `_MODE = 'Production'`.
-#
-# 2. Edit `archive_clips.StationClipArchiver._create_processors` according
-#    to whether or not you want to archive Old Bird detector clips.
-#
-# 3. Delete "/Users/harold/Desktop/NFC/LRGV/2024/Test Archive/
-#    Archive Database.sqlite".
-#
-# 4. Duplicate "/Users/harold/Desktop/NFC/LRGV/2024/Test Archive/
-#    Archive Database 03 - with archiver user.sqlite".
-#
-# 5. Rename the file of step 4 to "Archive Database.sqlite".
-#
-# 6. Start Vesper Server for test archive.
-#
-# 7. Run `simulate_detection.py`.
-#
-# 8. Run `archive_clips.py`.
-
-
 # App mode, either 'Test' or 'Production'.
 # _MODE = 'Test'
 _MODE = 'Production'

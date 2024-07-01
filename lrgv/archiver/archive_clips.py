@@ -16,6 +16,30 @@ import lrgv.util.logging_utils as logging_utils
 logger = logging.getLogger(__name__)
 
 
+# To test the archiver:
+#
+# 1. Uncomment `_MODE = 'Test'` in `app_settings.py` and comment out
+#    `_MODE = 'Production'`.
+#
+# 2. Edit `archive_clips.StationClipArchiver._create_processors` according
+#    to whether or not you want to archive Old Bird detector clips.
+#
+# 3. Open a terminal and cd to "Desktop/NFC/LRGV/2024/Test Archive".
+#
+# 4. Initialize the test archive database with:
+#
+#        ./init_test_archive_database.bash
+#
+# 5. Start the Vesper Server with:
+#
+#        conda activate vesper-dev
+#        vesper_admin runserver
+#
+# 6. Run `simulate_detection.py`.
+#
+# 7. Run `archive_clips.py`.
+
+
 # TODO: Create an app setting that controls whether or not we archive
 #       Old Bird detector clips.
 
