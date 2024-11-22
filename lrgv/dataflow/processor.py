@@ -2,6 +2,11 @@ from lrgv.dataflow.dataflow_error import DataflowError
 from lrgv.util.bunch import Bunch
 
 
+# TODO: Consider having `SimpleProcessor._process_item` return
+# a sequence of items instead of a single item. If you do that,
+# modify `SimpleProcessor._process_items` to concatenate output
+# item lists.
+
 # TODO: Make it easier for a graph to log a message for each
 # item (e.g. file path or clip) it processes.
 
