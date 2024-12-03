@@ -6,6 +6,7 @@ from lrgv.archiver.clip_audio_file_copier import ClipAudioFileCopier
 from lrgv.archiver.clip_audio_file_s3_uploader import ClipAudioFileS3Uploader
 from lrgv.archiver.clip_lister import ClipLister
 from lrgv.archiver.clip_mover import ClipMover
+from lrgv.archiver.detector_clip_deleter import DetectorClipDeleter
 from lrgv.archiver.old_bird_clip_converter import OldBirdClipConverter
 from lrgv.archiver.old_bird_clip_deleter import OldBirdClipDeleter
 from lrgv.archiver.vesper_clip_creator import VesperClipCreator
@@ -153,39 +154,39 @@ class StationClipArchiver(Graph):
 
     def _create_processors(self):
 
+        # Move Old Bird Dickcissel detector clips that appear in a station's
+        # SugarSync directory to the detector's `Incoming` clip directory,
+        # and add an accompanying clip metadata file.
         # old_bird_clip_converter = self._create_old_bird_clip_converter()
 
+        # Delete Old Bird Dickcissel detector clips that appear in a
+        # station's SugarSync directory without archiving them.
         old_bird_clip_deleter = self._create_old_bird_clip_deleter()
 
-        detector_clip_archivers = tuple(
-            self._create_detector_clip_archiver(n)
+        # Archive clips that appear in detectors' `Incoming` clip directories.
+        # detector_clip_archivers = tuple(
+        #     self._create_detector_clip_archiver(n)
+        #     for n in app_settings.detector_names)
+
+        # Delete clips that appear in detectors' `Incoming` clip directories
+        # without archiving them.
+        detector_clip_deleters = tuple(
+            self._create_detector_clip_deleter(n)
             for n in app_settings.detector_names)
         
+        # Move clips that appear in detectors' `Archived` clip directories
+        # to the detectors' `Retired` clip directories. The `Retired`
+        # directories are not SugarSync directories, so after clips are
+        # moved there SugarSync no longer has to worry about sychronizing
+        # them.
         detector_clip_retirers = tuple(
             self._create_detector_clip_retirer(n)
             for n in app_settings.detector_names)
 
-        # return \
-        #     (old_bird_clip_converter,) + detector_clip_archivers + \
-        #     detector_clip_retirers
-        return \
-            (old_bird_clip_deleter,) + detector_clip_archivers + \
-            detector_clip_retirers
-        # return detector_clip_archivers + detector_clip_retirers
+        return (
+            old_bird_clip_deleter, *detector_clip_deleters,
+            *detector_clip_retirers)
     
-
-    def _create_old_bird_clip_deleter(self):
-            
-            s = app_settings
-            station_name = self.settings.station_name
-            station_paths = s.paths.stations[station_name]
-
-            settings = Bunch(
-                source_clip_dir_path=station_paths.station_dir_path,
-                clip_file_wait_period=s.clip_file_wait_period)
-                
-            return OldBirdClipDeleter(settings, self)
-        
 
     def _create_old_bird_clip_converter(self):
             
@@ -201,6 +202,19 @@ class StationClipArchiver(Graph):
                 clip_classification=None)
                 
             return OldBirdClipConverter(settings, self)
+        
+
+    def _create_old_bird_clip_deleter(self):
+            
+            s = app_settings
+            station_name = self.settings.station_name
+            station_paths = s.paths.stations[station_name]
+
+            settings = Bunch(
+                source_clip_dir_path=station_paths.station_dir_path,
+                clip_file_wait_period=s.clip_file_wait_period)
+                
+            return OldBirdClipDeleter(settings, self)
         
 
     def _create_detector_clip_archiver(self, detector_name):
@@ -223,6 +237,20 @@ class StationClipArchiver(Graph):
 
         return DetectorClipArchiver(settings, self, name)
 
+
+    def _create_detector_clip_deleter(self, detector_name):
+            
+            s = app_settings
+            station_name = self.settings.station_name
+            station_paths = s.paths.stations[station_name]
+            detector_paths = station_paths.detectors[detector_name]
+
+            settings = Bunch(
+                source_clip_dir_path=detector_paths.incoming_clip_dir_path,
+                clip_file_wait_period=s.clip_file_wait_period)
+                
+            return DetectorClipDeleter(settings, self)
+        
 
     def _create_detector_clip_retirer(self, detector_name):
 
