@@ -37,5 +37,7 @@ dependencies = [
 ]
 
 [project.scripts]
-run_nighthawk = 'lrgv.nighthawk.run_nighthawk:main'
-archive_clips = 'lrgv.archiver.archive_clips:main'
+run_nighthawk_lrgv = 'lrgv.nighthawk.run_nighthawk_lrgv:main'
+run_nighthawk_lighthouse = 'lrgv.nighthawk.run_nighthawk_lighthouse:main'
+archive_clips_lrgv = 'lrgv.archiver.archive_clips_lrgv:main'
+archive_clips_lighthouse = 'lrgv.archiver.archive_clips_lighthouse:main'
