@@ -32,7 +32,8 @@ classifiers = [
 dependencies = [
     'boto3',
     'environs',
-    'requests'
+    'requests',
+    'ruamel_yaml',
 ]
 
 [project.scripts]
