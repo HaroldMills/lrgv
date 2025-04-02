@@ -1,5 +1,5 @@
 """
-Script that runs the Nighthawk NFC detector on recording files
+Script that runs the Nighthawk NFC detector on LRGV recording files
 from one night and creates an audio file and a metadata file for
 each resulting detection.
 
@@ -8,11 +8,11 @@ directory path and a clip directory path. It also has an optional
 third argument, the date of the night for which to run the detector.
 The third argument defaults to yesterday's date.
 
-Each LRGV station laptop runs this script every morning after the
-previous night's recording completes to process the recording. Each
-station laptop's clip directory is synced with one or more remote
-computers via SugarSync. We run the LRGV archiver on one such
-computer to put the clips into a Vesper cloud archive.
+Each station laptop in the monitoring network runs this script every
+morning after the previous night's recording completes to process the
+recording. Each station laptop's clip directory is synced with one or
+more remote computers via SugarSync. We run the clip archiver on one
+such computer to put the clips into a Vesper cloud archive.
 """
 
 
