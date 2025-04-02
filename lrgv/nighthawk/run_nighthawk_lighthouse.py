@@ -65,7 +65,7 @@ RECORDING_FILE_STATION_NAMES = {
 
 INCLUDED_CLASSIFICATIONS = frozenset([
     'Call.BAWW', 'Call.CAWA', 'Call.DICK', 'Call.GRSP', 'Call.LESA',
-    'Call.UPSA', 'Call.SAVS', 'Call.WTSP'
+    'Call.UPSA'
 ])
 
 
