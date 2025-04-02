@@ -47,7 +47,7 @@ STATION_TIME_ZONE = ZoneInfo('US/Central')
 UTC_TIME_ZONE = ZoneInfo('UTC')
 TIME_ZONE_OFFSET_LENGTH = 6
 SENSOR_NAME_FORMAT = '{station_name} 21c'
-DETECTOR_NAME = 'Nighthawk 0.3.0 80'
+DETECTOR_NAME = 'Nighthawk 0.3.1 80'
 
 RECORDING_FILE_STATION_NAMES = {
     'dhs': 'Donna',
@@ -247,7 +247,7 @@ def run_nighthawk_on_file(file, nighthawk_output_dir_path):
     # Build list of command line arguments.
     args = ['--output-dir', str(nighthawk_output_dir_path), str(file.path)]
     
-    environment_name = f'nighthawk-0.3.0'
+    environment_name = f'nighthawk-0.3.1'
     
     try:
         results = conda_utils.run_python_script(
