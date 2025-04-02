@@ -43,6 +43,7 @@ CSV_FILE_NAME_EXTENSION = '.csv'
 AUDIO_FILE_NAME_EXTENSION = '.wav'
 JSON_FILE_NAME_EXTENSION = '.json'
 
+ONE_DAY = TimeDelta(days=1)
 STATION_TIME_ZONE = ZoneInfo('US/Eastern')
 UTC_TIME_ZONE = ZoneInfo('UTC')
 TIME_ZONE_OFFSET_LENGTH = 6
@@ -183,8 +184,10 @@ def get_recording_files(recording_dir_path, date):
 
     for file_path in recording_dir_path.glob('*.wav'):
         file = parse_recording_file_path(file_path)
-        if file is not None and file.start_time >= noon:
-            files.append(file)
+        if file is not None:
+            delta = file.start_time - noon
+            if delta >= 0 and delta < ONE_DAY:
+                files.append(file)
 
     return files
 
