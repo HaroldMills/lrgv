@@ -43,7 +43,7 @@ CSV_FILE_NAME_EXTENSION = '.csv'
 AUDIO_FILE_NAME_EXTENSION = '.wav'
 JSON_FILE_NAME_EXTENSION = '.json'
 
-STATION_TIME_ZONE = ZoneInfo('US/Central')
+STATION_TIME_ZONE = ZoneInfo('US/Eastern')
 UTC_TIME_ZONE = ZoneInfo('UTC')
 TIME_ZONE_OFFSET_LENGTH = 6
 SENSOR_NAME_FORMAT = '{station_name} 21c'
@@ -63,7 +63,7 @@ RECORDING_FILE_STATION_NAMES = {
 
 INCLUDED_CLASSIFICATIONS = frozenset([
     'Call.BAWW', 'Call.CAWA', 'Call.DICK', 'Call.GRSP', 'Call.LESA',
-    'Call.UPSA'
+    'Call.UPSA', 'Call.SAVS', 'Call.WTSP'
 ])
 
 
