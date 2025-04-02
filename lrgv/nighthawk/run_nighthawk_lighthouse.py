@@ -193,7 +193,7 @@ def parse_recording_file_path(path):
 
     name = path.name
 
-    parts = name[:-4].split('-', 1)
+    parts = name[:-4].split('_', 1)
 
     if len(parts) != 2:
         logger.info(
@@ -204,7 +204,7 @@ def parse_recording_file_path(path):
     station_name, start_time = parts
 
     try:
-        start_time = DateTime.strptime(start_time, '%Y-%m-%d-%H-%M-%S')
+        start_time = DateTime.strptime(start_time, '%Y-%m-%d_%H.%M.%S_Z')
     except Exception:
         logger.info(
             f'Could not parse start time of audio file name "{name}". '
