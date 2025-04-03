@@ -43,6 +43,8 @@ CSV_FILE_NAME_EXTENSION = '.csv'
 AUDIO_FILE_NAME_EXTENSION = '.wav'
 JSON_FILE_NAME_EXTENSION = '.json'
 
+ZERO_SECONDS = TimeDelta(seconds=0)
+ONE_DAY = TimeDelta(days=1)
 STATION_TIME_ZONE = ZoneInfo('US/Central')
 UTC_TIME_ZONE = ZoneInfo('UTC')
 TIME_ZONE_OFFSET_LENGTH = 6
@@ -61,11 +63,8 @@ RECORDING_FILE_STATION_NAMES = {
     'rohs': 'Roma HS',
 }
 
-# INCLUDED_CLASSIFICATIONS = None
-# INCLUDED_CLASSIFICATIONS = frozenset(['Call.DICK'])
-# INCLUDED_CLASSIFICATIONS = \
-#     frozenset(['Call.BAWW', 'Call.DICK', 'Call.LESA', 'Call.UPSA'])
-INCLUDED_CLASSIFICATIONS = frozenset(['Call.BAWW', 'Call.DICK', 'Call.LESA'])
+# INCLUDED_CLASSIFICATIONS = frozenset(['Call.BAWW', 'Call.DICK', 'Call.LESA'])
+INCLUDED_CLASSIFICATIONS = frozenset(['Call.DICK'])
 
 
 def main():
@@ -184,8 +183,10 @@ def get_recording_files(recording_dir_path, date):
 
     for file_path in recording_dir_path.glob('*.wav'):
         file = parse_recording_file_path(file_path)
-        if file is not None and file.start_time >= noon:
-            files.append(file)
+        if file is not None:
+            delta = file.start_time - noon
+            if delta >= ZERO_SECONDS and delta < ONE_DAY:
+                files.append(file)
 
     return files
 
@@ -194,7 +195,7 @@ def parse_recording_file_path(path):
 
     name = path.name
 
-    parts = name[:-4].split('-', 1)
+    parts = name[:-4].split('_', 1)
 
     if len(parts) != 2:
         logger.info(
@@ -205,7 +206,7 @@ def parse_recording_file_path(path):
     station_name, start_time = parts
 
     try:
-        start_time = DateTime.strptime(start_time, '%Y-%m-%d-%H-%M-%S')
+        start_time = DateTime.strptime(start_time, '%Y-%m-%d_%H.%M.%S_Z')
     except Exception:
         logger.info(
             f'Could not parse start time of audio file name "{name}". '
