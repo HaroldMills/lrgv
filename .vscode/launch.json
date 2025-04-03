@@ -5,10 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Archive Clips",
+            "name": "Archive LRGV Clips",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/lrgv/archiver/archive_clips.py",
+            "program": "${workspaceFolder}/lrgv/archiver/archive_lrgv_clips.py",
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "console": "integratedTerminal",
+        },
+        {
+            "name": "Archive Lighthouse Clips",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/lrgv/archiver/archive_lighthouse_clips.py",
             "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
             "console": "integratedTerminal",
         },
