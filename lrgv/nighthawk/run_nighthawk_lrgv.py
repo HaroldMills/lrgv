@@ -45,7 +45,7 @@ JSON_FILE_NAME_EXTENSION = '.json'
 
 ZERO_SECONDS = TimeDelta(seconds=0)
 ONE_DAY = TimeDelta(days=1)
-STATION_TIME_ZONE = ZoneInfo('US/Central')
+STATION_TIME_ZONE = ZoneInfo('US/Eastern')
 UTC_TIME_ZONE = ZoneInfo('UTC')
 TIME_ZONE_OFFSET_LENGTH = 6
 SENSOR_NAME_FORMAT = '{station_name} 21c'
@@ -63,8 +63,13 @@ RECORDING_FILE_STATION_NAMES = {
     'rohs': 'Roma HS',
 }
 
+# For 2025 we included BAWW, DICK, and LESA through the night of April 14.
+# We included BAWW, CAWA, DICK, GRSP, LESA, and UPSA from April 15.
 # INCLUDED_CLASSIFICATIONS = frozenset(['Call.BAWW', 'Call.DICK', 'Call.LESA'])
-INCLUDED_CLASSIFICATIONS = frozenset(['Call.DICK'])
+INCLUDED_CLASSIFICATIONS = frozenset([
+    'Call.BAWW', 'Call.CAWA', 'Call.DICK', 'Call.GRSP', 'Call.LESA',
+    'Call.UPSA'
+])
 
 
 def main():
