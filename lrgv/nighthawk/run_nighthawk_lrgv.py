@@ -112,6 +112,8 @@ def main():
                     f'Attempt to process Nighthawk detections for '
                     f'recording file "{file.path}" raised exception with '
                     f'message: {e}')
+                
+    logger.info(f'Script complete.')
  
 
 def parse_args(args):
@@ -218,9 +220,8 @@ def parse_recording_file_path(path):
             f'File will be ignored.')
         return None
     
-    # Get UTC start time.
-    start_time = start_time.replace(tzinfo=STATION_TIME_ZONE)
-    start_time = start_time.astimezone(UTC_TIME_ZONE)
+    # Make time zone UTC.
+    start_time = start_time.replace(tzinfo=UTC_TIME_ZONE)
     
     file = Bunch()
     file.path = path

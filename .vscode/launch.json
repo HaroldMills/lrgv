@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run Nighthawk LRGV",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/lrgv/nighthawk/run_nighthawk_lrgv.py",
+            "args": ["/Users/harold/Desktop/Alamo/Recordings", "/Users/harold/Desktop/Alamo/Clips/Nighthawk/Nighthawk Output", "/Users/harold/Desktop/Alamo/Clips/Nighthawk/Incoming"],
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "console": "integratedTerminal",
+        },
+        {
             "name": "Archive LRGV Clips",
             "type": "debugpy",
             "request": "launch",
