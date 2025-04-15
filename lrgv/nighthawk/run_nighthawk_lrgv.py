@@ -45,7 +45,7 @@ JSON_FILE_NAME_EXTENSION = '.json'
 
 ZERO_SECONDS = TimeDelta(seconds=0)
 ONE_DAY = TimeDelta(days=1)
-STATION_TIME_ZONE = ZoneInfo('US/Eastern')
+STATION_TIME_ZONE = ZoneInfo('US/Central')
 UTC_TIME_ZONE = ZoneInfo('UTC')
 TIME_ZONE_OFFSET_LENGTH = 6
 SENSOR_NAME_FORMAT = '{station_name} 21c'
