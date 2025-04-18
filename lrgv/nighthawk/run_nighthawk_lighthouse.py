@@ -51,17 +51,7 @@ TIME_ZONE_OFFSET_LENGTH = 6
 SENSOR_NAME_FORMAT = '{station_name} 21c'
 DETECTOR_NAME = 'Nighthawk 0.3.1 80'
 
-RECORDING_FILE_STATION_NAMES = {
-    # 'dhs': 'Donna',
-    # 'dohs': 'Donna',
-    # 'hars': 'Harlingen',
-    # 'hhss': 'Harlingen',
-    # 'pijhs': 'Port Isabel',
-    # 'rbms': 'Roma RBMS',
-    # 'rhhs': 'Rio Hondo',
-    # 'rioh': 'Rio Hondo',
-    # 'rohs': 'Roma HS',
-}
+RECORDING_FILE_STATION_NAMES = {}
 
 INCLUDED_CLASSIFICATIONS = frozenset([
     'Call.BAWW', 'Call.CAWA', 'Call.DICK', 'Call.GRSP', 'Call.LESA',
@@ -109,6 +99,8 @@ def main():
                     f'Attempt to process Nighthawk detections for '
                     f'recording file "{file.path}" raised exception with '
                     f'message: {e}')
+                
+    logger.info(f'Script complete.')
  
 
 def parse_args(args):
@@ -215,9 +207,8 @@ def parse_recording_file_path(path):
             f'File will be ignored.')
         return None
     
-    # Get UTC start time.
-    start_time = start_time.replace(tzinfo=STATION_TIME_ZONE)
-    start_time = start_time.astimezone(UTC_TIME_ZONE)
+    # Make time zone UTC.
+    start_time = start_time.replace(tzinfo=UTC_TIME_ZONE)
     
     file = Bunch()
     file.path = path
