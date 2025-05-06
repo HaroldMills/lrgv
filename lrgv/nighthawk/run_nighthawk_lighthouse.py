@@ -366,8 +366,8 @@ def process_detections(
             # archive database requires that the combination of
             # recording channel, start time, and creating processor be
             # unique across all clips. See the
-            # `vesper.django.old_bird.views.CreateLrgvClipsView` Django
-            # view for more on this.)
+            # `vesper.django.old_bird.views.ImportRecordingsAndClipsView`
+            # Django view for more on this.)
             key = (station_name, start_time)
             serial_num = clip_counts[key]
             clip_counts[key] += 1

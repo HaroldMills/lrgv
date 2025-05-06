@@ -19,13 +19,16 @@ class FileLister(SimpleSource):
         else:
             self._file_name_re = re.compile(settings.file_name_re)
 
+        self._recursive = settings.recursive
+
         self._file_wait_period = settings.file_wait_period
 
 
     def _process_items(self):
 
         # Start with all file paths, sorted lexicographically.
-        file_paths = tuple(sorted(p for p in self._dir_path.glob('*')))
+        pattern = '**/*' if self._recursive else '*'
+        file_paths = tuple(sorted(p for p in self._dir_path.glob(pattern)))
 
         # If indicated, output only files whose names are matched by
         # `self._file_name_re`.

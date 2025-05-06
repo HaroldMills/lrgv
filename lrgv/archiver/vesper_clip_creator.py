@@ -10,13 +10,13 @@ from lrgv.dataflow import SimpleSink
 _logger = logging.getLogger(__name__)
 
 
-# Suffix of Vesper server login URL. We set the URL to redirect to
+# Format for Vesper server login URL. We set the URL to redirect to
 # "/health-check/" after login instead of the default "/" since "/"
 # redirects to the clip calendar, which is relatively expensive to
 # serve.
-_LOGIN_URL_SUFFIX = 'login/?next=/health-check/'
+_LOGIN_URL_SUFFIX_FORMAT = '{}login/?next={}health-check/'
 
-_CREATE_CLIPS_URL_SUFFIX = 'create-lrgv-clips/'
+_CREATE_CLIPS_URL_SUFFIX = 'import-recordings-and-clips/'
 
 
 class VesperClipCreator(SimpleSink):
@@ -26,18 +26,14 @@ class VesperClipCreator(SimpleSink):
 
         super().__init__(settings, parent, name)
 
-        s = settings
+        s = settings.vesper
 
-        # Append slash to archive URL if needed
-        archive_url = s.vesper.archive_url
-        if not archive_url.endswith('/'):
-            archive_url += '/'
+        self._login_url = \
+            _LOGIN_URL_SUFFIX_FORMAT.format(s.archive_url, s.archive_url_base)
+        self._create_clips_url = s.archive_url + _CREATE_CLIPS_URL_SUFFIX
 
-        self._login_url = archive_url + _LOGIN_URL_SUFFIX
-        self._create_clips_url = archive_url + _CREATE_CLIPS_URL_SUFFIX
-
-        self._username = s.vesper.username
-        self._password = s.vesper.password
+        self._username = s.username
+        self._password = s.password
         self._session = None
 
 
@@ -140,7 +136,7 @@ class VesperClipCreator(SimpleSink):
 
         # Set new Vesper clip ID on clip object and in metadata.
         response_data = json.loads(response.content)
-        clip_id = response_data['clips'][0]['clip_id']
+        clip_id = response_data['clips'][0]['id']
         metadata['clips'][0]['id'] = clip_id
 
         # Move audio file to created clip directory.

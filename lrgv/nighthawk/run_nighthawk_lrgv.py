@@ -48,7 +48,8 @@ ONE_DAY = TimeDelta(days=1)
 STATION_TIME_ZONE = ZoneInfo('US/Central')
 UTC_TIME_ZONE = ZoneInfo('UTC')
 TIME_ZONE_OFFSET_LENGTH = 6
-SENSOR_NAME_FORMAT = '{station_name} 21c'
+RECORDER_NAME_FORMAT = 'Vesper Recorder {station_num}'
+MIC_OUTPUT_NAME_FORMAT = '21c {station_num} Vesper Output'
 DETECTOR_NAME = 'Nighthawk 0.3.1 80'
 
 RECORDING_FILE_STATION_NAMES = {
@@ -63,11 +64,23 @@ RECORDING_FILE_STATION_NAMES = {
     'rohs': 'Roma HS',
 }
 
+STATION_NAMES = (
+    'Alamo',
+    'Donna',
+    'Harlingen',
+    'Port Isabel',
+    'Rio Hondo',
+    'Roma HS',
+    'Roma RBMS'
+)
+
+STATION_NUMS = {n: i for i, n in enumerate(STATION_NAMES)}
+
 # For 2025 we included BAWW, DICK, and LESA through the night of April 14.
 # We included BAWW, CAWA, DICK, GRSP, LESA, and UPSA from April 15.
 # INCLUDED_CLASSIFICATIONS = frozenset(['Call.BAWW', 'Call.DICK', 'Call.LESA'])
 INCLUDED_CLASSIFICATIONS = frozenset([
-    'Call.BAWW', 'Call.CAWA', 'Call.DICK', 'Call.GRSP', 'Call.LESA',
+    'Call.BAWW', 'Call.CAWA', 'Call.DICK', 'Call.GRSP', 'Call.LESA', 
     'Call.UPSA'
 ])
 
@@ -94,24 +107,24 @@ def main():
 
         logger.info(f'Processing recording file "{file.path}"...')
 
+        # try:
+        #     result = run_nighthawk_on_file(file, nighthawk_output_dir_path)
+        # except Exception as e:
+        #     logger.warning(
+        #         f'Attempt to run Nighthawk on recording file '
+        #         f'"{file.path}" raised exception with message: {e}')
+            
+        # if result:
+
         try:
-            result = run_nighthawk_on_file(file, nighthawk_output_dir_path)
+            process_detections(
+                file, taxon_mapping, nighthawk_output_dir_path,
+                clip_dir_path)
         except Exception as e:
             logger.warning(
-                f'Attempt to run Nighthawk on recording file '
-                f'"{file.path}" raised exception with message: {e}')
-            
-        if result:
-
-            try:
-                process_detections(
-                    file, taxon_mapping, nighthawk_output_dir_path,
-                    clip_dir_path)
-            except Exception as e:
-                logger.warning(
-                    f'Attempt to process Nighthawk detections for '
-                    f'recording file "{file.path}" raised exception with '
-                    f'message: {e}')
+                f'Attempt to process Nighthawk detections for '
+                f'recording file "{file.path}" raised exception with '
+                f'message: {e}')
                 
     logger.info(f'Script complete.')
  
@@ -318,11 +331,9 @@ def process_detections(
     key = station_name.lower()
     station_name = RECORDING_FILE_STATION_NAMES.get(key, station_name)
 
-    # Get recording sensors.
-    sensor_name = SENSOR_NAME_FORMAT.format(station_name=station_name)
-    recording_sensors = {
-        station_name: [sensor_name]
-    } 
+    station_num = STATION_NUMS[station_name]
+    recorder_name = RECORDER_NAME_FORMAT.format(station_num=station_num)
+    mic_output_name = MIC_OUTPUT_NAME_FORMAT.format(station_num=station_num)
 
     # Note that in the following we open the detection CSV file twice,
     # once so we can read it using a `csv.DictReader` and a second time
@@ -343,17 +354,16 @@ def process_detections(
 
         # Get recording metadata.
         start_time = format_start_time(recording_file.start_time)
-        recording_name = f'{station_name} {start_time}'
         length = wave_reader.getnframes()
         sample_rate = wave_reader.getframerate()
-        recordings = {
-            recording_name: {
-                'sensors': station_name,
-                'start_time': start_time,
-                'length': length,
-                'sample_rate': sample_rate
-            }
-        }
+        recordings = [{
+            'station': station_name,
+            'recorder': recorder_name,
+            'mic_outputs': [mic_output_name],
+            'start_time': start_time,
+            'length': length,
+            'sample_rate': sample_rate
+        }]
             
         for detection in csv_reader:
 
@@ -379,8 +389,8 @@ def process_detections(
             # archive database requires that the combination of
             # recording channel, start time, and creating processor be
             # unique across all clips. See the
-            # `vesper.django.old_bird.views.CreateLrgvClipsView` Django
-            # view for more on this.)
+            # `vesper.django.old_bird.views.ImportRecordingsAndClipsView`
+            # Django view for more on this.)
             key = (station_name, start_time)
             serial_num = clip_counts[key]
             clip_counts[key] += 1
@@ -408,8 +418,8 @@ def process_detections(
 
             # Collect clip metadata for metadata file.
             clips = [{
-                'recording': recording_name,
-                'sensor': sensor_name,
+                'station': station_name,
+                'mic_output': mic_output_name,
                 'detector': DETECTOR_NAME,
                 'start_time': start_time_text,
                 'serial_num': serial_num,
@@ -418,7 +428,6 @@ def process_detections(
             }]
             clip_metadata = {
                 'recordings': recordings,
-                'recording_sensors': recording_sensors,
                 'clips': clips
             }
 

@@ -20,10 +20,14 @@ import time
 # `Incoming` directory.
 
 
-DATA_SOURCE_DIR_PATH = \
-    Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Data Source')
+PROJECT_NAME = 'LRGV'
 
-DATA_DIR_PATH = Path('/Users/harold/Desktop/NFC/LRGV/2024/Archiver Test Data')
+TEST_DATA_DIR_PATH = Path(
+    '/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Archiver Test Data/')
+
+DATA_SOURCE_DIR_PATH = TEST_DATA_DIR_PATH / 'Test Station Data Source'
+
+DATA_DIR_PATH = TEST_DATA_DIR_PATH / 'Test Station Data'
 
 ACTIVE_DATA_DIR_PATH = DATA_DIR_PATH / 'Active'
 
@@ -37,9 +41,21 @@ INCOMING_DIR_NAME = 'Incoming'
 
 DETECTOR_CLIP_DIR_NAMES = (INCOMING_DIR_NAME, 'Created', 'Archived')
 
-STATION_NAMES = ('Alamo', 'Rio Hondo')
+ALL_STATION_NAMES = (
+    'Alamo',
+    'Donna',
+    'Harlingen',
+    'Port Isabel',
+    'Rio Hondo',
+    'Roma HS',
+    'Roma RBMS'
+)
 
-DETECTOR_NAMES = ('Dick', 'Nighthawk')
+ALL_DETECTOR_NAMES = ('Dick', 'Nighthawk')
+
+SIMULATION_STATION_NAMES = ('Alamo', 'Port Isabel')
+
+SIMULATION_DETECTOR_NAMES = ('Dick', 'Nighthawk')
 
 DETECTION_SLEEP_PERIOD = 2
 
@@ -81,21 +97,26 @@ def clear_dirs():
         
     for data_dir_path in DATA_DIR_PATHS:
 
-        for station_name in STATION_NAMES:
+        for station_name in ALL_STATION_NAMES:
 
-            station_dir_path = data_dir_path / station_name
+            station_dir_name = get_station_dir_name(station_name)
+            station_dir_path = data_dir_path / station_dir_name
             
             clear_dir(station_dir_path)
 
             clip_dir_path = station_dir_path / CLIP_DIR_NAME
             
-            for detector_name in DETECTOR_NAMES:
+            for detector_name in ALL_DETECTOR_NAMES:
 
                 detector_dir_path = clip_dir_path / detector_name
 
                 for dir_name in DETECTOR_CLIP_DIR_NAMES:
                     dir_path = detector_dir_path / dir_name
                     clear_dir(dir_path)
+
+
+def get_station_dir_name(station_name):
+    return f'{PROJECT_NAME} - {station_name}'
 
 
 def get_clip_audio_file_paths():
@@ -109,21 +130,28 @@ def get_clip_audio_file_paths():
 def get_old_bird_clip_audio_file_paths():
 
     def get_clips_aux(station_name):
-        dir_path = DATA_SOURCE_DIR_PATH / station_name
+        station_dir_name = get_station_dir_name(station_name)
+        dir_path = DATA_SOURCE_DIR_PATH / station_dir_name
+        if not dir_path.exists():
+            raise FileNotFoundError(
+                f'Station data source directory "{dir_path}" does not exist.')
         return sorted(p for p in dir_path.glob('*.wav'))
     
-    return [get_clips_aux(n) for n in STATION_NAMES]
+    return [get_clips_aux(n) for n in SIMULATION_STATION_NAMES]
 
 
 def get_other_clip_audio_file_paths():
 
     def get_clips_aux(station_name, detector_name):
+        station_dir_name = get_station_dir_name(station_name)
         dir_path = \
-            DATA_SOURCE_DIR_PATH / station_name / CLIP_DIR_NAME / \
+            DATA_SOURCE_DIR_PATH / station_dir_name / CLIP_DIR_NAME / \
             detector_name / INCOMING_DIR_NAME
         return sorted(p for p in dir_path.glob('*.wav'))
 
-    cases = itertools.product(STATION_NAMES, DETECTOR_NAMES)
+    cases = \
+        itertools.product(SIMULATION_STATION_NAMES, SIMULATION_DETECTOR_NAMES)
+    
     return [get_clips_aux(s, d) for s, d in cases]
 
 

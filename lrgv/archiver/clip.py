@@ -57,13 +57,12 @@ class Clip:
 
     @property
     def station_name(self):
+        return self._clip_metadata['station']
+    
 
-        # Extract station name from recording name. The recording
-        # name has the form "<station name> <date> <time> Z". We
-        # use `rsplit` with a `maxsplit` argument to split it since
-        # the station name may contain spaces.
-        recording_name = self._clip_metadata['recording']
-        return recording_name.rsplit(maxsplit=3)[0]
+    @property
+    def mic_output_name(self):
+        return self._clip_metadata['mic_output']
 
 
     @property
@@ -87,15 +86,6 @@ class Clip:
             return None
         
         return int(serial_num)
-
-
-    @property
-    def sample_rate(self):
-        metadata = self._metadata_file_contents
-        clip = metadata['clips'][0]
-        recording_name = clip['recording']
-        recording = metadata['recordings'][recording_name]
-        return float(recording['sample_rate'])
 
 
     @property

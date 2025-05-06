@@ -1,7 +1,7 @@
 import logging
 import time
 
-from lrgv.archiver.app_settings import app_settings
+from lrgv.archiver.app_settings_lighthouse import app_settings
 from lrgv.archiver.clip_audio_file_copier import ClipAudioFileCopier
 from lrgv.archiver.clip_audio_file_s3_uploader import ClipAudioFileS3Uploader
 from lrgv.archiver.clip_lister import ClipLister

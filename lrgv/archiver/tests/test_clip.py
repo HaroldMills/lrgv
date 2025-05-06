@@ -7,8 +7,8 @@ from lrgv.util.test_case import TestCase
 _DATA_DIR_PATH = Path(__file__).parent / 'data'
 _EXPECTED_ID = 28180
 _EXPECTED_STATION_NAME = 'Alamo'
+_EXPECTED_MIC_OUTPUT_NAME = '21c 0 Vesper Output'
 _EXPECTED_SERIAL_NUM = 2
-_EXPECTED_SAMPLE_RATE = 22050
 _EXPECTED_LENGTH = 30870
 _EXPECTED_CLASSIFICATION = 'Call.DICK'
 
@@ -30,7 +30,6 @@ class ClipTests(TestCase):
         self.assertIsNone(clip.id)
         self.assertEqual(clip.station_name, _EXPECTED_STATION_NAME)
         self.assertIsNone(clip.serial_num)
-        self.assertEqual(clip.sample_rate, _EXPECTED_SAMPLE_RATE)
         self.assertEqual(clip.length, _EXPECTED_LENGTH)
         self.assertIsNone(clip.classification)
 
@@ -52,7 +51,6 @@ class ClipTests(TestCase):
         self.assertEqual(clip.id, _EXPECTED_ID)
         self.assertEqual(clip.station_name, _EXPECTED_STATION_NAME)
         self.assertEqual(clip.serial_num, _EXPECTED_SERIAL_NUM)
-        self.assertEqual(clip.sample_rate, _EXPECTED_SAMPLE_RATE)
         self.assertEqual(clip.length, _EXPECTED_LENGTH)
         self.assertEqual(clip.classification, _EXPECTED_CLASSIFICATION)
 

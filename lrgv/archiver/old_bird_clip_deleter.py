@@ -28,6 +28,7 @@ class OldBirdClipDeleter(LinearGraph):
         settings = Bunch(
             dir_path=s.source_clip_dir_path,
             file_name_re=_CLIP_FILE_NAME_RE,
+            recursive=False,
             file_wait_period=s.clip_file_wait_period)
         lister = FileLister(settings, self)
 

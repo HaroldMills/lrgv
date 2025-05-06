@@ -27,17 +27,15 @@ _CLIP_FILE_NAME_RE = (
     r'\.(?:wav|WAV)'
     r'$')
 
+_METADATA_DETECTOR_NAME = 'Old Bird Dickcissel Detector 1.0'
+
 _RECORDING_START_TIME = Time(hour=21)
 _RECORDING_DURATION = 8             # hours
-
-_SENSOR_NAME_FORMAT = '{station_name} 21c'
-_TIME_ZONE_OFFSET_LENGTH = 6
-_METADATA_DETECTOR_NAME = 'Old Bird Dickcissel Detector 1.0'
 
 _AUDIO_FILE_NAME_EXTENSION = '.wav'
 _METADATA_FILE_NAME_EXTENSION = '.json'
 
-_US_CENTRAL = ZoneInfo('US/Central')
+_TIME_ZONE_OFFSET_LENGTH = 6
 _UTC = ZoneInfo('UTC')
 
 
@@ -51,12 +49,16 @@ class OldBirdClipConverter(LinearGraph):
         settings = Bunch(
             dir_path=s.source_clip_dir_path,
             file_name_re=_CLIP_FILE_NAME_RE,
+            recursive=False,
             file_wait_period=s.clip_file_wait_period)
         lister = FileLister(settings, self)
 
         paths = s.station_paths.detectors[_DETECTOR_NAME]
         settings = Bunch(
             station_name=s.station_name,
+            recorder_name=s.recorder_name,
+            mic_output_name=s.mic_output_name,
+            station_time_zone=s.station_time_zone,
             destination_dir_path=paths.incoming_clip_dir_path,
             clip_classification=s.clip_classification)
         mover = _ClipFileMover(settings, self)
@@ -76,7 +78,7 @@ class _ClipFileMover(SimpleSink):
 
         # Get clip start time and serial number from audio file name.
         match = audio_file.name_match
-        clip_start_time = _get_clip_start_time(match)
+        clip_start_time = _get_clip_start_time(match, s.station_time_zone)
         clip_serial_num = int(match.group('num'))
 
         # Get clip length and sample rate from audio file.
@@ -85,7 +87,8 @@ class _ClipFileMover(SimpleSink):
             sample_rate = wave_reader.getframerate()
         
         # Get recording start time and length.
-        recording_start_time = _get_recording_start_time(clip_start_time)
+        recording_start_time = \
+            _get_recording_start_time(clip_start_time, s.station_time_zone)
         recording_length = int(round(_RECORDING_DURATION * 3600 * sample_rate))
 
         # Get clip annotations.
@@ -98,9 +101,10 @@ class _ClipFileMover(SimpleSink):
 
         # Get metadata.
         metadata = create_clip_metadata(
-            s.station_name, recording_start_time, recording_length,
-            sample_rate, _METADATA_DETECTOR_NAME, clip_start_time,
-            clip_serial_num, clip_length, clip_annotations)
+            s.station_name, s.recorder_name, s.mic_output_name,
+            recording_start_time, recording_length, sample_rate,
+            _METADATA_DETECTOR_NAME, clip_start_time, clip_serial_num,
+            clip_length, clip_annotations)
 
         # Get metadata file path.
         file_name_stem = _get_clip_file_name_stem(
@@ -124,7 +128,7 @@ class _ClipFileMover(SimpleSink):
                 f'Error message was: {e}')
 
 
-def _get_clip_start_time(match):
+def _get_clip_start_time(match, station_time_zone):
 
     group = match.group
 
@@ -139,7 +143,7 @@ def _get_clip_start_time(match):
     second = get('second')
 
     start_time = DateTime(
-        year, month, day, hour, minute, second, tzinfo=_US_CENTRAL)
+        year, month, day, hour, minute, second, tzinfo=station_time_zone)
 
     return start_time.astimezone(_UTC)
 
@@ -149,47 +153,42 @@ def _get_clip_file_name_stem(station_name, start_time, serial_num):
     return f'{station_name}_{start_time_text}_{serial_num:02d}'
 
 
-def _get_recording_start_time(clip_start_time):
+def _get_recording_start_time(clip_start_time, station_time_zone):
 
-    dt = clip_start_time.astimezone(_US_CENTRAL)
+    dt = clip_start_time.astimezone(station_time_zone)
 
     date = dt.date()
     if dt.hour < 12:
         date -= TimeDelta(days=1)
 
-    dt = DateTime.combine(date, _RECORDING_START_TIME, _US_CENTRAL)
+    dt = DateTime.combine(date, _RECORDING_START_TIME, station_time_zone)
 
     return dt.astimezone(_UTC)
 
 
 def create_clip_metadata(
-        station_name, recording_start_time, recording_length, sample_rate,
-        detector_name, clip_start_time, clip_serial_num, clip_length,
-        clip_annotations):
+        station_name, recorder_name, mic_output_name, recording_start_time,
+        recording_length, sample_rate, detector_name, clip_start_time,
+        clip_serial_num, clip_length, clip_annotations):
 
     # Prepare recording metadata.
     start_time = _format_start_time(recording_start_time)
-    recording_name = f'{station_name} {start_time}'
-    recordings = {
-        recording_name: {
-            'sensors': station_name,
+    recordings = [
+        {
+            'station': station_name,
+            'recorder': recorder_name,
+            'mic_outputs': [mic_output_name],
             'start_time': start_time,
             'length': recording_length,
             'sample_rate': sample_rate
         }
-    }
-
-    # Prepare recording sensor metadata.
-    sensor_name = _SENSOR_NAME_FORMAT.format(station_name=station_name)
-    recording_sensors = {
-        station_name: [sensor_name]
-    }
+    ]
 
     # Prepare clip metadata.
     start_time = _format_start_time(clip_start_time, timespec='milliseconds')
     clips = [{
-        'recording': recording_name,
-        'sensor': sensor_name,
+        'station': station_name,
+        'mic_output': mic_output_name,
         'detector': detector_name,
         'start_time': start_time,
         'serial_num': clip_serial_num,
@@ -200,7 +199,6 @@ def create_clip_metadata(
     # Return all metadata.
     return {
         'recordings': recordings,
-        'recording_sensors': recording_sensors,
         'clips': clips
     }
 

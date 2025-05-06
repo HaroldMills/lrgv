@@ -52,13 +52,13 @@ _LOG_FILE_PATH = None
 
 _LOGGING_LEVEL = logging.INFO
 
-_DETECTOR_NAMES = ('Nighthawk',)
+_DETECTOR_NAMES = ('Dick',)
 
 _CLIP_FILE_WAIT_PERIOD = 10                   # seconds
 # _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 10        # seconds
 _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 172800    # seconds
 
-_SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets.env'
+_SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lighthouse.env'
 
 
 env = Env()
@@ -113,23 +113,23 @@ def _get_paths(station_names, detector_names):
 def _get_vesper_settings():
     if _ARCHIVE_REMOTE:
         return Bunch(
-            archive_url=env('LRGV_REMOTE_ARCHIVE_URL'),
-            username=env('LRGV_REMOTE_ARCHIVE_USERNAME'),
-            password=env('LRGV_REMOTE_ARCHIVE_PASSWORD'))
+            archive_url=env('REMOTE_ARCHIVE_URL'),
+            username=env('REMOTE_ARCHIVE_USERNAME'),
+            password=env('REMOTE_ARCHIVE_PASSWORD'))
     else:
         return Bunch(
-            archive_url=env('LRGV_LOCAL_ARCHIVE_URL'),
-            username=env('LRGV_LOCAL_ARCHIVE_USERNAME'),
-            password=env('LRGV_LOCAL_ARCHIVE_PASSWORD'))
+            archive_url=env('LOCAL_ARCHIVE_URL'),
+            username=env('LOCAL_ARCHIVE_USERNAME'),
+            password=env('LOCAL_ARCHIVE_PASSWORD'))
 
 
 def _get_aws_settings():
     return Bunch(
-        access_key_id=env('LRGV_AWS_ACCESS_KEY_ID'),
-        secret_access_key=env('LRGV_AWS_SECRET_ACCESS_KEY'),
-        region_name=env('LRGV_AWS_REGION_NAME'),
-        s3_clip_bucket_name=env('LRGV_AWS_S3_CLIP_BUCKET_NAME'),
-        s3_clip_folder_path=env('LRGV_AWS_S3_CLIP_FOLDER_PATH'))
+        access_key_id=env('AWS_ACCESS_KEY_ID'),
+        secret_access_key=env('AWS_SECRET_ACCESS_KEY'),
+        region_name=env('AWS_REGION_NAME'),
+        s3_clip_bucket_name=env('AWS_S3_CLIP_BUCKET_NAME'),
+        s3_clip_folder_path=env('AWS_S3_CLIP_FOLDER_PATH'))
 
 
 app_settings = Bunch(
