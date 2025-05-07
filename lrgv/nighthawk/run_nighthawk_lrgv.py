@@ -32,6 +32,10 @@ import lrgv.util.conda_utils as conda_utils
 import lrgv.util.logging_utils as logging_utils
 
 
+# TODO: In `process_detections`, create clip file ancestor directories
+# if needed.
+
+
 logger = logging.getLogger(__name__)
 
 
