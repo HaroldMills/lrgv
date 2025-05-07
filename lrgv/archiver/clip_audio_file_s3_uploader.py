@@ -1,11 +1,16 @@
 """Processor that uploads a clip audio file to an AWS S3 bucket."""
 
 
+import logging
+
 import boto3
 
 from lrgv.archiver.archiver_error import ArchiverError
 from lrgv.dataflow import SimpleProcessor
 import lrgv.util.vesper_utils as vesper_utils
+
+
+_logger = logging.getLogger(__name__)
 
 
 class ClipAudioFileS3Uploader(SimpleProcessor):
@@ -47,6 +52,11 @@ class ClipAudioFileS3Uploader(SimpleProcessor):
                 f'Processor "{self.path}" could not put boto3 S3 object to '
                 f'bucket "{self._clip_bucket_name}", object key '
                 f'"{object_key}". Exception message was: {e}')
+        
+        _logger.info(
+            f'Processor "{self.path}" uploaded audio file to S3 for clip '
+            f'{clip.id} for station "{clip.station_name}", mic output '
+            f'"{clip.mic_output_name}", and start time {clip.start_time}.')
         
         return clip
 

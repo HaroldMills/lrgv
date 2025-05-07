@@ -112,6 +112,16 @@ class _ClipFileMover(SimpleSink):
         metadata_file_name = f'{file_name_stem}{_METADATA_FILE_NAME_EXTENSION}'
         metadata_file_path = s.destination_dir_path / metadata_file_name
 
+        # Create metadata file parent directories if needed.
+        try:
+            metadata_file_path.parent.mkdir(
+                mode=0o755, parents=True, exist_ok=True)
+        except Exception as e:
+            raise ArchiverError(
+                f'Processor "{self.path}" could not create one or more '
+                f'parent directories for clip metadata file '
+                f'"{metadata_file_path}". Error message was: {e}')
+
         # Write metadata file.
         with open(metadata_file_path, 'wt') as file:
             json.dump(metadata, file, indent=4)

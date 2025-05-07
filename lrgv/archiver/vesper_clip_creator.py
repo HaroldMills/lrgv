@@ -48,8 +48,8 @@ class VesperClipCreator(SimpleSink):
 
         _logger.info(
             f'Processor "{self.path}" created Vesper clip {clip.id} '
-            f'for station "{clip.station_name}", start time '
-            f'{clip.start_time}.')
+            f'for station "{clip.station_name}", mic output '
+            f'"{clip.mic_output_name}", and start time {clip.start_time}.')
 
 
     # TODO: Learn more about HTTP sessions, Django authentication,
@@ -139,9 +139,19 @@ class VesperClipCreator(SimpleSink):
         clip_id = response_data['clips'][0]['id']
         metadata['clips'][0]['id'] = clip_id
 
+        # Create created clip directory if needed.
+        created_clip_dir_path = self._settings.created_clip_dir_path
+        try:
+            created_clip_dir_path.mkdir(
+                mode=0o755, parents=True, exist_ok=True)
+        except Exception as e:
+            raise ArchiverError(
+                f'Could not create directory "{created_clip_dir_path}". '
+                f'Error message was: {e}')
+        
         # Move audio file to created clip directory.
         old_path = clip.audio_file_path
-        new_path = self._settings.created_clip_dir_path / old_path.name
+        new_path = created_clip_dir_path / old_path.name
         try:
             old_path.rename(new_path)
         except Exception as e:
@@ -151,7 +161,7 @@ class VesperClipCreator(SimpleSink):
         
         # Create new metadata file in created clip directory.
         old_path = clip.metadata_file_path
-        new_path = self._settings.created_clip_dir_path / old_path.name
+        new_path = created_clip_dir_path / old_path.name
         try:
             with open(new_path, 'wt') as file:
                 json.dump(metadata, file, indent=4)
