@@ -42,16 +42,14 @@ logger = logging.getLogger(__name__)
 #       Old Bird detector clips.
 
 # TODO: A Dick-r clip that starts at or after the end of the recording
-#       period for a night (e.g. 10:00:00 UTC) causes the Dick Clip
-#       Archiver to try to create a duplicate recording. Decide what
-#       should happen and implement. Perhaps we should log a warning
-#       and move the clip files to an Outside directory.
+#       period for a night (e.g. 10:00:00 UTC) causes the Dick clip
+#       archiver get stuck on that clip, repeatedly attempting to
+#       create the clip in the archive but failing. Implement some
+#       remedy for this. Perhaps we should log a warning and move the
+#       files for the clip to an Outside directory.
 
 # TODO: Don't attempt to process clip for which audio and metadata files
 #       are not both present.
-
-# TODO: Consider uploading clip audio file *before* adding clip to archive
-#       so users don't see blank spectrograms in clip albums.
 
 # TODO: Don't stop processing clips for a station and detector if the
 #       processing of one clip raises an exception: just move on to the
@@ -60,6 +58,10 @@ logger = logging.getLogger(__name__)
 # TODO: Log per-clip messages from station/detector processors.
 #       This will require modifications to dataflow package.
 
+# TODO: We currently create clips in the archive for lots of clips from
+#       a station and then upload their audio files to S3. Interleave
+#       clip creation and audio file uploading so audio is visible in
+#       a clip album sooner.
 
 # * In top level processor, create one processor per station. The processor
 #   for a station will include one processor per detector for that station.
