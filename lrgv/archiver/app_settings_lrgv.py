@@ -1,15 +1,10 @@
 from pathlib import Path
 from zoneinfo import ZoneInfo
-import itertools
 import logging
 
 from environs import Env
 
 from lrgv.util.bunch import Bunch
-
-
-def _chain(iterable):
-    return itertools.chain.from_iterable(iterable)
 
 
 # App mode, either 'Test' or 'Production'.
@@ -43,7 +38,7 @@ elif _MODE == 'Production':
 
 _ACTIVE_DATA_DIR_PATH = _STATION_DATA_DIR_PATH / 'Active'
 _RETIRED_DATA_DIR_PATH = _STATION_DATA_DIR_PATH / 'Retired'
-    
+
 _ARCHIVE_REMOTE = _ARCHIVE_DIR_PATH is None
 
 _STATION_TIME_ZONE = ZoneInfo('US/Central')
@@ -53,12 +48,13 @@ _LOG_FILE_PATH = None
 
 _LOGGING_LEVEL = logging.INFO
 
-_DETECTOR_NAMES = ('Dick',)
-# _DETECTOR_NAMES = ('Dick', 'Nighthawk')
+# _DETECTOR_NAMES = ('Dick',)
+# _DETECTOR_NAMES = ('Nighthawk',)
+_DETECTOR_NAMES = ('Dick', 'Nighthawk')
 
 _CLIP_FILE_WAIT_PERIOD = 10                   # seconds
 # _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 60        # seconds
-_CLIP_FILE_RETIREMENT_WAIT_PERIOD = 172800    # seconds
+_CLIP_FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
 
 _SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lrgv.env'
 
