@@ -1,5 +1,8 @@
 # Script that moves .wav and .json files from one directory hierarchy to
-# another if they were last modified at least a certain time ago.
+# another if they were last modified at least a certain time ago. The
+# script creates target directories as needed.
+#
+# Usage: python move_clip_files.py <source_dir_path> <target_dir_path>
 
 
 from pathlib import Path
@@ -8,17 +11,16 @@ import time
 
 
 FILE_NAME_EXTENSIONS = ('.wav', '.json')
-FILE_AGE_THRESHOLD = 48 * 3600
-# FILE_AGE_THRESHOLD = 0
+# FILE_AGE_THRESHOLD = 48 * 3600
+FILE_AGE_THRESHOLD = 0
 SOURCE_DIR_NAME = 'Active'
 TARGET_DIR_NAME = 'Stashed'
 
 
 def main():
 
-    station_data_dir_path = Path(sys.argv[1])
-    source_dir_path = station_data_dir_path / SOURCE_DIR_NAME
-    target_dir_path = station_data_dir_path / TARGET_DIR_NAME
+    source_dir_path = Path(sys.argv[1])
+    target_dir_path = Path(sys.argv[2])
 
     if not source_dir_path.exists():
         raise FileNotFoundError(
