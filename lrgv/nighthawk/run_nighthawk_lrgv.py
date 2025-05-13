@@ -111,24 +111,24 @@ def main():
 
         logger.info(f'Processing recording file "{file.path}"...')
 
-        # try:
-        #     result = run_nighthawk_on_file(file, nighthawk_output_dir_path)
-        # except Exception as e:
-        #     logger.warning(
-        #         f'Attempt to run Nighthawk on recording file '
-        #         f'"{file.path}" raised exception with message: {e}')
-            
-        # if result:
-
         try:
-            process_detections(
-                file, taxon_mapping, nighthawk_output_dir_path,
-                clip_dir_path)
+            result = run_nighthawk_on_file(file, nighthawk_output_dir_path)
         except Exception as e:
             logger.warning(
-                f'Attempt to process Nighthawk detections for '
-                f'recording file "{file.path}" raised exception with '
-                f'message: {e}')
+                f'Attempt to run Nighthawk on recording file '
+                f'"{file.path}" raised exception with message: {e}')
+            
+        if result:
+
+            try:
+                process_detections(
+                    file, taxon_mapping, nighthawk_output_dir_path,
+                    clip_dir_path)
+            except Exception as e:
+                logger.warning(
+                    f'Attempt to process Nighthawk detections for '
+                    f'recording file "{file.path}" raised exception with '
+                    f'message: {e}')
                 
     logger.info(f'Script complete.')
  
