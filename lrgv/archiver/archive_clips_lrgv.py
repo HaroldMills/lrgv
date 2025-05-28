@@ -38,9 +38,6 @@ logger = logging.getLogger(__name__)
 # 6. Run `archive_clips_lrgv.py`.
 
 
-# TODO: Create an app setting that controls whether or not we archive
-#       Old Bird detector clips.
-
 # TODO: A Dick-r clip that starts at or after the end of the recording
 #       period for a night (e.g. 10:00:00 UTC) causes the Dick clip
 #       archiver get stuck on that clip, repeatedly attempting to
