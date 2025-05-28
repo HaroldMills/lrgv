@@ -159,11 +159,11 @@ class StationClipArchiver(Graph):
         # Move Old Bird Dickcissel detector clips that appear in a station's
         # SugarSync directory to the detector's `Incoming` clip directory,
         # and add an accompanying clip metadata file.
-        old_bird_clip_converter = self._create_old_bird_clip_converter()
+        # old_bird_clip_converter = self._create_old_bird_clip_converter()
 
         # Delete Old Bird Dickcissel detector clips that appear in a
         # station's SugarSync directory without archiving them.
-        # old_bird_clip_deleter = self._create_old_bird_clip_deleter()
+        old_bird_clip_deleter = self._create_old_bird_clip_deleter()
 
         # Archive clips that appear in detectors' `Incoming` clip directories.
         detector_clip_archivers = tuple(
@@ -186,8 +186,12 @@ class StationClipArchiver(Graph):
             for n in app_settings.detector_names)
 
         return (
-            old_bird_clip_converter, *detector_clip_archivers,
+            old_bird_clip_deleter, *detector_clip_archivers,
             *detector_clip_retirers)
+    
+        # return (
+        #     old_bird_clip_converter, *detector_clip_archivers,
+        #     *detector_clip_retirers)
     
 
     def _create_old_bird_clip_converter(self):

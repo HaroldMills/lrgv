@@ -49,11 +49,12 @@ _LOG_FILE_PATH = None
 _LOGGING_LEVEL = logging.INFO
 
 # _DETECTOR_NAMES = ('Dick',)
-# _DETECTOR_NAMES = ('Nighthawk',)
-_DETECTOR_NAMES = ('Dick', 'Nighthawk')
+_DETECTOR_NAMES = ('Nighthawk',)
+# _DETECTOR_NAMES = ('Dick', 'Nighthawk')
 
-_CLIP_FILE_WAIT_PERIOD = 10                   # seconds
-# _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 60        # seconds
+_CLIP_FILE_WAIT_PERIOD = 60                  # seconds
+# _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 60       # seconds
+# _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 0        # seconds
 _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
 
 _SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lrgv.env'
