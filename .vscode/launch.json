@@ -5,6 +5,25 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "List Missing Dick-r Clip Files",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "program": "${workspaceFolder}/lrgv/scripts/list_missing_dick_r_clip_files.py",
+            "console": "integratedTerminal",
+        },
+         {
+            "name": "Transfer GlassOFire Clip Classifications",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "/Users/harold/miniconda3/envs/vesper-dev/bin/python",
+            "program": "${workspaceFolder}/lrgv/scripts/transfer_glassofire_clip_classifications.py",
+            "envFile": "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Docker/vesper.env",
+            "cwd": "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Docker/Archive",
+            "django": true,
+            "console": "integratedTerminal",
+        },
+        {
             "name": "Run Nighthawk LRGV",
             "type": "debugpy",
             "request": "launch",
@@ -71,7 +90,7 @@
             "program": "${workspaceFolder}/lrgv/scripts/move_clip_files.py",
             "args": [
                 "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025/Station Data/Active",
-                "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025/Station Data/Stashed/Active"
+                "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025/Station Data/Stashed"
             ],
             "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
             "console": "integratedTerminal",
