@@ -156,15 +156,6 @@ class StationClipArchiver(Graph):
 
     def _create_processors(self):
 
-        # Move Old Bird Dickcissel detector clips that appear in a station's
-        # SugarSync directory to the detector's `Incoming` clip directory,
-        # and add an accompanying clip metadata file.
-        # old_bird_clip_converter = self._create_old_bird_clip_converter()
-
-        # Delete Old Bird Dickcissel detector clips that appear in a
-        # station's SugarSync directory without archiving them.
-        old_bird_clip_deleter = self._create_old_bird_clip_deleter()
-
         # Archive clips that appear in detectors' `Incoming` clip directories.
         detector_clip_archivers = tuple(
             self._create_detector_clip_archiver(n)
@@ -185,48 +176,28 @@ class StationClipArchiver(Graph):
             self._create_detector_clip_retirer(n)
             for n in app_settings.detector_names)
 
-        return (
-            old_bird_clip_deleter, *detector_clip_archivers,
-            *detector_clip_retirers)
+        processors = (*detector_clip_archivers, *detector_clip_retirers)
+
+        if app_settings.process_old_bird_clips:
+
+            if app_settings.delete_old_bird_clips:
+
+                # Delete Old Bird Dickcissel detector clips that appear in
+                # a station's SugarSync directory without archiving them.
+                processor = self._create_old_bird_clip_deleter()
+
+            else:
+
+                # Move Old Bird Dickcissel detector clips that appear in
+                # a station's SugarSync directory to the detector's
+                # `Incoming` clip directory, and add an accompanying
+                # clip metadata file.
+                processor = self._create_old_bird_clip_converter()
+
+            processors = (processor, *processors)
     
-        # return (
-        #     old_bird_clip_converter, *detector_clip_archivers,
-        #     *detector_clip_retirers)
+        return processors
     
-
-    def _create_old_bird_clip_converter(self):
-            
-            s = app_settings
-            station_name = self.settings.station_name
-            recorder_name, mic_output_name = \
-                s.old_bird_clip_device_data[station_name]
-            station_paths = s.paths.stations[station_name]
-
-            settings = Bunch(
-                station_name=station_name,
-                recorder_name=recorder_name,
-                mic_output_name=mic_output_name,
-                station_time_zone=s.station_time_zone,
-                source_clip_dir_path=station_paths.station_dir_path,
-                clip_file_wait_period=s.clip_file_wait_period,
-                station_paths=station_paths,
-                clip_classification=None)
-                
-            return OldBirdClipConverter(settings, self)
-        
-
-    def _create_old_bird_clip_deleter(self):
-            
-            s = app_settings
-            station_name = self.settings.station_name
-            station_paths = s.paths.stations[station_name]
-
-            settings = Bunch(
-                source_clip_dir_path=station_paths.station_dir_path,
-                clip_file_wait_period=s.clip_file_wait_period)
-                
-            return OldBirdClipDeleter(settings, self)
-        
 
     def _create_detector_clip_archiver(self, detector_name):
 
@@ -278,6 +249,40 @@ class StationClipArchiver(Graph):
 
         return DetectorClipRetirer(settings, self, name)
 
+
+    def _create_old_bird_clip_deleter(self):
+            
+            s = app_settings
+            station_name = self.settings.station_name
+            station_paths = s.paths.stations[station_name]
+
+            settings = Bunch(
+                source_clip_dir_path=station_paths.station_dir_path,
+                clip_file_wait_period=s.clip_file_wait_period)
+                
+            return OldBirdClipDeleter(settings, self)
+    
+
+    def _create_old_bird_clip_converter(self):
+            
+            s = app_settings
+            station_name = self.settings.station_name
+            recorder_name, mic_output_name = \
+                s.old_bird_clip_device_data[station_name]
+            station_paths = s.paths.stations[station_name]
+
+            settings = Bunch(
+                station_name=station_name,
+                recorder_name=recorder_name,
+                mic_output_name=mic_output_name,
+                station_time_zone=s.station_time_zone,
+                source_clip_dir_path=station_paths.station_dir_path,
+                clip_file_wait_period=s.clip_file_wait_period,
+                station_paths=station_paths,
+                clip_classification=None)
+                
+            return OldBirdClipConverter(settings, self)
+        
 
 class DetectorClipArchiver(Graph):
 

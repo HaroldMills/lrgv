@@ -48,13 +48,14 @@ _LOG_FILE_PATH = None
 
 _LOGGING_LEVEL = logging.INFO
 
-# _DETECTOR_NAMES = ('Dick',)
-_DETECTOR_NAMES = ('Nighthawk',)
-# _DETECTOR_NAMES = ('Dick', 'Nighthawk')
+_PROCESS_OLD_BIRD_CLIPS = True
+_DELETE_OLD_BIRD_CLIPS = True
+_OLD_BIRD_DETECTOR_NAME = 'Dick'
+_NON_OLD_BIRD_DETECTOR_NAMES = ('Nighthawk',)
 
 _CLIP_FILE_WAIT_PERIOD = 60                  # seconds
-# _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 60       # seconds
 # _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 0        # seconds
+# _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 60       # seconds
 _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
 
 _SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lrgv.env'
@@ -62,6 +63,13 @@ _SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lrgv.env'
 
 env = Env()
 env.read_env(_SECRET_FILE_PATH)
+
+
+def _get_detector_names():
+    if _PROCESS_OLD_BIRD_CLIPS and not _DELETE_OLD_BIRD_CLIPS:
+        return (_OLD_BIRD_DETECTOR_NAME, *_NON_OLD_BIRD_DETECTOR_NAMES)
+    else:
+        return _NON_OLD_BIRD_DETECTOR_NAMES
 
 
 def _get_old_bird_clip_device_data():
@@ -170,14 +178,18 @@ def _get_aws_settings():
         s3_clip_folder_path=env('AWS_S3_CLIP_FOLDER_PATH'))
 
 
+_detector_names = _get_detector_names()
+
 app_settings = Bunch(
     archive_remote=_ARCHIVE_REMOTE,
     logging_level=_LOGGING_LEVEL,
     station_names=_STATION_NAMES,
     station_time_zone=_STATION_TIME_ZONE,
     old_bird_clip_device_data=_get_old_bird_clip_device_data(),
-    detector_names=_DETECTOR_NAMES,
-    paths=_get_paths(_STATION_NAMES, _DETECTOR_NAMES),
+    process_old_bird_clips=_PROCESS_OLD_BIRD_CLIPS,
+    delete_old_bird_clips=_DELETE_OLD_BIRD_CLIPS,
+    detector_names=_detector_names,
+    paths=_get_paths(_STATION_NAMES, _detector_names),
     clip_file_wait_period=_CLIP_FILE_WAIT_PERIOD,
     clip_file_retirement_wait_period=_CLIP_FILE_RETIREMENT_WAIT_PERIOD,
     vesper=_get_vesper_settings())
