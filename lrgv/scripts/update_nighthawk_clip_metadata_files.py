@@ -12,14 +12,26 @@ import json
 import sys
 
 
+# LRGV mapping from station name to station number. Station numbers are
+# used in recorder and mic names.
+# STATION_NUMS = {
+#     'Alamo': 0,
+#     'Donna': 1,
+#     'Harlingen': 2,
+#     'Port Isabel': 3,
+#     'Rio Hondo': 4,
+#     'Roma HS': 5,
+#     'Roma RBMS': 6
+# }
+
+# Lighthouse mapping from station name to station number. Station numbers
+# are used in recorder and mic names.
 STATION_NUMS = {
-    'Alamo': 0,
-    'Donna': 1,
-    'Harlingen': 2,
-    'Port Isabel': 3,
-    'Rio Hondo': 4,
-    'Roma HS': 5,
-    'Roma RBMS': 6
+    'Barker': 0,
+    'Lyndonville': 1,
+    'Newfane': 2,
+    'Station 5': 3,
+    'Wilson': 4
 }
 
 RECORDER_NAME_FORMAT = 'Vesper Recorder {}'
