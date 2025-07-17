@@ -388,8 +388,8 @@ def process_detections(
             #
             # We use the serial numbers for two purposes. First, we
             # use them to create unique clip file names. Second, the
-            # Django view that creates LRGV clips in a Vesper archive
-            # uses them to create unique clip start times. (The Vesper
+            # Django view that creates clips in a Vesper archive uses
+            # them to create unique clip start times. (The Vesper
             # archive database requires that the combination of
             # recording channel, start time, and creating processor be
             # unique across all clips. See the
