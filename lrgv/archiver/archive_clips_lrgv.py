@@ -38,6 +38,16 @@ logger = logging.getLogger(__name__)
 # 6. Run `archive_clips_lrgv.py`.
 
 
+# TODO: Change the name of the `lrgv` package to something more
+#       generic. The package is now used not only by the LRGV project,
+#       but also by the Lighthouse project, and might be used by
+#       other projects in the future.
+
+# TODO: Consider creating a single `archive_clips` script that could
+#       be used for LRGV, Lighthouse, and other projects. The script
+#       would ideally be configured by a YAML settings file that would
+#       specify all project-specific settings.
+
 # TODO: A Dick-r clip that starts at or after the end of the recording
 #       period for a night (e.g. 10:00:00 UTC) causes the Dick clip
 #       archiver get stuck on that clip, repeatedly attempting to
