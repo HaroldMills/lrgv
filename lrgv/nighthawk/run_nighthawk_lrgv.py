@@ -3,10 +3,11 @@ Script that runs the Nighthawk NFC detector on LRGV recording files
 from one night and creates an audio file and a metadata file for
 each resulting detection.
 
-The script has two required command line arguments, a recording
-directory path and a clip directory path. It also has an optional
-third argument, the date of the night for which to run the detector.
-The third argument defaults to yesterday's date.
+The script has three required command line arguments, a recording
+directory path, a Nighthawk output directory path, and a clip directory
+path. It also has an optional fourth argument, the date of the night
+for which to run the detector. The fourth argument defaults to yesterday's
+date.
 
 Each station laptop in the monitoring network runs this script every
 morning after the previous night's recording completes to process the
@@ -30,10 +31,6 @@ import wave
 from lrgv.util.bunch import Bunch
 import lrgv.util.conda_utils as conda_utils
 import lrgv.util.logging_utils as logging_utils
-
-
-# TODO: In `process_detections`, create clip file ancestor directories
-# if needed.
 
 
 logger = logging.getLogger(__name__)
@@ -101,6 +98,11 @@ def main():
         f'Nighthawk output directory path is "{nighthawk_output_dir_path}".')
     logger.info(f'Clip directory path is "{clip_dir_path}".')
 
+    create_dir_if_needed(
+        nighthawk_output_dir_path, 'Nighthawk output')
+    
+    create_dir_if_needed(clip_dir_path, 'clip')
+
     taxon_mapping = get_taxon_mapping(TAXON_MAPPING_FILE_PATH)
 
     files = get_recording_files(recording_dir_path, date)
@@ -151,19 +153,7 @@ def parse_args(args):
         sys.exit(1)
 
     nighthawk_output_dir_path = Path(args[2])
-
-    if not nighthawk_output_dir_path.exists():
-        logger.critical(
-            f'Specified Nighthawk output directory "{recording_dir_path}" '
-            f'does not exist.')
-        sys.exit(1)
-
     clip_dir_path = Path(args[3])
-
-    if not clip_dir_path.exists():
-        logger.critical(
-            f'Specified clip directory "{clip_dir_path}" does not exist.')
-        sys.exit(1)
 
     if len(args) == 5:
         try:
@@ -175,6 +165,22 @@ def parse_args(args):
         date = Date.fromordinal(Date.today().toordinal() - 1)
 
     return recording_dir_path, nighthawk_output_dir_path, clip_dir_path, date
+
+
+def create_dir_if_needed(dir_path, name):
+
+    if not dir_path.exists():
+
+        logger.info(f'Creating {name} directory "{dir_path}"...')
+
+        try:
+            dir_path.mkdir(mode=0o755, parents=True, exist_ok=True)
+
+        except Exception as e:
+            logger.critical(
+                f'Could not create directory "{dir_path}". Error message '
+                f'was: {e}')
+            sys.exit(1)
 
 
 def get_taxon_mapping(file_path):
