@@ -51,7 +51,8 @@ def move_files(
                 target_file_path = target_dir_path / relative_path
 
                 # Create target file parent directory if needed.
-                target_file_path.parent.mkdir(parents=True, exist_ok=True)
+                target_file_path.parent.mkdir(
+                    mode=0o755, parents=True, exist_ok=True)
 
                 # Move file to target directory.
                 # print(f'Move "{file_path}" to "{target_file_path}"...')

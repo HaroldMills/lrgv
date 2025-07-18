@@ -30,7 +30,7 @@ OUTPUT_FILE_NAME = Path('run_nighthawk_2.log')
 def process_file(input_file_path, output_file_path):
 
     # Create output file parent directory if needed.
-    output_file_path.parent.mkdir(parents=True, exist_ok=True)
+    output_file_path.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
 
     with input_file_path.open('rb') as input_file, \
             output_file_path.open('wb') as output_file:
