@@ -18,47 +18,24 @@ import lrgv.util.logging_utils as logging_utils
 logger = logging.getLogger(__name__)
 
 
-# To test the archiver:
+# To test the Lighthouse archiver:
 #
-# 1. Uncomment `_MODE = 'Test'` in `app_settings.py` and comment out
-#    `_MODE = 'Production'`.
+# 1. Uncomment `_MODE = 'Test'` in `app_settings_lighthouse.py` and comment
+#    out `_MODE = 'Production'`.
 #
-# 2. Edit `archive_clips.StationClipArchiver._create_processors` according
-#    to how you want to process Old Bird detector clips.
+# 2. Edit `archive_clips_lighthouse.StationClipArchiver._create_processors`
+#    according to how you want to process clips.
 #
 # 3. Open a terminal and cd to
-#    "/Users/haroldDesktop/NFC/LRGV/2024/Test Archive".
+#    "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025/Archiver Test Data/Test Archive".
 #
-# 4. Initialize and server the test archive with:
+# 4. Initialize and serve the test archive with:
 #
-#        ./init_and_server_test_archive.bash
+#        ./init_and_serve_test_archive.bash
 #
-# 5. Run `simulate_detection.py`.
+# 5. Run `simulate_detection_lighthouse.py`.
 #
-# 6. Run `archive_clips.py`.
-
-
-# TODO: Create an app setting that controls whether or not we archive
-#       Old Bird detector clips.
-
-# TODO: A Dick-r clip that starts at or after the end of the recording
-#       period for a night (e.g. 10:00:00 UTC) causes the Dick Clip
-#       Archiver to try to create a duplicate recording. Decide what
-#       should happen and implement. Perhaps we should log a warning
-#       and move the clip files to an Outside directory.
-
-# TODO: Don't attempt to process clip for which audio and metadata files
-#       are not both present.
-
-# TODO: Consider uploading clip audio file *before* adding clip to archive
-#       so users don't see blank spectrograms in clip albums.
-
-# TODO: Don't stop processing clips for a station and detector if the
-#       processing of one clip raises an exception: just move on to the
-#       next clip. This will require modifications to dataflow package.
-
-# TODO: Log per-clip messages from station/detector processors.
-#       This will require modifications to dataflow package.
+# 6. Run `archive_clips_lighthouse.py`.
 
 
 # * In top level processor, create one processor per station. The processor
@@ -154,25 +131,16 @@ class StationClipArchiver(Graph):
 
     def _create_processors(self):
 
-        # Move Old Bird Dickcissel detector clips that appear in a station's
-        # SugarSync directory to the detector's `Incoming` clip directory,
-        # and add an accompanying clip metadata file.
-        # old_bird_clip_converter = self._create_old_bird_clip_converter()
-
-        # Delete Old Bird Dickcissel detector clips that appear in a
-        # station's SugarSync directory without archiving them.
-        old_bird_clip_deleter = self._create_old_bird_clip_deleter()
-
         # Archive clips that appear in detectors' `Incoming` clip directories.
-        # detector_clip_archivers = tuple(
-        #     self._create_detector_clip_archiver(n)
-        #     for n in app_settings.detector_names)
+        detector_clip_archivers = tuple(
+            self._create_detector_clip_archiver(n)
+            for n in app_settings.detector_names)
 
         # Delete clips that appear in detectors' `Incoming` clip directories
         # without archiving them.
-        detector_clip_deleters = tuple(
-            self._create_detector_clip_deleter(n)
-            for n in app_settings.detector_names)
+        # detector_clip_deleters = tuple(
+        #     self._create_detector_clip_deleter(n)
+        #     for n in app_settings.detector_names)
         
         # Move clips that appear in detectors' `Archived` clip directories
         # to the detectors' `Retired` clip directories. The `Retired`
@@ -183,39 +151,28 @@ class StationClipArchiver(Graph):
             self._create_detector_clip_retirer(n)
             for n in app_settings.detector_names)
 
-        return (
-            old_bird_clip_deleter, *detector_clip_deleters,
-            *detector_clip_retirers)
+        processors = (*detector_clip_archivers, *detector_clip_retirers)
+
+        if app_settings.process_old_bird_clips:
+
+            if app_settings.delete_old_bird_clips:
+
+                # Delete Old Bird Dickcissel detector clips that appear in
+                # a station's SugarSync directory without archiving them.
+                processor = self._create_old_bird_clip_deleter()
+
+            else:
+
+                # Move Old Bird Dickcissel detector clips that appear in
+                # a station's SugarSync directory to the detector's
+                # `Incoming` clip directory, and add an accompanying
+                # clip metadata file.
+                processor = self._create_old_bird_clip_converter()
+
+            processors = (processor, *processors)
     
-
-    def _create_old_bird_clip_converter(self):
-            
-            s = app_settings
-            station_name = self.settings.station_name
-            station_paths = s.paths.stations[station_name]
-
-            settings = Bunch(
-                station_name=station_name,
-                source_clip_dir_path=station_paths.station_dir_path,
-                clip_file_wait_period=s.clip_file_wait_period,
-                station_paths=station_paths,
-                clip_classification=None)
-                
-            return OldBirdClipConverter(settings, self)
-        
-
-    def _create_old_bird_clip_deleter(self):
-            
-            s = app_settings
-            station_name = self.settings.station_name
-            station_paths = s.paths.stations[station_name]
-
-            settings = Bunch(
-                source_clip_dir_path=station_paths.station_dir_path,
-                clip_file_wait_period=s.clip_file_wait_period)
-                
-            return OldBirdClipDeleter(settings, self)
-        
+        return processors
+    
 
     def _create_detector_clip_archiver(self, detector_name):
 
@@ -267,6 +224,40 @@ class StationClipArchiver(Graph):
 
         return DetectorClipRetirer(settings, self, name)
 
+
+    def _create_old_bird_clip_deleter(self):
+            
+            s = app_settings
+            station_name = self.settings.station_name
+            station_paths = s.paths.stations[station_name]
+
+            settings = Bunch(
+                source_clip_dir_path=station_paths.station_dir_path,
+                clip_file_wait_period=s.clip_file_wait_period)
+                
+            return OldBirdClipDeleter(settings, self)
+    
+
+    def _create_old_bird_clip_converter(self):
+            
+            s = app_settings
+            station_name = self.settings.station_name
+            recorder_name, mic_output_name = \
+                s.old_bird_clip_device_data[station_name]
+            station_paths = s.paths.stations[station_name]
+
+            settings = Bunch(
+                station_name=station_name,
+                recorder_name=recorder_name,
+                mic_output_name=mic_output_name,
+                station_time_zone=s.station_time_zone,
+                source_clip_dir_path=station_paths.station_dir_path,
+                clip_file_wait_period=s.clip_file_wait_period,
+                station_paths=station_paths,
+                clip_classification=None)
+                
+            return OldBirdClipConverter(settings, self)
+        
 
 class DetectorClipArchiver(Graph):
 
