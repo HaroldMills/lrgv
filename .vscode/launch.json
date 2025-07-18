@@ -4,6 +4,17 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+         {
+            "name": "Archive Missing Recordings LRGV",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "/Users/harold/miniconda3/envs/vesper-dev/bin/python",
+            "program": "${workspaceFolder}/lrgv/archiver/archive_missing_recordings_lrgv.py",
+            "envFile": "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Docker/vesper.env",
+            "cwd": "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Docker/Archive",
+            "django": true,
+            "console": "integratedTerminal",
+        },
         {
             "name": "List Missing Dick-r Clip Files",
             "type": "debugpy",
@@ -33,6 +44,20 @@
             "console": "integratedTerminal",
         },
         {
+            "name": "Run Nighthawk Lighthouse",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/lrgv/nighthawk/run_nighthawk_lighthouse.py",
+            "args": [
+                "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025/Run Nighthawk Test Data/Barker/Recordings",
+                "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025/Run Nighthawk Test Data/Barker/Clips/Nighthawk/Nighthawk Output",
+                "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025/Run Nighthawk Test Data/Barker/Clips/Nighthawk/Incoming",
+                "2025-05-01"
+            ],
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "console": "integratedTerminal",
+        },
+        {
             "name": "Fix Nighthawk Clip Files",
             "type": "debugpy",
             "request": "launch",
@@ -42,11 +67,11 @@
             "console": "integratedTerminal",
         },
         {
-            "name": "Update LRGV Nighthawk Clip Metadata Files",
+            "name": "Update Nighthawk Clip Metadata Files",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/lrgv/scripts/update_nighthawk_clip_metadata_files.py",
-            "args": ["/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Station Data/Active"],
+            "args": ["/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025/Station Data/Active"],
             "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
             "console": "integratedTerminal",
         },
