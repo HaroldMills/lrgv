@@ -3,10 +3,11 @@ Script that runs the Nighthawk NFC detector on Lighthouse recording
 files from one night and creates an audio file and a metadata file
 for each resulting detection.
 
-The script has two required command line arguments, a recording
-directory path and a clip directory path. It also has an optional
-third argument, the date of the night for which to run the detector.
-The third argument defaults to yesterday's date.
+The script has three required command line arguments, a recording
+directory path, a Nighthawk output directory path, and a clip directory
+path. It also has an optional fourth argument, the date of the night
+for which to run the detector. The fourth argument defaults to yesterday's
+date.
 
 Each station laptop in the monitoring network runs this script every
 morning after the previous night's recording completes to process the
@@ -48,13 +49,24 @@ ONE_DAY = TimeDelta(days=1)
 STATION_TIME_ZONE = ZoneInfo('US/Eastern')
 UTC_TIME_ZONE = ZoneInfo('UTC')
 TIME_ZONE_OFFSET_LENGTH = 6
-SENSOR_NAME_FORMAT = '{station_name} 21c'
+RECORDER_NAME_FORMAT = 'Vesper Recorder {station_num}'
+MIC_OUTPUT_NAME_FORMAT = '21c {station_num} Vesper Output'
 DETECTOR_NAME = 'Nighthawk 0.3.1 80'
 
 RECORDING_FILE_STATION_NAMES = {}
 
+STATION_NAMES = (
+    'Barker',
+    'Lyndonville',
+    'Newfane',
+    'Station 5',
+    'Wilson'
+)
+
+STATION_NUMS = {n: i for i, n in enumerate(STATION_NAMES)}
+
 INCLUDED_CLASSIFICATIONS = frozenset([
-    'Call.BAWW', 'Call.CAWA', 'Call.DICK', 'Call.GRSP', 'Call.LESA',
+    'Call.BAWW', 'Call.CAWA', 'Call.DICK', 'Call.GRSP', 'Call.LESA', 
     'Call.UPSA'
 ])
 
@@ -70,6 +82,11 @@ def main():
     logger.info(
         f'Nighthawk output directory path is "{nighthawk_output_dir_path}".')
     logger.info(f'Clip directory path is "{clip_dir_path}".')
+
+    create_dir_if_needed(
+        nighthawk_output_dir_path, 'Nighthawk output')
+    
+    create_dir_if_needed(clip_dir_path, 'clip')
 
     taxon_mapping = get_taxon_mapping(TAXON_MAPPING_FILE_PATH)
 
@@ -121,19 +138,7 @@ def parse_args(args):
         sys.exit(1)
 
     nighthawk_output_dir_path = Path(args[2])
-
-    if not nighthawk_output_dir_path.exists():
-        logger.critical(
-            f'Specified Nighthawk output directory "{recording_dir_path}" '
-            f'does not exist.')
-        sys.exit(1)
-
     clip_dir_path = Path(args[3])
-
-    if not clip_dir_path.exists():
-        logger.critical(
-            f'Specified clip directory "{clip_dir_path}" does not exist.')
-        sys.exit(1)
 
     if len(args) == 5:
         try:
@@ -145,6 +150,22 @@ def parse_args(args):
         date = Date.fromordinal(Date.today().toordinal() - 1)
 
     return recording_dir_path, nighthawk_output_dir_path, clip_dir_path, date
+
+
+def create_dir_if_needed(dir_path, name):
+
+    if not dir_path.exists():
+
+        logger.info(f'Creating {name} directory "{dir_path}"...')
+
+        try:
+            dir_path.mkdir(mode=0o755, parents=True, exist_ok=True)
+
+        except Exception as e:
+            logger.critical(
+                f'Could not create directory "{dir_path}". Error message '
+                f'was: {e}')
+            sys.exit(1)
 
 
 def get_taxon_mapping(file_path):
@@ -305,11 +326,9 @@ def process_detections(
     key = station_name.lower()
     station_name = RECORDING_FILE_STATION_NAMES.get(key, station_name)
 
-    # Get recording sensors.
-    sensor_name = SENSOR_NAME_FORMAT.format(station_name=station_name)
-    recording_sensors = {
-        station_name: [sensor_name]
-    } 
+    station_num = STATION_NUMS[station_name]
+    recorder_name = RECORDER_NAME_FORMAT.format(station_num=station_num)
+    mic_output_name = MIC_OUTPUT_NAME_FORMAT.format(station_num=station_num)
 
     # Note that in the following we open the detection CSV file twice,
     # once so we can read it using a `csv.DictReader` and a second time
@@ -330,17 +349,16 @@ def process_detections(
 
         # Get recording metadata.
         start_time = format_start_time(recording_file.start_time)
-        recording_name = f'{station_name} {start_time}'
         length = wave_reader.getnframes()
         sample_rate = wave_reader.getframerate()
-        recordings = {
-            recording_name: {
-                'sensors': station_name,
-                'start_time': start_time,
-                'length': length,
-                'sample_rate': sample_rate
-            }
-        }
+        recordings = [{
+            'station': station_name,
+            'recorder': recorder_name,
+            'mic_outputs': [mic_output_name],
+            'start_time': start_time,
+            'length': length,
+            'sample_rate': sample_rate
+        }]
             
         for detection in csv_reader:
 
@@ -361,8 +379,8 @@ def process_detections(
             #
             # We use the serial numbers for two purposes. First, we
             # use them to create unique clip file names. Second, the
-            # Django view that creates LRGV clips in a Vesper archive
-            # uses them to create unique clip start times. (The Vesper
+            # Django view that creates clips in a Vesper archive uses
+            # them to create unique clip start times. (The Vesper
             # archive database requires that the combination of
             # recording channel, start time, and creating processor be
             # unique across all clips. See the
@@ -395,8 +413,8 @@ def process_detections(
 
             # Collect clip metadata for metadata file.
             clips = [{
-                'recording': recording_name,
-                'sensor': sensor_name,
+                'station': station_name,
+                'mic_output': mic_output_name,
                 'detector': DETECTOR_NAME,
                 'start_time': start_time_text,
                 'serial_num': serial_num,
@@ -405,7 +423,6 @@ def process_detections(
             }]
             clip_metadata = {
                 'recordings': recordings,
-                'recording_sensors': recording_sensors,
                 'clips': clips
             }
 
