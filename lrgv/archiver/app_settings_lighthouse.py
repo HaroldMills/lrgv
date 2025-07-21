@@ -52,10 +52,10 @@ _DELETE_OLD_BIRD_CLIPS = True
 _OLD_BIRD_DETECTOR_NAME = 'Dick'
 _NON_OLD_BIRD_DETECTOR_NAMES = ('Nighthawk',)
 
-_CLIP_FILE_WAIT_PERIOD = 30                  # seconds
+_CLIP_FILE_WAIT_PERIOD = 60                  # seconds
 # _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 0        # seconds
-_CLIP_FILE_RETIREMENT_WAIT_PERIOD = 30       # seconds
-# _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
+# _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 30       # seconds
+_CLIP_FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
 
 _SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lighthouse.env'
 
