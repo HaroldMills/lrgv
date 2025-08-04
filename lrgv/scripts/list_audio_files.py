@@ -10,8 +10,8 @@ files. It writes one row of information to the specified output CSV file
 for each audio file that it finds. The CSV file also includes a header row.
 An example of the first two lines of such a CSV file is:
 
-    File Path,Channel Count,Sample Rate (Hz),Frame Count,Duration
-    "/Volumes/Recordings/Alamo_2025-04-09_01.22.52_Z.wav",1,22050,783127800,9:51:56.000
+    File Path,File Name,Channel Count,Sample Rate (Hz),Frame Count,Duration
+    "/Volumes/Recordings/Alamo_2025-04-09_01.22.52_Z.wav","Alamo_2025-04-09_01.22.52_Z.wav",1,22050,783127800,9:51:56.000
 
 The script creates output file ancestor directories as needed.
 """
@@ -64,6 +64,10 @@ def get_audio_file_infos(dir_path):
 
     for file_path in dir_path.glob('**/*.wav'):
 
+        if file_path.name.startswith('.'):
+            print(f'Ignoring hidden audio file "{file_path}".')
+            continue
+
         try:
             channel_count, sample_rate, frame_count = \
                 get_wave_file_info(file_path)
@@ -73,16 +77,14 @@ def get_audio_file_infos(dir_path):
             print(
                 f'Could not get info for audio file "{file_path}". '
                 f'Attempt raised {class_name} exception with message: '
-                f'{str(e)}.')
+                f'{str(e)}. File will be ignored.')
+            continue
             
-        else:
-            
-            duration = frame_count / sample_rate
-            
-            info = (
-                file_path, channel_count, sample_rate, frame_count, duration)
-            
-            infos.append(info)
+        duration = frame_count / sample_rate
+        
+        info = (file_path, channel_count, sample_rate, frame_count, duration)
+        
+        infos.append(info)
     
     infos.sort()
     
@@ -116,7 +118,7 @@ def write_output_csv_file(file_path, infos):
 def write_output_csv_file_aux(file, infos):
 
     file.write(
-        'File Path,Channel Count,Sample Rate (Hz),Frame Count,'
+        'File Path,File Name,Channel Count,Sample Rate (Hz),Frame Count,'
         'Duration\n')
 
     for file_path, channel_count, sample_rate, frame_count, duration \
@@ -130,8 +132,8 @@ def write_output_csv_file_aux(file, infos):
         duration = f'{hours}:{minutes:02d}:{seconds:02d}.{millis:03d}'
 
         file.write(
-            f'"{file_path}",{channel_count},{sample_rate},{frame_count},'
-            f'{duration}\n')
+            f'"{file_path}","{file_path.name}",{channel_count},'
+            f'{sample_rate},{frame_count},{duration}\n')
            
     
 if __name__ == '__main__':
