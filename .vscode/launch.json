@@ -4,7 +4,35 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-         {
+        {
+            "name": "List Audio Files",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "program": "${workspaceFolder}/lrgv/scripts/list_audio_files.py",
+            "args": [
+                "/Users/harold/Desktop/Alamo/Recordings",
+                "/Users/harold/Desktop/Alamo/Recording Files.csv"
+            ],
+            "console": "integratedTerminal",
+        },
+        {
+            "name": "Create Recording Metadata Files LRGV",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "program": "${workspaceFolder}/lrgv/archiver/create_recording_metadata_files_lrgv.py",
+            "args": [
+                // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--start-date", "2025-05-01", "--end-date", "2025-05-02"
+                // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv"
+                // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--date", "2025-05-01"
+                // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--start-date", "2025-05-01"
+                "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--end-date", "2025-05-01"
+                // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--output-dir", "/Users/harold/Desktop/Bobo/Metadata Files", "--start-date", "2025-05-01", "--end-date", "2025-05-02"
+            ],
+            "console": "integratedTerminal",
+        },
+        {
             "name": "Archive Missing Recordings LRGV",
             "type": "debugpy",
             "request": "launch",
