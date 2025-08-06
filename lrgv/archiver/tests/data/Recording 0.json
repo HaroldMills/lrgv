@@ -8,14 +8,5 @@
             "length": 692568450,
             "sample_rate": 22050
         }
-    ],
-    "clips": [
-        {
-            "station": "Alamo",
-            "mic_output": "21c 0 Vesper Output",
-            "detector": "Nighthawk 0.3.1 80",
-            "start_time": "2025-08-05 04:00:00.000 Z",
-            "length": 30870
-        }
     ]
 }

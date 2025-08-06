@@ -1,0 +1,13 @@
+{
+    "recordings": [
+        {
+            "station": "Alamo",
+            "recorder": "Vesper Recorder 0",
+            "mic_outputs": ["21c 0 Vesper Output"],
+            "start_time": "2025-08-05 02:00:00 Z",
+            "length": 692568450,
+            "sample_rate": 22050,
+            "id": 1234
+        }
+    ]
+}

@@ -1,20 +1,20 @@
 {
-    "recordings": {
-        "Alamo 2024-05-09 02:00:00 Z": {
+    "recordings": [
+        {
             "station": "Alamo",
-            "recorder": "Dick-r 0",
-            "mic_outputs": ["21c 0 Dick-r"],
-            "start_time": "2024-05-09 02:00:00 Z",
-            "length": 634606648,
+            "recorder": "Vesper Recorder 0",
+            "mic_outputs": ["21c 0 Vesper Output"],
+            "start_time": "2025-08-05 02:00:00 Z",
+            "length": 692568450,
             "sample_rate": 22050
         }
-    },
+    ],
     "clips": [
         {
             "station": "Alamo",
-            "mic_output": "21c 0 Dick-r",
-            "detector": "Old Bird Dickcissel Detector 1.0",
-            "start_time": "2024-05-09 02:15:05.400 Z",
+            "mic_output": "21c 0 Vesper Output",
+            "detector": "Nighthawk 0.3.1 80",
+            "start_time": "2025-08-05 04:00:00.000 Z",
             "serial_num": 2,
             "length": 30870,
             "annotations": {

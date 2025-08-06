@@ -2,16 +2,12 @@ from lrgv.archiver.archiver_error import ArchiverError
 from lrgv.dataflow import SimpleSink
 
 
-class ClipMover(SimpleSink):
+class RecordingMover(SimpleSink):
 
 
-    def _process_item(self, clip, finished):
-        self._move_clip_file(clip.audio_file_path)
-        self._move_clip_file(clip.metadata_file_path)
-        
+    def _process_item(self, recording, finished):
 
-    def _move_clip_file(self, old_file_path):
-
+        old_file_path = recording.metadata_file_path
         file_name = old_file_path.name
         new_file_path = self.settings.destination_dir_path / file_name
 
@@ -20,7 +16,7 @@ class ClipMover(SimpleSink):
         except Exception as e:
             raise ArchiverError(
                 f'Processor "{self.path}" could not create one or more '
-                f'parent directories for clip file "{new_file_path}". '
+                f'parent directories for recording file "{new_file_path}". '
                 f'Error message was: {e}')
 
         try:

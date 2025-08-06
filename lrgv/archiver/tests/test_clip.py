@@ -1,3 +1,4 @@
+from datetime import datetime as DateTime
 from pathlib import Path
 
 from lrgv.archiver.clip import Clip
@@ -8,6 +9,7 @@ _DATA_DIR_PATH = Path(__file__).parent / 'data'
 _EXPECTED_ID = 28180
 _EXPECTED_STATION_NAME = 'Alamo'
 _EXPECTED_MIC_OUTPUT_NAME = '21c 0 Vesper Output'
+_EXPECTED_START_TIME = DateTime.fromisoformat("2025-08-05T04:00:00.000Z")
 _EXPECTED_SERIAL_NUM = 2
 _EXPECTED_LENGTH = 30870
 _EXPECTED_CLASSIFICATION = 'Call.DICK'
@@ -26,15 +28,21 @@ class ClipTests(TestCase):
         metadata_file_path = _create_metadata_file_path(0)
         clip = Clip(metadata_file_path)
 
+        self._check_constant_attributes(clip)
         self.assertEqual(clip.metadata_file_path, metadata_file_path)
         self.assertIsNone(clip.id)
-        self.assertEqual(clip.station_name, _EXPECTED_STATION_NAME)
         self.assertIsNone(clip.serial_num)
-        self.assertEqual(clip.length, _EXPECTED_LENGTH)
         self.assertIsNone(clip.classification)
 
         audio_file_path = clip.metadata_file_path.with_suffix('.wav')
         self.assertEqual(clip.audio_file_path, audio_file_path)
+
+
+    def _check_constant_attributes(self, clip):
+        self.assertEqual(clip.station_name, _EXPECTED_STATION_NAME)
+        self.assertEqual(clip.mic_output_name, _EXPECTED_MIC_OUTPUT_NAME)
+        self.assertEqual(clip.start_time, _EXPECTED_START_TIME)
+        self.assertEqual(clip.length, _EXPECTED_LENGTH)
 
 
     def test_initialization_1(self):
@@ -47,11 +55,10 @@ class ClipTests(TestCase):
         metadata_file_path = _create_metadata_file_path(1)
         clip = Clip(metadata_file_path)
 
+        self._check_constant_attributes(clip)
         self.assertEqual(clip.metadata_file_path, metadata_file_path)
         self.assertEqual(clip.id, _EXPECTED_ID)
-        self.assertEqual(clip.station_name, _EXPECTED_STATION_NAME)
         self.assertEqual(clip.serial_num, _EXPECTED_SERIAL_NUM)
-        self.assertEqual(clip.length, _EXPECTED_LENGTH)
         self.assertEqual(clip.classification, _EXPECTED_CLASSIFICATION)
 
         audio_file_path = clip.metadata_file_path.with_suffix('.wav')

@@ -30,6 +30,7 @@ if _MODE == 'Test':
     _STATION_DATA_DIR_PATH = _TEST_DATA_DIR_PATH / 'Test Station Data'
     _STATION_NAMES = ('Barker', 'Newfane')
 
+
 elif _MODE == 'Production':
     _ARCHIVE_DIR_PATH = None
     _STATION_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Station Data'
@@ -47,15 +48,17 @@ _LOG_FILE_PATH = None
 
 _LOGGING_LEVEL = logging.INFO
 
+_RECORDER_NAMES = ('Vesper Recorder',)
+
 _PROCESS_OLD_BIRD_CLIPS = False
 _DELETE_OLD_BIRD_CLIPS = True
 _OLD_BIRD_DETECTOR_NAME = 'Dick'
 _NON_OLD_BIRD_DETECTOR_NAMES = ('Nighthawk',)
 
-_CLIP_FILE_WAIT_PERIOD = 60                  # seconds
-# _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 0        # seconds
-# _CLIP_FILE_RETIREMENT_WAIT_PERIOD = 30       # seconds
-_CLIP_FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
+_FILE_WAIT_PERIOD = 60                  # seconds
+# _FILE_RETIREMENT_WAIT_PERIOD = 0        # seconds
+# _FILE_RETIREMENT_WAIT_PERIOD = 60       # seconds
+_FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
 
 _SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lighthouse.env'
 
@@ -91,6 +94,19 @@ def _get_old_bird_clip_device_data():
 def _get_paths(station_names, detector_names):
 
 
+    def get_recorder_paths(
+            active_recording_dir_path, retired_recording_dir_path,
+            recorder_name):
+
+        active_dir_path = active_recording_dir_path / recorder_name
+        retired_dir_path = retired_recording_dir_path / recorder_name
+        
+        return Bunch(
+            incoming_recording_dir_path=active_dir_path / 'Incoming',
+            archived_recording_dir_path=active_dir_path / 'Archived',
+            retired_recording_dir_path=retired_dir_path / 'Archived')
+
+
     def get_detector_paths(
             active_clip_dir_path, retired_clip_dir_path, detector_name):
 
@@ -108,11 +124,20 @@ def _get_paths(station_names, detector_names):
 
         station_dir_name = f'{_PROJECT_NAME} - {station_name}'
         station_dir_path = _ACTIVE_DATA_DIR_PATH / station_dir_name
-        active_clip_dir_path = station_dir_path / 'Clips'
 
+        active_recording_dir_path = station_dir_path / 'Recordings'
+        retired_recording_dir_path = \
+            _RETIRED_DATA_DIR_PATH / station_name / 'Recordings'
+        recorder_paths = {
+            recorder_name: get_recorder_paths(
+                active_recording_dir_path, retired_recording_dir_path,
+                recorder_name)
+            for recorder_name in _RECORDER_NAMES
+        }
+        
+        active_clip_dir_path = station_dir_path / 'Clips'
         retired_clip_dir_path = \
             _RETIRED_DATA_DIR_PATH / station_name / 'Clips'
-
         detector_paths = {
             detector_name: get_detector_paths(
                 active_clip_dir_path, retired_clip_dir_path, detector_name)
@@ -121,6 +146,7 @@ def _get_paths(station_names, detector_names):
 
         return Bunch(
             station_dir_path=station_dir_path,
+            recorders=recorder_paths,
             detectors=detector_paths)
 
     station_paths = {
@@ -180,6 +206,7 @@ def _get_aws_settings():
 _detector_names = _get_detector_names()
 
 app_settings = Bunch(
+    project_name=_PROJECT_NAME,
     archive_remote=_ARCHIVE_REMOTE,
     logging_level=_LOGGING_LEVEL,
     station_names=_STATION_NAMES,
@@ -189,8 +216,10 @@ app_settings = Bunch(
     delete_old_bird_clips=_DELETE_OLD_BIRD_CLIPS,
     detector_names=_detector_names,
     paths=_get_paths(_STATION_NAMES, _detector_names),
-    clip_file_wait_period=_CLIP_FILE_WAIT_PERIOD,
-    clip_file_retirement_wait_period=_CLIP_FILE_RETIREMENT_WAIT_PERIOD,
+    recording_file_wait_period=_FILE_WAIT_PERIOD,
+    recording_file_retirement_wait_period=_FILE_RETIREMENT_WAIT_PERIOD,
+    clip_file_wait_period=_FILE_WAIT_PERIOD,
+    clip_file_retirement_wait_period=_FILE_RETIREMENT_WAIT_PERIOD,
     vesper=_get_vesper_settings())
 
 if _ARCHIVE_REMOTE:

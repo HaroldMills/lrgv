@@ -7,7 +7,7 @@ from lrgv.util.bunch import Bunch
 _CLIP_FILE_NAME_RE = r'^.*\.(json|JSON|wav|WAV)$'
 
 
-class DetectorClipDeleter(LinearGraph):
+class ClipDeleter(LinearGraph):
 
 
     def _create_processors(self):

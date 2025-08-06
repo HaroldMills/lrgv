@@ -6,10 +6,13 @@ from lrgv.archiver.clip_audio_file_copier import ClipAudioFileCopier
 from lrgv.archiver.clip_audio_file_s3_uploader import ClipAudioFileS3Uploader
 from lrgv.archiver.clip_lister import ClipLister
 from lrgv.archiver.clip_mover import ClipMover
-from lrgv.archiver.detector_clip_deleter import DetectorClipDeleter
+from lrgv.archiver.clip_deleter import ClipDeleter
 from lrgv.archiver.old_bird_clip_converter import OldBirdClipConverter
 from lrgv.archiver.old_bird_clip_deleter import OldBirdClipDeleter
+from lrgv.archiver.recording_lister import RecordingLister
+from lrgv.archiver.recording_mover import RecordingMover
 from lrgv.archiver.vesper_clip_creator import VesperClipCreator
+from lrgv.archiver.vesper_recording_creator import VesperRecordingCreator
 from lrgv.dataflow import Graph, LinearGraph
 from lrgv.util.bunch import Bunch
 import lrgv.util.logging_utils as logging_utils
@@ -23,7 +26,7 @@ logger = logging.getLogger(__name__)
 # 1. Uncomment `_MODE = 'Test'` in `app_settings_lrgv.py` and comment out
 #    `_MODE = 'Production'`.
 #
-# 2. Edit `archive_clips_lrgv.StationClipArchiver._create_processors`
+# 2. Edit `archive_clips_lrgv.StationArchiver._create_processors`
 #    according to how you want to process clips.
 #
 # 3. Open a terminal and cd to
@@ -55,9 +58,6 @@ logger = logging.getLogger(__name__)
 #       remedy for this. Perhaps we should log a warning and move the
 #       files for the clip to an Outside directory.
 
-# TODO: Don't attempt to process clip for which audio and metadata files
-#       are not both present.
-
 # TODO: Don't stop processing clips for a station and detector if the
 #       processing of one clip raises an exception: just move on to the
 #       next clip. This will require modifications to dataflow package.
@@ -70,57 +70,39 @@ logger = logging.getLogger(__name__)
 #       clip creation and audio file uploading so audio is visible in
 #       a clip album sooner.
 
-# * In top level processor, create one processor per station. The processor
-#   for a station will include one processor per detector for that station.
-#   If we will run the Old Bird Dickcissel detector at the station it will
-#   also include a processor that moves clips from the station clip
-#   folder to the detector's Incoming folder, renaming them and adding
-#   clip metadata files.
-#
-#       StationClipArchiver
-#
-#       DetectorClipArchiver
-#
-#       DetectorClipCreator
-#           For each clip audio file in "Incoming" clip folder:
-#               * Create clip in archive database
-#               * Move clip audio file to "Created" clip folder, renaming
-#                 according to clip ID.
-#               * Delete clip metadata file from "Incoming" clip folder.
-#
-#       DetectorClipUploader
-#           For each clip audio file in "Created" clip folder:
-#               * Upload file to S3.
-#               * Delete file from "Created" clip folder.
-#
-#       OldBirdClipConverter
-#           For each clip audio file in Old Bird clip folder:
-#               * Get clip start time.
-#               * Move clip audio file to "Incoming" clip folder, renaming
-#                 according to station and start time.
-#               * Create clip metadata file in "Incoming" clip folder.
+# TODO: Consider moving clip deleters to the clip archivers.
+        
+# TODO: Consider moving Old-Bird-specific processing to the clip archivers.
 
 
 '''
-LRGV
-    Alamo
+Processor hierarchy:
+
+Archiver (e.g. LRGV)
+    StationArchiver (e.g. Alamo)
+        RecordingArchiver (e.g. Vesper Recorder)
+            RecordingMetadataArchiver
+                RecordingLister
+                VesperRecordingCreator
+             RecordingRetirer
+                RecordingLister
+                RecordingMover
         OldBirdClipConverter
-        Dick
-            DetectorVesperClipCreator
+        ClipArchiver (e.g. Dick or Nighthawk)
+            ClipMetadataArchiver
                 ClipLister
-                    FileLister
-                    ClipObjectCreator
                 VesperClipCreator
-            DetectorClipAudioFileS3Uploader
+            ClipAudioFileS3Archiver
                 ClipLister
-                    FileLister
-                    ClipObjectCreator
-                DetectorClipAudioFileCopier
-                    ClipLister
-                        FileLister
-                        ClipObjectCreator
-                    ClipAudioFileCopier
-                    ClipMover
+                ClipAudioFileS3Uploader
+                ClipMover
+            ClipAudioFileLocalArchiver
+                ClipLister
+                ClipAudioFileCopier
+                ClipMover
+            ClipRetirer
+                ClipLister
+                ClipMover
 '''
 
 
@@ -138,52 +120,50 @@ def main():
 
 
 def create_archiver():
-    archiver = ClipArchiver(name='LRGV')
+    archiver = Archiver(name=app_settings.project_name)
     archiver.connect()
     archiver.start()
     return archiver
 
 
-class ClipArchiver(Graph):
+class Archiver(Graph):
      
 
     def _create_processors(self):
         return tuple(
-            self._create_station_clip_archiver(n)
+            self._create_station_archiver(n)
             for n in app_settings.station_names)
     
 
-    def _create_station_clip_archiver(self, station_name):
+    def _create_station_archiver(self, station_name):
         settings = Bunch(station_name=station_name)
-        return StationClipArchiver(settings, self, station_name)
+        return StationArchiver(settings, self, station_name)
 
 
-class StationClipArchiver(Graph):
+class StationArchiver(Graph):
      
 
     def _create_processors(self):
 
+        # Archive recordings that appear in recorders' `Incoming` recording
+        # directories.
+        # recording_archivers = tuple(
+        #     self._create_recording_archiver(n)
+        #     for n in app_settings.recorder_names)
+        recording_archivers = ()
+        
         # Archive clips that appear in detectors' `Incoming` clip directories.
-        detector_clip_archivers = tuple(
-            self._create_detector_clip_archiver(n)
+        clip_archivers = tuple(
+            self._create_clip_archiver(n)
             for n in app_settings.detector_names)
 
         # Delete clips that appear in detectors' `Incoming` clip directories
         # without archiving them.
-        # detector_clip_deleters = tuple(
-        #     self._create_detector_clip_deleter(n)
+        # clip_deleters = tuple(
+        #     self._create_clip_deleter(n)
         #     for n in app_settings.detector_names)
         
-        # Move clips that appear in detectors' `Archived` clip directories
-        # to the detectors' `Retired` clip directories. The `Retired`
-        # directories are not SugarSync directories, so after clips are
-        # moved there SugarSync no longer has to worry about sychronizing
-        # them.
-        detector_clip_retirers = tuple(
-            self._create_detector_clip_retirer(n)
-            for n in app_settings.detector_names)
-
-        processors = (*detector_clip_archivers, *detector_clip_retirers)
+        processors = (*recording_archivers, *clip_archivers)
 
         if app_settings.process_old_bird_clips:
 
@@ -206,7 +186,24 @@ class StationClipArchiver(Graph):
         return processors
     
 
-    def _create_detector_clip_archiver(self, detector_name):
+    def _create_recording_archiver(self, recorder_name):
+
+        s = app_settings
+        station_name = self.settings.station_name
+        station_paths = s.paths.stations[station_name]
+        recorder_paths = station_paths.recorders[recorder_name]
+
+        settings = Bunch(
+            recorder_paths=recorder_paths,
+            recording_file_wait_period=s.recording_file_wait_period,
+            recording_file_retirement_wait_period=
+                s.recording_file_retirement_wait_period,
+            vesper=s.vesper)
+
+        return RecordingMetadataArchiver(settings, self, recorder_name)
+    
+
+    def _create_clip_archiver(self, detector_name):
 
         s = app_settings
         station_name = self.settings.station_name
@@ -217,6 +214,8 @@ class StationClipArchiver(Graph):
             archive_remote=s.archive_remote,
             detector_paths=detector_paths,
             clip_file_wait_period=s.clip_file_wait_period,
+            clip_file_retirement_wait_period=
+                s.clip_file_retirement_wait_period,
             vesper=s.vesper)
         
         if s.archive_remote:
@@ -224,10 +223,10 @@ class StationClipArchiver(Graph):
        
         name = f'{detector_name}'
 
-        return DetectorClipArchiver(settings, self, name)
+        return ClipArchiver(settings, self, name)
 
 
-    def _create_detector_clip_deleter(self, detector_name):
+    def _create_clip_deleter(self, detector_name):
             
             s = app_settings
             station_name = self.settings.station_name
@@ -238,24 +237,8 @@ class StationClipArchiver(Graph):
                 source_clip_dir_path=detector_paths.incoming_clip_dir_path,
                 clip_file_wait_period=s.clip_file_wait_period)
                 
-            return DetectorClipDeleter(settings, self)
+            return ClipDeleter(settings, self)
         
-
-    def _create_detector_clip_retirer(self, detector_name):
-
-        s = app_settings
-        station_name = self.settings.station_name
-        station_paths = s.paths.stations[station_name]
-        detector_paths = station_paths.detectors[detector_name]
-
-        settings = Bunch(
-            detector_paths=detector_paths,
-            clip_file_wait_period=s.clip_file_retirement_wait_period)
-        
-        name = f'{detector_name} Clip Retirer'
-
-        return DetectorClipRetirer(settings, self, name)
-
 
     def _create_old_bird_clip_deleter(self):
             
@@ -291,14 +274,94 @@ class StationClipArchiver(Graph):
             return OldBirdClipConverter(settings, self)
         
 
-class DetectorClipArchiver(Graph):
+class RecordingArchiver(Graph):
 
 
     def _create_processors(self):
 
         s = self.settings
 
-        vesper_clip_creator = DetectorVesperClipCreator(s, self)
+        metadata_archiver = RecordingMetadataArchiver(s, self)
+
+        settings = Bunch(
+            detector_paths=s.detector_paths,
+            recording_file_wait_period=s.recording_file_retirement_wait_period)
+        
+        retirer = RecordingRetirer(settings, self)
+
+        return metadata_archiver, retirer
+
+    
+    def _process(self, input_data):
+
+        # If any of our subprocessors raises an exception for a recording,
+        # we catch it here and log an error message. Unfortunately, this
+        # doesn't allow us to process subsequent recordings for the same
+        # station and recorder, as long as subsequent attempts to process
+        # the same recording raise the same exception.
+
+        try:
+            return super()._process(input_data)
+        except Exception as e:
+            logger.warning(
+                f'Processor "{self.path}" raised exception. Message '
+                f'was: {e}')
+            
+            
+class RecordingMetadataArchiver(LinearGraph):
+
+
+    def _create_processors(self):
+
+        s = self.settings
+
+        settings = Bunch(
+            recording_dir_path=s.recorder_paths.incoming_recording_dir_path,
+            recording_file_wait_period=s.recording_file_wait_period)
+        recording_lister = RecordingLister(settings, self)
+
+        settings = Bunch(
+            vesper=s.vesper,
+            archived_recording_dir_path=(
+                s.recorder_paths.archived_recording_dir_path))
+        recording_creator = VesperRecordingCreator(settings, self)
+
+        return recording_lister, recording_creator
+    
+
+class RecordingRetirer(LinearGraph):
+
+    """
+    Moves recordings that appear in a detector's `Archived` recording
+    directory to the detector's `Retired` recording directory. The
+    `Retired` directory is not a SugarSync directory, so after recordings
+    are moved there SugarSync no longer has to synchronize them.
+    """
+
+    def _create_processors(self):
+        
+        s = self.settings
+
+        settings = Bunch(
+            recording_dir_path=s.detector_paths.archived_clip_dir_path,
+            recording_file_wait_period=s.recording_file_wait_period)
+        recording_lister = RecordingLister(settings, self)
+
+        settings = Bunch(
+            destination_dir_path=s.detector_paths.retired_recording_dir_path)
+        recording_mover = RecordingMover(settings, self)
+
+        return recording_lister, recording_mover
+
+
+class ClipArchiver(Graph):
+
+
+    def _create_processors(self):
+
+        s = self.settings
+
+        metadata_archiver = ClipMetadataArchiver(s, self)
 
         if s.archive_remote:
 
@@ -306,8 +369,8 @@ class DetectorClipArchiver(Graph):
                 detector_paths=s.detector_paths,
                 clip_file_wait_period=s.clip_file_wait_period,
                 aws=s.aws)
-            audio_file_handler = \
-                DetectorClipAudioFileS3Uploader(settings, self)
+            
+            audio_file_archiver = ClipAudioFileS3Archiver(settings, self)
             
         else:
             # archive local
@@ -316,18 +379,25 @@ class DetectorClipArchiver(Graph):
                 detector_paths=s.detector_paths,
                 clip_file_wait_period=s.clip_file_wait_period,
                 archive_dir_path=app_settings.paths.archive_dir_path)
-            audio_file_handler = \
-                DetectorClipAudioFileCopier(settings, self)
+            
+            audio_file_archiver = ClipAudioFileLocalArchiver(settings, self)
 
-        return vesper_clip_creator, audio_file_handler
+        settings = Bunch(
+            detector_paths=s.detector_paths,
+            clip_file_wait_period=s.clip_file_retirement_wait_period)
+        
+        retirer = ClipRetirer(settings, self)
+
+        return metadata_archiver, audio_file_archiver, retirer
 
     
     def _process(self, input_data):
 
         # If any of our subprocessors raises an exception for a clip,
-        # we catch it here and log an error message. This keeps the
-        # exception from interfering with the processing of subsequent
-        # clips.
+        # we catch it here and log an error message. Unfortunately, this
+        # doesn't allow us to process subsequent clips for the same
+        # station and detector, as long as subsequent attempts to process
+        # the same clip raise the same exception.
 
         try:
             return super()._process(input_data)
@@ -337,7 +407,7 @@ class DetectorClipArchiver(Graph):
                 f'was: {e}')
 
 
-class DetectorVesperClipCreator(LinearGraph):
+class ClipMetadataArchiver(LinearGraph):
 
 
     def _create_processors(self):
@@ -357,7 +427,7 @@ class DetectorVesperClipCreator(LinearGraph):
         return clip_lister, clip_creator
 
 
-class DetectorClipAudioFileS3Uploader(LinearGraph):
+class ClipAudioFileS3Archiver(LinearGraph):
 
 
     def _create_processors(self):
@@ -379,7 +449,7 @@ class DetectorClipAudioFileS3Uploader(LinearGraph):
         return clip_lister, audio_file_uploader, clip_mover
     
 
-class DetectorClipAudioFileCopier(LinearGraph):
+class ClipAudioFileLocalArchiver(LinearGraph):
 
 
     def _create_processors(self):
@@ -401,8 +471,14 @@ class DetectorClipAudioFileCopier(LinearGraph):
         return clip_lister, audio_file_copier, clip_mover
             
 
-class DetectorClipRetirer(LinearGraph):
+class ClipRetirer(LinearGraph):
 
+    """
+    Moves clips that appear in a detector's `Archived` clip directory
+    to the detector's `Retired` clip directory. The `Retired` directory
+    is not a SugarSync directory, so after clips are moved there
+    SugarSync no longer has to synchronize them.
+    """
 
     def _create_processors(self):
         

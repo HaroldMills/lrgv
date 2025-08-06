@@ -19,7 +19,7 @@ _LOGIN_URL_SUFFIX_FORMAT = '{}login/?next={}health-check/'
 _CREATE_OBJECTS_URL_SUFFIX = 'import-recordings-and-clips/'
 
 
-class VesperClipCreator(SimpleSink):
+class VesperRecordingCreator(SimpleSink):
 
 
     def __init__(self, settings, parent=None, name=None):
@@ -30,27 +30,26 @@ class VesperClipCreator(SimpleSink):
 
         self._login_url = \
             _LOGIN_URL_SUFFIX_FORMAT.format(s.archive_url, s.archive_url_base)
-        self._create_clips_url = s.archive_url + _CREATE_OBJECTS_URL_SUFFIX
+        self._create_objects_url = s.archive_url + _CREATE_OBJECTS_URL_SUFFIX
 
         self._username = s.username
         self._password = s.password
         self._session = None
 
 
-    def _process_item(self, clip, finished):
+    def _process_item(self, recording, finished):
 
         if self._session is None:
             self._start_new_session()
 
-        # Create clip in Vesper archive. The clip receives an ID on
-        # the server, which is also set as `clip.id`.
-        self._create_clip(clip)
+        # Create recording in Vesper archive. The recording receives an
+        # ID on the server, which is also set as `recording.id`.
+        self._create_recording(recording)
 
         _logger.info(
-            f'Processor "{self.path}" created Vesper clip {clip.id} '
-            f'for station "{clip.station_name}", mic output '
-            f'"{clip.mic_output_name}", and start time {clip.start_time}.')
-
+            f'Processor "{self.path}" created Vesper recording '
+            f'{recording.id} for station "{recording.station_name}" '
+            f'and start time {recording.start_time}.')
 
     # TODO: Learn more about HTTP sessions, Django authentication,
     # and the relationship between the two.
@@ -102,11 +101,12 @@ class VesperClipCreator(SimpleSink):
             raise ArchiverError('Could not log in to Vesper server.')
         
 
-    def _create_clip(self, clip):
+    def _create_recording(self, recording):
 
-        metadata = clip.metadata_file_contents
+        metadata = recording.metadata_file_contents
 
-        response = _post(self._session, self._create_clips_url, json=metadata)
+        response = \
+            _post(self._session, self._create_objects_url, json=metadata)
 
         if response.status_code == 401:
             # not logged in
@@ -118,56 +118,45 @@ class VesperClipCreator(SimpleSink):
             # direct way for a client to tell when a session has expired?
             self._start_new_session()
             response = \
-                _post(self._session, self._create_clips_url, json=metadata)
+                _post(self._session, self._create_objects_url, json=metadata)
 
         if not response.ok:
             message = response.content.decode(response.encoding)
             raise ArchiverError(
-                f'Could not create clip in Vesper archive database. '
+                f'Could not create recording in Vesper archive database. '
                 f'Vesper server error message was: {message}')
         
-        # If we get here, we sucessfully added the new clip to the
-        # Vesper archive database. It remains to move the clip files
-        # to from their existing location to the created clip
-        # directory, adding the clip's Vesper archive ID to its
-        # metadata. Unfortunately we can't just move the files with
-        # a `ClipMover` processor since it doesn't know how to add
-        # the clip ID.
+        # If we get here, we sucessfully added the recording to the
+        # Vesper archive database. It remains to move the recording
+        # metadata file from its existing location to the archived
+        # recording directory, adding the recording's Vesper archive
+        # ID to its metadata.
 
-        # Set new Vesper clip ID on clip object and in metadata.
+        # Set new Vesper recording ID on recording object and in metadata.
         response_data = json.loads(response.content)
-        clip_id = response_data['clips'][0]['id']
-        metadata['clips'][0]['id'] = clip_id
+        recording_id = response_data['recordings'][0]['id']
+        metadata['recordings'][0]['id'] = recording_id
 
-        # Create created clip directory if needed.
-        created_clip_dir_path = self._settings.created_clip_dir_path
+        # Create archived recording directory if needed.
+        archived_recording_dir_path = \
+            self._settings.archived_recording_dir_path
         try:
-            created_clip_dir_path.mkdir(
+            archived_recording_dir_path.mkdir(
                 mode=0o755, parents=True, exist_ok=True)
         except Exception as e:
             raise ArchiverError(
-                f'Could not create directory "{created_clip_dir_path}". '
-                f'Error message was: {e}')
-        
-        # Move audio file to created clip directory.
-        old_path = clip.audio_file_path
-        new_path = created_clip_dir_path / old_path.name
-        try:
-            old_path.rename(new_path)
-        except Exception as e:
-            raise ArchiverError(
-                f'Could not move clip audio file "{old_path}" to '
-                f'"{new_path.parent}". Error message was: {e}')
-        
-        # Create new metadata file in created clip directory.
-        old_path = clip.metadata_file_path
-        new_path = created_clip_dir_path / old_path.name
+                f'Could not create directory '
+                f'"{archived_recording_dir_path}". Error message was: {e}')
+
+        # Create new metadata file in archived recording directory.
+        old_path = recording.metadata_file_path
+        new_path = archived_recording_dir_path / old_path.name
         try:
             with open(new_path, 'wt') as file:
                 json.dump(metadata, file, indent=4)
         except Exception as e:
             raise ArchiverError(
-                f'Could not create clip metadata file "{new_path}". '
+                f'Could not create recording metadata file "{new_path}". '
                 f'Error message was: {e}')
         
         # Remove old metadata file.
@@ -175,7 +164,7 @@ class VesperClipCreator(SimpleSink):
             old_path.unlink()
         except Exception as e:
             raise ArchiverError(
-                f'Could not delete clip metadata file "{old_path}". '
+                f'Could not delete recording metadata file "{old_path}". '
                 f'Error message was: {e}')
 
 
