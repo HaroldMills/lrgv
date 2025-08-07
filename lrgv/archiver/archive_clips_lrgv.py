@@ -51,6 +51,14 @@ logger = logging.getLogger(__name__)
 #       would ideally be configured by a YAML settings file that would
 #       specify all project-specific settings.
 
+# TODO: Consider moving clip deleters to clip archivers. In association
+#       with this, consider adding a setting that controls whether clips
+#       for a station and detector are archived or deleted. The setting
+#       could take the form of a set of (station_name, detector_name)
+#       pairs for which clips should be deleted.
+
+# TODO: Consider moving Old-Bird-specific processing to clip archivers.
+
 # TODO: A Dick-r clip that starts at or after the end of the recording
 #       period for a night (e.g. 10:00:00 UTC) causes the Dick clip
 #       archiver get stuck on that clip, repeatedly attempting to
@@ -69,10 +77,6 @@ logger = logging.getLogger(__name__)
 #       a station and then upload their audio files to S3. Interleave
 #       clip creation and audio file uploading so audio is visible in
 #       a clip album sooner.
-
-# TODO: Consider moving clip deleters to the clip archivers.
-        
-# TODO: Consider moving Old-Bird-specific processing to the clip archivers.
 
 
 '''
@@ -114,7 +118,7 @@ def main():
     archiver = create_archiver()
 
     while True:
-        logger.info('Looking for new clips to archive...')
+        logger.info('Looking for new recordings and clips to archive...')
         archiver.process()
         time.sleep(5)
 
@@ -147,10 +151,9 @@ class StationArchiver(Graph):
 
         # Archive recordings that appear in recorders' `Incoming` recording
         # directories.
-        # recording_archivers = tuple(
-        #     self._create_recording_archiver(n)
-        #     for n in app_settings.recorder_names)
-        recording_archivers = ()
+        recording_archivers = tuple(
+            self._create_recording_archiver(n)
+            for n in app_settings.recorder_names)
         
         # Archive clips that appear in detectors' `Incoming` clip directories.
         clip_archivers = tuple(
@@ -200,7 +203,7 @@ class StationArchiver(Graph):
                 s.recording_file_retirement_wait_period,
             vesper=s.vesper)
 
-        return RecordingMetadataArchiver(settings, self, recorder_name)
+        return RecordingArchiver(settings, self, recorder_name)
     
 
     def _create_clip_archiver(self, detector_name):
@@ -278,17 +281,9 @@ class RecordingArchiver(Graph):
 
 
     def _create_processors(self):
-
         s = self.settings
-
         metadata_archiver = RecordingMetadataArchiver(s, self)
-
-        settings = Bunch(
-            detector_paths=s.detector_paths,
-            recording_file_wait_period=s.recording_file_retirement_wait_period)
-        
-        retirer = RecordingRetirer(settings, self)
-
+        retirer = RecordingRetirer(s, self)
         return metadata_archiver, retirer
 
     
@@ -343,12 +338,12 @@ class RecordingRetirer(LinearGraph):
         s = self.settings
 
         settings = Bunch(
-            recording_dir_path=s.detector_paths.archived_clip_dir_path,
-            recording_file_wait_period=s.recording_file_wait_period)
+            recording_dir_path=s.recorder_paths.archived_recording_dir_path,
+            recording_file_wait_period=s.recording_file_retirement_wait_period)
         recording_lister = RecordingLister(settings, self)
 
         settings = Bunch(
-            destination_dir_path=s.detector_paths.retired_recording_dir_path)
+            destination_dir_path=s.recorder_paths.retired_recording_dir_path)
         recording_mover = RecordingMover(settings, self)
 
         return recording_lister, recording_mover

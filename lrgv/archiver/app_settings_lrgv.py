@@ -92,7 +92,7 @@ def _get_old_bird_clip_device_data():
         for i, n in enumerate(_ALL_STATION_NAMES))
     
 
-def _get_paths(station_names, detector_names):
+def _get_paths(station_names, recorder_names, detector_names):
 
 
     def get_recorder_paths(
@@ -121,7 +121,7 @@ def _get_paths(station_names, detector_names):
             retired_clip_dir_path=retired_dir_path / 'Archived')
 
 
-    def get_station_paths(station_name, detector_names):
+    def get_station_paths(station_name, recorder_names, detector_names):
 
         station_dir_name = f'{_PROJECT_NAME} - {station_name}'
         station_dir_path = _ACTIVE_DATA_DIR_PATH / station_dir_name
@@ -133,7 +133,7 @@ def _get_paths(station_names, detector_names):
             recorder_name: get_recorder_paths(
                 active_recording_dir_path, retired_recording_dir_path,
                 recorder_name)
-            for recorder_name in _RECORDER_NAMES
+            for recorder_name in recorder_names
         }
         
         active_clip_dir_path = station_dir_path / 'Clips'
@@ -151,7 +151,8 @@ def _get_paths(station_names, detector_names):
             detectors=detector_paths)
 
     station_paths = {
-        station_name: get_station_paths(station_name, detector_names)
+        station_name: 
+            get_station_paths(station_name, recorder_names, detector_names)
         for station_name in station_names
     }
     
@@ -207,21 +208,35 @@ def _get_aws_settings():
 _detector_names = _get_detector_names()
 
 app_settings = Bunch(
+
     project_name=_PROJECT_NAME,
     archive_remote=_ARCHIVE_REMOTE,
     logging_level=_LOGGING_LEVEL,
+
+    # stations
     station_names=_STATION_NAMES,
     station_time_zone=_STATION_TIME_ZONE,
+
+    # recordings
+    recorder_names=_RECORDER_NAMES,
+    recording_file_wait_period=_FILE_WAIT_PERIOD,
+    recording_file_retirement_wait_period=_FILE_RETIREMENT_WAIT_PERIOD,
+
+    # clips
     old_bird_clip_device_data=_get_old_bird_clip_device_data(),
     process_old_bird_clips=_PROCESS_OLD_BIRD_CLIPS,
     delete_old_bird_clips=_DELETE_OLD_BIRD_CLIPS,
     detector_names=_detector_names,
-    paths=_get_paths(_STATION_NAMES, _detector_names),
-    recording_file_wait_period=_FILE_WAIT_PERIOD,
-    recording_file_retirement_wait_period=_FILE_RETIREMENT_WAIT_PERIOD,
     clip_file_wait_period=_FILE_WAIT_PERIOD,
     clip_file_retirement_wait_period=_FILE_RETIREMENT_WAIT_PERIOD,
-    vesper=_get_vesper_settings())
+
+    # paths
+    paths=_get_paths(_STATION_NAMES, _RECORDER_NAMES, _detector_names),
+
+    # Vesper server
+    vesper=_get_vesper_settings()
+
+)
 
 if _ARCHIVE_REMOTE:
     app_settings.aws=_get_aws_settings()
