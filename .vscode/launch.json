@@ -21,7 +21,7 @@
             "type": "debugpy",
             "request": "launch",
             "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
-            "program": "${workspaceFolder}/lrgv/archiver/create_recording_metadata_files_lrgv.py",
+            "program": "${workspaceFolder}/lrgv/scripts/create_recording_metadata_files_lrgv.py",
             "args": [
                 // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--start-date", "2025-05-01", "--end-date", "2025-05-02"
                 // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv"
