@@ -27,7 +27,7 @@
                 // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv"
                 // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--date", "2025-05-01"
                 // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--start-date", "2025-05-01"
-                "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--end-date", "2025-05-01"
+                "--input-file", "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Station Data/Active/LRGV - Roma RBMS/Recordings/Vesper Recorder/Recording Files.csv", "--output-dir", "Incoming"
                 // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--output-dir", "/Users/harold/Desktop/Bobo/Metadata Files", "--start-date", "2025-05-01", "--end-date", "2025-05-02"
             ],
             "console": "integratedTerminal",
