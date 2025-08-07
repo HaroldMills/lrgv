@@ -49,6 +49,12 @@ import lrgv.util.arg_utils as arg_utils
 import lrgv.util.file_utils as file_utils
 
 
+# TODO: Consider making this script more flexible regarding recording
+#       file name formats. It currently assumes Vesper Recorder recording
+#       file names. We might want to process files with names in other
+#       formats at some point, such as i-Sound Recorder files.
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -62,7 +68,7 @@ Recordings
         Recording Files.csv
     Vesper Recorder
         Recording Files.csv
-        Alamo_2025-07-30_07.03.18.800_Z.json
+        Incoming/Alamo_2025-07-30_07.03.18.800_Z.json
 
         
 Example recording metadata JSON:
@@ -130,6 +136,13 @@ def parse_args(args):
 
         # Set output dir path to parent directory of input file.
         args.output_dir = args.input_file.parent
+
+    elif not args.output_dir.is_absolute():
+        # output dir path is relative
+
+        # Make it absolute by joining it with the parent directory of the
+        # input file.
+        args.output_dir = args.input_file.parent / args.output_dir
 
     # Perform some additional argument checks.
     try:
@@ -242,6 +255,15 @@ def create_recording_metadata_files(files, output_dir_path):
 
 def create_recording_metadata_file(file, output_dir_path):
 
+    # Create output directory if needed.
+    try:
+        output_dir_path.mkdir(mode=0o755, parents=True, exist_ok=True)
+    except Exception as e:
+        logger.critical(
+            f'Could not create output directory "{output_dir_path}". '
+            f'Error message was: {e}')
+        sys.exit(1)
+
     # Get file path.
     start_time = file.start_time.strftime("%Y-%m-%d_%H.%M.%S_Z")
     file_name = f'{file.station_name}_{start_time}.json'
@@ -270,9 +292,15 @@ def create_recording_metadata_file(file, output_dir_path):
     )
 
     # Write file.
-    with open(file_path, 'w') as f:
-        f.write(file_contents)
+    try:
+        with open(file_path, 'w') as f:
+            f.write(file_contents)
+    except Exception as e:
+        logger.critical(
+            f'Could not write metadata file "{file_path}". '
+            f'Error message was: {e}')
+        sys.exit(1)
 
-    
+
 if __name__ == '__main__':
     main()
