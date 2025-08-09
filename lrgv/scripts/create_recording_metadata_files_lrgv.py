@@ -1,6 +1,6 @@
 """
 Script that creates Vesper recording metadata files from a CSV recording
-file list.
+file list for the LRGV project.
 
 Usage:
     python create_recording_metadata_files_lrgv.py
@@ -68,7 +68,8 @@ Recordings
         Recording Files.csv
     Vesper Recorder
         Recording Files.csv
-        Incoming/Alamo_2025-07-30_07.03.18.800_Z.json
+        Incoming
+            Alamo_2025-07-30_07.03.18.800_Z.json
 
         
 Example recording metadata JSON:
