@@ -55,7 +55,8 @@ ALL_STATION_NAMES = (
     'Port Isabel',
     'Rio Hondo',
     'Roma HS',
-    'Roma RBMS'
+    'Roma RBMS',
+    'Rio Grande City'
 )
 
 ALL_DETECTOR_NAMES = ('Dick', 'Nighthawk')

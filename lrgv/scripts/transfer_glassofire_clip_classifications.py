@@ -49,7 +49,8 @@ STATION_NAMES = frozenset((
     'Port Isabel',
     'Rio Hondo',
     'Roma HS',
-    'Roma RBMS'
+    'Roma RBMS',
+    'Rio Grande City'
 ))
 
 CLASSIFICATIONS = {

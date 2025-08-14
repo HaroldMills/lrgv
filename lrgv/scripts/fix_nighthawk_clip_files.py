@@ -25,7 +25,8 @@ STATION_NUMS = {
     'Port Isabel': 3,
     'Rio Hondo': 4,
     'Roma HS': 5,
-    'Roma RBMS': 6
+    'Roma RBMS': 6,
+    'Rio Grande City': 7
 }
 
 RECORDER_NAME_FORMAT = 'Vesper Recorder {}'

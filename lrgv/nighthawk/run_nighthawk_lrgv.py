@@ -72,7 +72,8 @@ STATION_NAMES = (
     'Port Isabel',
     'Rio Hondo',
     'Roma HS',
-    'Roma RBMS'
+    'Roma RBMS',
+    'Rio Grande City'
 )
 
 STATION_NUMS = {n: i for i, n in enumerate(STATION_NAMES)}
