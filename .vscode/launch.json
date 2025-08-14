@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Add File Name Column To Recording File List",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "program": "${workspaceFolder}/lrgv/scripts/add_file_name_column_to_recording_file_list.py",
+            "args": [
+                "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Station Data/Active/LRGV - Rio Hondo/Recordings/Vesper Recorder/Recording Files Old.csv",
+                "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Station Data/Active/LRGV - Rio Hondo/Recordings/Vesper Recorder/Recording Files.csv",
+            ],
+            "console": "integratedTerminal",
+        },
+        {
             "name": "List Audio Files",
             "type": "debugpy",
             "request": "launch",
@@ -13,7 +25,7 @@
             "args": [
                 "/Users/harold/Desktop/Alamo/Recordings",
                 "/Users/harold/Desktop/Alamo/Recording Files.csv"
-            ],
+           ],
             "console": "integratedTerminal",
         },
         {
@@ -27,7 +39,23 @@
                 // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv"
                 // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--date", "2025-05-01"
                 // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--start-date", "2025-05-01"
-                "--input-file", "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Station Data/Active/LRGV - Roma RBMS/Recordings/Vesper Recorder/Recording Files.csv", "--output-dir", "Incoming"
+                "--input-file", "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Station Data/Active/LRGV - Alamo/Recordings/Vesper Recorder/Recording Files.csv", "--output-dir", "Incoming"
+                // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--output-dir", "/Users/harold/Desktop/Bobo/Metadata Files", "--start-date", "2025-05-01", "--end-date", "2025-05-02"
+            ],
+            "console": "integratedTerminal",
+        },
+        {
+            "name": "Create Recording Metadata Files Lighthouse",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "program": "${workspaceFolder}/lrgv/scripts/create_recording_metadata_files_lighthouse.py",
+            "args": [
+                // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--start-date", "2025-05-01", "--end-date", "2025-05-02"
+                // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv"
+                // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--date", "2025-05-01"
+                // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--start-date", "2025-05-01"
+                "--input-file", "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025/Station Data/Active/Lighthouse - Station 5/Recordings/Vesper Recorder/Recording Files.csv", "--output-dir", "Incoming"
                 // "--input-file", "/Users/harold/Desktop/Alamo/Recording Files.csv", "--output-dir", "/Users/harold/Desktop/Bobo/Metadata Files", "--start-date", "2025-05-01", "--end-date", "2025-05-02"
             ],
             "console": "integratedTerminal",
