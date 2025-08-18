@@ -3,7 +3,7 @@
 # To create a Python environment named `lrgv` in which to work on
 # the `lrgv` package:
 #
-#     conda create -n lrgv python=3.12
+#     conda create -n lrgv python=3.13
 #     conda activate lrgv
 #     pip install -e <lrgv package dir path>
 
