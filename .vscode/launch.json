@@ -95,7 +95,14 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/lrgv/nighthawk/run_nighthawk_lrgv.py",
-            "args": ["/Users/harold/Desktop/Alamo/Recordings", "/Users/harold/Desktop/Alamo/Clips/Nighthawk/Nighthawk Output", "/Users/harold/Desktop/Alamo/Clips/Nighthawk/Incoming"],
+            "args": [
+                "--recording-dir", "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Run Nighthawk Test Data/Alamo/Recordings",
+                "--nighthawk-output-dir", "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Run Nighthawk Test Data/Alamo/Clips/Nighthawk/Nighthawk Output",
+                "--clip-dir", "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Run Nighthawk Test Data/Alamo/Clips/Nighthawk/Incoming",
+                "--extract-only",
+                "--start-date", "2025-08-10",
+                "--end-date", "2025-08-20"
+            ],
             "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
             "console": "integratedTerminal",
         },
