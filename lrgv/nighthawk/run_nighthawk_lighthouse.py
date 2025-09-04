@@ -1,25 +1,37 @@
 """
-Script that runs the Nighthawk NFC detector on Lighthouse recording
-files from one night and creates an audio file and a metadata file
-for each resulting detection.
+Script that runs the Nighthawk NFC detector on Lighthouse recording files
+and extracts clips for the resulting detections, creating an audio file
+and a metadata file for each one.
 
-The script has three required command line arguments, a recording
+The script has three required command line arguments: a recording
 directory path, a Nighthawk output directory path, and a clip directory
-path. It also has an optional fourth argument, the date of the night
-for which to run the detector. The fourth argument defaults to yesterday's
-date.
+path. There is also a boolean argument for performing extraction without
+detection, as well as arguments for specifying a date or date range of
+the recordings to process.
 
-Each station laptop in the monitoring network runs this script every
-morning after the previous night's recording completes to process the
-recording. Each station laptop's clip directory is synced with one or
-more remote computers via SugarSync. We run the clip archiver on one
-such computer to put the clips into a Vesper cloud archive.
+The command line looks like:
+
+    python run_nighthawk_lighthouse.py
+        --recording-dir <recording_dir>
+        --nighthawk-output-dir <nighthawk_output_dir>
+        --clip-dir <clip_dir>
+        --extract-only
+        [--date <date>]
+        [--start-date <start_date>]
+        [--end-date <end_date>]
+
+Normally each station laptop in the monitoring network runs this script
+every morning after the previous night's recording completes to process
+the recording. Each station laptop's clip directory is synced with one
+or more remote computers via SugarSync. We run the clip archiver on one
+of the remote computers to put the clips into the network's Vesper cloud
+archive.
 """
 
 
+from argparse import ArgumentParser
 from collections import defaultdict
-from datetime import (
-    date as Date, datetime as DateTime, timedelta as TimeDelta)
+from datetime import datetime as DateTime, timedelta as TimeDelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 import csv
@@ -29,6 +41,7 @@ import sys
 import wave
 
 from lrgv.util.bunch import Bunch
+import lrgv.util.arg_utils as arg_utils
 import lrgv.util.conda_utils as conda_utils
 import lrgv.util.logging_utils as logging_utils
 
@@ -65,6 +78,9 @@ STATION_NAMES = (
 
 STATION_NUMS = {n: i for i, n in enumerate(STATION_NAMES)}
 
+# For 2025 we included BAWW, DICK, and LESA through the night of April 14.
+# We included BAWW, CAWA, DICK, GRSP, LESA, and UPSA from April 15.
+# INCLUDED_CLASSIFICATIONS = frozenset(['Call.BAWW', 'Call.DICK', 'Call.LESA'])
 INCLUDED_CLASSIFICATIONS = frozenset([
     'Call.BAWW', 'Call.CAWA', 'Call.DICK', 'Call.GRSP', 'Call.LESA', 
     'Call.UPSA'
@@ -76,36 +92,40 @@ def main():
     logging_utils.configure_logging(logging.INFO, LOG_FILE_PATH)
 
     # Get recording and clip directory paths.
-    recording_dir_path, nighthawk_output_dir_path, clip_dir_path, date = \
-        parse_args(sys.argv)
-    logger.info(f'Recording directory path is "{recording_dir_path}".')
-    logger.info(
-        f'Nighthawk output directory path is "{nighthawk_output_dir_path}".')
-    logger.info(f'Clip directory path is "{clip_dir_path}".')
+    (recording_dir_path, nighthawk_output_dir_path, clip_dir_path,
+     extract_only, start_date, end_date) = parse_args(sys.argv)
 
-    create_dir_if_needed(
-        nighthawk_output_dir_path, 'Nighthawk output')
-    
+    # logger.info(f'Recording directory path: "{recording_dir_path}".')
+    # logger.info(
+    #     f'Nighthawk output directory path: "{nighthawk_output_dir_path}".')
+    # logger.info(f'Clip directory path: "{clip_dir_path}".')
+    # logger.info(f'Extract only: "{extract_only}".')
+    # logger.info(f'Start date: "{start_date}".')
+    # logger.info(f'End date: "{end_date}".')
+
+    create_dir_if_needed(nighthawk_output_dir_path, 'Nighthawk output')
     create_dir_if_needed(clip_dir_path, 'clip')
 
     taxon_mapping = get_taxon_mapping(TAXON_MAPPING_FILE_PATH)
 
-    files = get_recording_files(recording_dir_path, date)
+    files = get_recording_files(recording_dir_path, start_date, end_date)
 
-    log_file_count(len(files), date)
+    log_file_count(len(files), start_date, end_date)
 
     for file in files:
 
         logger.info(f'Processing recording file "{file.path}"...')
 
-        try:
-            result = run_nighthawk_on_file(file, nighthawk_output_dir_path)
-        except Exception as e:
-            logger.warning(
-                f'Attempt to run Nighthawk on recording file '
-                f'"{file.path}" raised exception with message: {e}')
+        if not extract_only:
+            try:
+                result = run_nighthawk_on_file(file, nighthawk_output_dir_path)
+            except Exception as e:
+                logger.warning(
+                    f'Attempt to run Nighthawk on recording file '
+                    f'"{file.path}" raised exception with message: {e}')
+                continue
             
-        if result:
+        if extract_only or result:
 
             try:
                 process_detections(
@@ -122,34 +142,88 @@ def main():
 
 def parse_args(args):
 
-    if len(args) != 4 and len(args) != 5:
-        logger.critical(f'Bad script arguments: {args}')
-        logger.critical(
-            'Usage: run_nighthawk <recording_dir_path> '
-            '<nighthawk_output_dir_path> <clip_dir_path> [<date>]')
-        sys.exit(1)
+    parser = create_arg_parser()
 
-    recording_dir_path = Path(args[1])
+    # Parse script arguments with the parser.
+    args = parser.parse_args(args[1:])
 
-    if not recording_dir_path.exists():
-        logger.critical(
-            f'Specified recording directory "{recording_dir_path}" does '
-            f'not exist.')
-        sys.exit(1)
+    help_text = parser.format_help()
 
-    nighthawk_output_dir_path = Path(args[2])
-    clip_dir_path = Path(args[3])
+    # Check that recording directory exists.
+    check_directory_existence(
+        args.recording_dir, 'Recording directory', help_text)
 
-    if len(args) == 5:
-        try:
-            date = Date.fromisoformat(args[4])
-        except Exception:
-            logger.critical(f'Bad date "{args[4]}".')
-            sys.exit(1)
-    else:
-        date = Date.fromordinal(Date.today().toordinal() - 1)
+    # If not detecting, check that Nighthawk output directory exists.
+    if args.extract_only:
+        check_directory_existence(
+            args.nighthawk_output_dir, 'Nighthawk output directory', help_text)
 
-    return recording_dir_path, nighthawk_output_dir_path, clip_dir_path, date
+    # Get start and end dates from arguments.
+    try:
+        start_date, end_date = arg_utils.get_start_and_end_dates(args)
+    except Exception as e:
+        message = f'Could not parse script arguments. Error message was: {e}'
+        handle_critical_error(message, help_text)
+
+    return (
+        args.recording_dir, args.nighthawk_output_dir, args.clip_dir,
+        args.extract_only, start_date, end_date)
+
+
+def create_arg_parser():
+
+    parser = ArgumentParser(
+        description=('Run Nighthawk and extract resulting clips.'))
+
+    parser.add_argument(
+        '--recording-dir',
+        type=Path,
+        required=True,
+        help='Recording directory path (required).')
+
+    parser.add_argument(
+        '--nighthawk-output-dir',
+        type=Path,
+        required=True,
+        help='Nighthawk output directory path (required).')
+
+    parser.add_argument(
+        '--clip-dir',
+        type=Path,
+        required=True,
+        help='Extracted clip directory (required).')
+
+    parser.add_argument(
+        '--extract-only',
+        action='store_true',
+        default=False,
+        help=(
+            'Do not run Nighthawk, but extract clips from existing '
+            'Nighthawk output files (default: False).'))
+    
+    arg_utils.add_date_args(parser)
+
+    return parser
+        
+    
+def check_directory_existence(dir_path, name, help_text):
+
+    """Check that a file system path exists and is a directory."""
+
+    if not dir_path.exists():
+        handle_critical_error(
+            f'{name} path "{dir_path}" does not exist.', help_text)
+
+    if not dir_path.is_dir():
+        handle_critical_error(
+            f'{name} path "{dir_path}" exists but is not a directory.',
+            help_text)
+        
+
+def handle_critical_error(message, help_text):
+    logger.critical(message)
+    logger.critical(help_text)
+    sys.exit(1)
 
 
 def create_dir_if_needed(dir_path, name):
@@ -189,19 +263,18 @@ def get_taxon_mapping(file_path):
         return {}
     
 
-def get_recording_files(recording_dir_path, date):
-
-    noon = DateTime(
-        date.year, date.month, date.day, 12, tzinfo=STATION_TIME_ZONE)
+def get_recording_files(recording_dir_path, start_date, end_date):
 
     files = []
 
     for file_path in recording_dir_path.glob('*.wav'):
+
         file = parse_recording_file_path(file_path)
-        if file is not None:
-            delta = file.start_time - noon
-            if delta >= ZERO_SECONDS and delta < ONE_DAY:
-                files.append(file)
+
+        if file is not None and \
+                (start_date is None or file.night_date >= start_date) and \
+                (end_date is None or file.night_date <= end_date):
+            files.append(file)
 
     return files
 
@@ -228,18 +301,30 @@ def parse_recording_file_path(path):
             f'File will be ignored.')
         return None
     
-    # Make time zone UTC.
+    # Set time zone to UTC.
     start_time = start_time.replace(tzinfo=UTC_TIME_ZONE)
     
     file = Bunch()
     file.path = path
     file.station_name = station_name
     file.start_time = start_time
+    file.night_date = get_night_date(start_time, STATION_TIME_ZONE)
 
     return file
 
 
-def log_file_count(count, date):
+def get_night_date(dt, tz_info):
+
+    local_dt = dt.astimezone(tz_info)
+    date = local_dt.date()
+
+    if local_dt.hour < 12:
+        date -= TimeDelta(days=1)
+
+    return date
+
+
+def log_file_count(count, start_date, end_date):
 
     if count == 0:
         text = "no recording files"
@@ -248,7 +333,7 @@ def log_file_count(count, date):
     else:
         text = f'{count} recording files'
 
-    logger.info(f'Found {text} for date {date}.')
+    logger.info(f'Found {text} for date range [{start_date}, {end_date}].')
 
 
 def run_nighthawk_on_file(file, nighthawk_output_dir_path):
