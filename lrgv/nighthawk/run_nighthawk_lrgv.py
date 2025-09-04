@@ -1,32 +1,32 @@
 """
 Script that runs the Nighthawk NFC detector on LRGV recording files
-from one night and creates an audio file and a metadata file for
-each resulting detection.
+and extracts clips for the resulting detections, creating an audio file
+and a metadata file for each one.
 
-The script has three required command line arguments, a recording
+The script has three required command line arguments: a recording
 directory path, a Nighthawk output directory path, and a clip directory
-path. It also has an optional fourth argument, the date of the night
-for which to run the detector. The fourth argument defaults to yesterday's
-date.
+path. There is also a boolean argument for performing extraction without
+detection, as well as arguments for specifying a date or date range of
+the recordings to process.
 
-Each station laptop in the monitoring network runs this script every
-morning after the previous night's recording completes to process the
-recording. Each station laptop's clip directory is synced with one or
-more remote computers via SugarSync. We run the clip archiver on one
-such computer to put the clips into a Vesper cloud archive.
+The command line looks like:
+
+    python run_nighthawk_lrgv.py
+        --recording-dir <recording_dir>
+        --nighthawk-output-dir <nighthawk_output_dir>
+        --clip-dir <clip_dir>
+        --extract-only
+        [--date <date>]
+        [--start-date <start_date>]
+        [--end-date <end_date>]
+
+Normally each station laptop in the monitoring network runs this script
+every morning after the previous night's recording completes to process
+the recording. Each station laptop's clip directory is synced with one
+or more remote computers via SugarSync. We run the clip archiver on one
+of the remote computers to put the clips into the network's Vesper cloud
+archive.
 """
-
-
-'''
-python run_nighthawk_lrgv.py
-    --recording-dir <recording_dir>
-    --nighthawk-output-dir <nighthawk_output_dir>
-    --clip-dir <clip_dir>
-    --extract-only
-    [--date <date>]
-    [--start-date <start_date>]
-    [--end-date <end_date>]
-'''
 
 
 from argparse import ArgumentParser
