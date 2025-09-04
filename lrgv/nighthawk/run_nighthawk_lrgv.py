@@ -46,6 +46,11 @@ import lrgv.util.conda_utils as conda_utils
 import lrgv.util.logging_utils as logging_utils
 
 
+# TODO: Modify the script to keep checking for new files to process for
+# some time period, controlled by a command line argument whose default
+# value is zero.
+
+
 logger = logging.getLogger(__name__)
 
 
