@@ -7,7 +7,7 @@ from lrgv.util.test_case import TestCase
 
 _DATA_DIR_PATH = Path(__file__).parent / 'data'
 _EXPECTED_STATION_NAME = 'Alamo'
-_EXPECTED_MIC_OUTPUT_NAMES = ['21c 0 Vesper Output']
+_EXPECTED_MIC_OUTPUT_NAMES = ['21c 0 Output']
 _EXPECTED_START_TIME = DateTime.fromisoformat("2025-08-05T02:00:00.000Z")
 _EXPECTED_LENGTH = 692568450
 _EXPECTED_SAMPLE_RATE = 22050
