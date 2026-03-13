@@ -14,17 +14,17 @@ _MODE = 'Production'
 _PROJECT_NAME = 'LRGV'
 
 _ROOT_DATA_DIR_PATH = Path(
-    '/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025')
+    '/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026')
 
 _ALL_STATION_NAMES = (
     'Alamo',
     'Donna',
     'Harlingen',
     'Port Isabel',
+    'Rio Grande City',
     'Rio Hondo',
     'Roma HS',
     'Roma RBMS',
-    'Rio Grande City'
 )
 
 if _MODE == 'Test':
@@ -59,8 +59,8 @@ _NON_OLD_BIRD_DETECTOR_NAMES = ('Nighthawk',)
 
 _FILE_WAIT_PERIOD = 60                  # seconds
 # _FILE_RETIREMENT_WAIT_PERIOD = 0        # seconds
-# _FILE_RETIREMENT_WAIT_PERIOD = 60       # seconds
-_FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
+_FILE_RETIREMENT_WAIT_PERIOD = 300        # seconds
+# _FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
 
 _SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lrgv.env'
 
