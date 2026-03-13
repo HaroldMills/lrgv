@@ -68,7 +68,7 @@ STATION_TIME_ZONE = ZoneInfo('US/Central')
 UTC_TIME_ZONE = ZoneInfo('UTC')
 TIME_ZONE_OFFSET_LENGTH = 6
 RECORDER_NAME_FORMAT = 'Vesper Recorder {station_num}'
-MIC_OUTPUT_NAME_FORMAT = '21c {station_num} Vesper Output'
+MIC_OUTPUT_NAME_FORMAT = '21c {station_num} Output'
 DETECTOR_NAME = 'Nighthawk 0.3.1 80'
 
 RECORDING_FILE_STATION_NAMES = {
@@ -88,10 +88,10 @@ STATION_NAMES = (
     'Donna',
     'Harlingen',
     'Port Isabel',
+    'Rio Grande City',
     'Rio Hondo',
     'Roma HS',
     'Roma RBMS',
-    'Rio Grande City'
 )
 
 STATION_NUMS = {n: i for i, n in enumerate(STATION_NAMES)}

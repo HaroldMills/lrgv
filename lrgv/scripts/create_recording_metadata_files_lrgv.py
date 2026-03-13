@@ -16,7 +16,7 @@ and duration the form H:MM:SS.SSS. An example of the first two lines of such
 an inputfile is:
 
     File Path,File Name,Channel Count,Sample Rate (Hz),Frame Count,Duration
-    "/Volumes/Recordings/Alamo_2025-04-09_01.22.52_Z.wav","Alamo_2025-04-09_01.22.52_Z.wav",1,22050,783127800,9:51:56.000
+    "/Volumes/Recordings/Alamo_2026-04-09_01.22.52_Z.wav","Alamo_2026-04-09_01.22.52_Z.wav",1,22050,783127800,9:51:56.000
 
 The output directory is where the recording metadata files will be created.
 If the output directory is not specified, it defaults to the parent
@@ -69,7 +69,7 @@ Recordings
     Vesper Recorder
         Recording Files.csv
         Incoming
-            Alamo_2025-07-30_07.03.18.800_Z.json
+            Alamo_2026-07-30_07.03.18.800_Z.json
 
         
 Example recording metadata JSON:
@@ -79,9 +79,9 @@ Example recording metadata JSON:
             "station": "Alamo",
             "recorder": "Vesper Recorder 0",
             "mic_outputs": [
-                "21c 0 Vesper Output"
+                "21c 0 Output"
             ],
-            "start_time": "2025-07-31 01:50:09 Z",
+            "start_time": "2026-07-31 01:50:09 Z",
             "length": 684961200,
             "sample_rate": 22050
         }
@@ -95,16 +95,16 @@ STATION_NAMES = (
     'Donna',
     'Harlingen',
     'Port Isabel',
+    'Rio Grande City',
     'Rio Hondo',
     'Roma HS',
     'Roma RBMS',
-    'Rio Grande City'
 )
 
 STATION_NUMS = {n: i for i, n in enumerate(STATION_NAMES)}
 
 RECORDER_NAME_FORMAT = 'Vesper Recorder {}'
-MIC_OUTPUT_NAME_FORMAT = '21c {} Vesper Output'
+MIC_OUTPUT_NAME_FORMAT = '21c {} Output'
 
 STATION_TIME_ZONE = ZoneInfo('US/Central')
 
