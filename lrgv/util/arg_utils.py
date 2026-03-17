@@ -54,7 +54,7 @@ def _parse_date(date, today):
             f'Invalid date "{date}". Expected YYYY-MM-DD.') from e
 
 
-def get_start_and_end_dates(args, default_date='today'):
+def get_start_and_end_dates(args):
 
     date = args.date
     start_date = args.start_date
