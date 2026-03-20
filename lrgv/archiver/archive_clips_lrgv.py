@@ -172,16 +172,15 @@ class StationArchiver(Graph):
 
             if app_settings.delete_old_bird_clips:
 
-                # Delete Old Bird Dickcissel detector clips that appear in
-                # a station's SugarSync directory without archiving them.
+                # Delete Old Bird detector clips that appear in a station's
+                # SugarSync directory without archiving them.
                 processor = self._create_old_bird_clip_deleter()
 
             else:
 
-                # Move Old Bird Dickcissel detector clips that appear in
-                # a station's SugarSync directory to the detector's
-                # `Incoming` clip directory, and add an accompanying
-                # clip metadata file.
+                # Move Old Bird detector clips that appear in a station's
+                # SugarSync directory to the detector's  `Incoming` clip
+                # directory, and add an accompanying clip metadata file.
                 processor = self._create_old_bird_clip_converter()
 
             processors = (processor, *processors)

@@ -91,11 +91,18 @@ Example recording metadata JSON:
 
 
 STATION_NAMES = (
+    'BBBO',
     'Barker',
+    'Golden Hill',
+    'Hamlin Beach',
+    'Hilton',
+    'Kendall',
+    'Lakeside',
     'Lyndonville',
     'Newfane',
+    'Station 1',
     'Station 5',
-    'Wilson'
+    'Wilson',
 )
 
 STATION_NUMS = {n: i for i, n in enumerate(STATION_NAMES)}

@@ -14,14 +14,21 @@ _MODE = 'Production'
 _PROJECT_NAME = 'Lighthouse'
 
 _ROOT_DATA_DIR_PATH = Path(
-    '/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025')
+    '/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2026')
 
 _ALL_STATION_NAMES = (
+    'BBBO',
     'Barker',
+    'Golden Hill',
+    'Hamlin Beach',
+    'Hilton',
+    'Kendall',
+    'Lakeside',
     'Lyndonville',
     'Newfane',
+    'Station 1',
     'Station 5',
-    'Wilson'
+    'Wilson',
 )
 
 if _MODE == 'Test':
@@ -52,13 +59,13 @@ _RECORDER_NAMES = ('Vesper Recorder',)
 
 _PROCESS_OLD_BIRD_CLIPS = False
 _DELETE_OLD_BIRD_CLIPS = True
-_OLD_BIRD_DETECTOR_NAME = 'Dick'
+_OLD_BIRD_DETECTOR_NAME = 'Tseep'
 _NON_OLD_BIRD_DETECTOR_NAMES = ('Nighthawk',)
 
 _FILE_WAIT_PERIOD = 60                  # seconds
 # _FILE_RETIREMENT_WAIT_PERIOD = 0        # seconds
-# _FILE_RETIREMENT_WAIT_PERIOD = 60       # seconds
-_FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
+_FILE_RETIREMENT_WAIT_PERIOD = 300        # seconds
+# _FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
 
 _SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lighthouse.env'
 
