@@ -250,6 +250,7 @@ class StationArchiver(Graph):
 
             settings = Bunch(
                 source_clip_dir_path=station_paths.station_dir_path,
+                clip_file_name_re=app_settings.old_bird_clip_file_name_re,
                 clip_file_wait_period=s.clip_file_wait_period)
                 
             return OldBirdClipDeleter(settings, self)
@@ -269,6 +270,11 @@ class StationArchiver(Graph):
                 mic_output_name=mic_output_name,
                 station_time_zone=s.station_time_zone,
                 source_clip_dir_path=station_paths.station_dir_path,
+                short_detector_name=s.old_bird_short_detector_name,
+                full_detector_name=s.old_bird_full_detector_name,
+                clip_file_name_re=s.old_bird_clip_file_name_re,
+                detector_start_time=s.old_bird_detector_start_time,
+                detector_run_time=s.old_bird_detector_run_time,
                 clip_file_wait_period=s.clip_file_wait_period,
                 station_paths=station_paths,
                 clip_classification=None)

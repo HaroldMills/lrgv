@@ -1,5 +1,4 @@
-from datetime import (
-    datetime as DateTime, time as Time, timedelta as TimeDelta)
+from datetime import datetime as DateTime, timedelta as TimeDelta
 from zoneinfo import ZoneInfo
 import json
 import logging
@@ -13,24 +12,6 @@ from lrgv.util.bunch import Bunch
 
 _logger = logging.getLogger(__name__)
 
-
-_DETECTOR_NAME = 'Dick'
-
-_CLIP_FILE_NAME_RE = (
-    r'^'
-    f'{_DETECTOR_NAME}_'
-    r'(?P<year>\d\d\d\d)-(?P<month>\d\d)-(?P<day>\d\d)'
-    r'_'
-    r'(?P<hour>\d\d)\.(?P<minute>\d\d)\.(?P<second>\d\d)'
-    r'_'
-    r'(?P<num>\d\d)'
-    r'\.(?:wav|WAV)'
-    r'$')
-
-_METADATA_DETECTOR_NAME = 'Old Bird Dickcissel Detector 1.0'
-
-_RECORDING_START_TIME = Time(hour=21)
-_RECORDING_DURATION = 8             # hours
 
 _AUDIO_FILE_NAME_EXTENSION = '.wav'
 _METADATA_FILE_NAME_EXTENSION = '.json'
@@ -48,12 +29,12 @@ class OldBirdClipConverter(LinearGraph):
 
         settings = Bunch(
             dir_path=s.source_clip_dir_path,
-            file_name_re=_CLIP_FILE_NAME_RE,
+            file_name_re=s.clip_file_name_re,
             recursive=False,
             file_wait_period=s.clip_file_wait_period)
         lister = FileLister(settings, self)
 
-        paths = s.station_paths.detectors[_DETECTOR_NAME]
+        paths = s.station_paths.detectors[s.short_detector_name]
         settings = Bunch(
             station_name=s.station_name,
             recorder_name=s.recorder_name,
@@ -87,9 +68,10 @@ class _ClipFileMover(SimpleSink):
             sample_rate = wave_reader.getframerate()
         
         # Get recording start time and length.
-        recording_start_time = \
-            _get_recording_start_time(clip_start_time, s.station_time_zone)
-        recording_length = int(round(_RECORDING_DURATION * 3600 * sample_rate))
+        recording_start_time = _get_recording_start_time(
+            clip_start_time, s.detector_start_time, s.station_time_zone)
+        recording_length = \
+            int(round(s.detector_run_time * 3600 * sample_rate))
 
         # Get clip annotations.
         if s.clip_classification is None:
@@ -103,7 +85,7 @@ class _ClipFileMover(SimpleSink):
         metadata = create_clip_metadata(
             s.station_name, s.recorder_name, s.mic_output_name,
             recording_start_time, recording_length, sample_rate,
-            _METADATA_DETECTOR_NAME, clip_start_time, clip_serial_num,
+            s.full_detector_name, clip_start_time, clip_serial_num,
             clip_length, clip_annotations)
 
         # Get metadata file path.
@@ -163,7 +145,8 @@ def _get_clip_file_name_stem(station_name, start_time, serial_num):
     return f'{station_name}_{start_time_text}_{serial_num:02d}'
 
 
-def _get_recording_start_time(clip_start_time, station_time_zone):
+def _get_recording_start_time(
+        clip_start_time, detector_start_time, station_time_zone):
 
     dt = clip_start_time.astimezone(station_time_zone)
 
@@ -171,7 +154,7 @@ def _get_recording_start_time(clip_start_time, station_time_zone):
     if dt.hour < 12:
         date -= TimeDelta(days=1)
 
-    dt = DateTime.combine(date, _RECORDING_START_TIME, station_time_zone)
+    dt = DateTime.combine(date, detector_start_time, station_time_zone)
 
     return dt.astimezone(_UTC)
 

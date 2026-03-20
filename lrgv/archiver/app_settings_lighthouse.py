@@ -1,3 +1,4 @@
+from datetime import time as Time
 from pathlib import Path
 from zoneinfo import ZoneInfo
 import logging
@@ -59,7 +60,21 @@ _RECORDER_NAMES = ('Vesper Recorder',)
 
 _PROCESS_OLD_BIRD_CLIPS = False
 _DELETE_OLD_BIRD_CLIPS = True
-_OLD_BIRD_DETECTOR_NAME = 'Tseep'
+_OLD_BIRD_SHORT_DETECTOR_NAME = 'Tseep'
+_OLD_BIRD_FULL_DETECTOR_NAME = 'Old Bird Tseep Detector 1.0'
+_OLD_BIRD_CLIP_FILE_NAME_RE = (
+    r'^'
+    f'{_OLD_BIRD_SHORT_DETECTOR_NAME}_'
+    r'(?P<year>\d\d\d\d)-(?P<month>\d\d)-(?P<day>\d\d)'
+    r'_'
+    r'(?P<hour>\d\d)\.(?P<minute>\d\d)\.(?P<second>\d\d)'
+    r'_'
+    r'(?P<num>\d\d)'
+    r'\.(?:wav|WAV)'
+    r'$')
+_OLD_BIRD_DETECTOR_START_TIME = Time(hour=21)
+_OLD_BIRD_DETECTOR_RUN_TIME = 8           # hours
+
 _NON_OLD_BIRD_DETECTOR_NAMES = ('Nighthawk',)
 
 _FILE_WAIT_PERIOD = 60                  # seconds
@@ -76,7 +91,7 @@ env.read_env(_SECRET_FILE_PATH)
 
 def _get_detector_names():
     if _PROCESS_OLD_BIRD_CLIPS and not _DELETE_OLD_BIRD_CLIPS:
-        return (_OLD_BIRD_DETECTOR_NAME, *_NON_OLD_BIRD_DETECTOR_NAMES)
+        return (_OLD_BIRD_SHORT_DETECTOR_NAME, *_NON_OLD_BIRD_DETECTOR_NAMES)
     else:
         return _NON_OLD_BIRD_DETECTOR_NAMES
 
@@ -89,8 +104,9 @@ def _get_old_bird_clip_device_data():
     """
 
     def get_device_data(station_num):
-        recorder_name = f'Dick-r {station_num}'
-        mic_output_name = f'21c {station_num} Dick-r Output'
+        detector_name = f'{_OLD_BIRD_SHORT_DETECTOR_NAME}-r'
+        recorder_name = f'{detector_name} {station_num}'
+        mic_output_name = f'21c {station_num} {detector_name} Output'
         return (recorder_name, mic_output_name)
     
     return dict(
@@ -229,9 +245,14 @@ app_settings = Bunch(
     recording_file_retirement_wait_period=_FILE_RETIREMENT_WAIT_PERIOD,
 
     # clips
-    old_bird_clip_device_data=_get_old_bird_clip_device_data(),
     process_old_bird_clips=_PROCESS_OLD_BIRD_CLIPS,
     delete_old_bird_clips=_DELETE_OLD_BIRD_CLIPS,
+    old_bird_short_detector_name=_OLD_BIRD_SHORT_DETECTOR_NAME,
+    old_bird_full_detector_name=_OLD_BIRD_FULL_DETECTOR_NAME,
+    old_bird_clip_file_name_re=_OLD_BIRD_CLIP_FILE_NAME_RE,
+    old_bird_detector_start_time=_OLD_BIRD_DETECTOR_START_TIME,
+    old_bird_detector_run_time=_OLD_BIRD_DETECTOR_RUN_TIME,
+    old_bird_clip_device_data=_get_old_bird_clip_device_data(),
     detector_names=_detector_names,
     clip_file_wait_period=_FILE_WAIT_PERIOD,
     clip_file_retirement_wait_period=_FILE_RETIREMENT_WAIT_PERIOD,
