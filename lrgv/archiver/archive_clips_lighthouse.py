@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 #    according to how you want to process clips.
 #
 # 3. Open a terminal and cd to
-#    "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2025/Archiver Test Data/Test Archive".
+#    "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2026/Archiver Test Data/Test Archive".
 #
 # 4. Initialize and serve the test archive with:
 #
