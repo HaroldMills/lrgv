@@ -36,7 +36,7 @@ if _MODE == 'Test':
     _TEST_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Archiver Test Data'
     _ARCHIVE_DIR_PATH = _TEST_DATA_DIR_PATH / 'Test Archive'
     _STATION_DATA_DIR_PATH = _TEST_DATA_DIR_PATH / 'Test Station Data'
-    _STATION_NAMES = ('Barker', 'Newfane')
+    _STATION_NAMES = ('Lyndonville', 'Station 5')
 
 
 elif _MODE == 'Production':
