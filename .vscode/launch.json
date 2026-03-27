@@ -208,6 +208,14 @@
             "console": "integratedTerminal",
         },
         {
+            "name": "Simulate Lighthouse Detection",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/lrgv/scripts/simulate_detection_lighthouse.py",
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "console": "integratedTerminal",
+        },
+        {
             "name": "Serve Test Archive",
             "type": "debugpy",
             "request": "launch",
