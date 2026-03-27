@@ -40,6 +40,9 @@ class OldBirdClipConverter(LinearGraph):
             recorder_name=s.recorder_name,
             mic_output_name=s.mic_output_name,
             station_time_zone=s.station_time_zone,
+            detector_start_time=s.detector_start_time,
+            detector_run_time=s.detector_run_time,
+            full_detector_name=s.full_detector_name,
             destination_dir_path=paths.incoming_clip_dir_path,
             clip_classification=s.clip_classification)
         mover = _ClipFileMover(settings, self)
