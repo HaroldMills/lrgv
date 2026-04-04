@@ -26,11 +26,12 @@ logger = logging.getLogger(__name__)
 # 1. Uncomment `_MODE = 'Test'` in `app_settings_lrgv.py` and comment out
 #    `_MODE = 'Production'`.
 #
-# 2. Edit `archive_clips_lrgv.StationArchiver._create_processors`
-#    according to how you want to process clips.
+# 2. Set `_PROCESS_OLD_BIRD_CLIPS` and `_DELETE_OLD_BIRD_CLIPS` in
+#    `app_settings_lrgv.py` according to how you want to process
+#    Old Bird detector clips.
 #
 # 3. Open a terminal and cd to
-#    "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Archiver Test Data/Test Archive".
+#    "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Archiver Test Data/Test Archive".
 #
 # 4. Initialize and serve the test archive with:
 #

@@ -26,8 +26,9 @@ logger = logging.getLogger(__name__)
 # 1. Uncomment `_MODE = 'Test'` in `app_settings_lighthouse.py` and comment out
 #    `_MODE = 'Production'`.
 #
-# 2. Edit `archive_clips_lighthouse.StationArchiver._create_processors`
-#    according to how you want to process clips.
+# 2. Set `_PROCESS_OLD_BIRD_CLIPS` and `_DELETE_OLD_BIRD_CLIPS` in
+#    `app_settings_lrgv.py` according to how you want to process
+#    Old Bird detector clips.
 #
 # 3. Open a terminal and cd to
 #    "/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2026/Archiver Test Data/Test Archive".
