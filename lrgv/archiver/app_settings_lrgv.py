@@ -32,16 +32,15 @@ if _MODE == 'Test':
     _TEST_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Archiver Test Data'
     _ARCHIVE_DIR_PATH = _TEST_DATA_DIR_PATH / 'Test Archive'
     _STATION_DATA_DIR_PATH = _TEST_DATA_DIR_PATH / 'Test Station Data'
+    _ARCHIVER_DATA_DIR_PATH = _TEST_DATA_DIR_PATH / 'Test Archiver Data'
     _STATION_NAMES = ('Alamo', 'Port Isabel')
 
 elif _MODE == 'Production':
     _ARCHIVE_DIR_PATH = None
-    _STATION_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Station Data'
+    _STATION_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Synced Station Data'
+    _ARCHIVER_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Archiver Data'
     _STATION_NAMES = (
         'Alamo', 'Donna', 'Harlingen', 'Rio Grande City', 'Roma RBMS')
-
-_ACTIVE_DATA_DIR_PATH = _STATION_DATA_DIR_PATH / 'Active'
-_RETIRED_DATA_DIR_PATH = _STATION_DATA_DIR_PATH / 'Retired'
 
 _ARCHIVE_REMOTE = _ARCHIVE_DIR_PATH is None
 
@@ -74,9 +73,6 @@ _OLD_BIRD_DETECTOR_RUN_TIME = 8           # hours
 _NON_OLD_BIRD_DETECTOR_NAMES = ('Nighthawk',)
 
 _FILE_WAIT_PERIOD = 60                  # seconds
-# _FILE_RETIREMENT_WAIT_PERIOD = 0        # seconds
-_FILE_RETIREMENT_WAIT_PERIOD = 300        # seconds
-# _FILE_RETIREMENT_WAIT_PERIOD = 86400    # seconds
 
 _SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lrgv.env'
 
@@ -113,60 +109,69 @@ def _get_old_bird_clip_device_data():
 def _get_paths(station_names, recorder_names, detector_names):
 
 
-    def get_recorder_paths(
-            active_recording_dir_path, retired_recording_dir_path,
-            recorder_name):
+    def get_synced_station_dir_path(station_name):
+        station_dir_name = f'{_PROJECT_NAME} - {station_name}'
+        return _STATION_DATA_DIR_PATH / station_dir_name
+    
 
-        active_dir_path = active_recording_dir_path / recorder_name
-        retired_dir_path = retired_recording_dir_path / recorder_name
+    def get_archiver_station_dir_path(station_name):
+        return _ARCHIVER_DATA_DIR_PATH / station_name
+    
+
+    def get_recorder_paths(station_name, recorder_name):
+        
+        def get_recorder_dir_path(station_dir_path):
+            return station_dir_path / 'Recordings' / recorder_name
+        
+        station_dir_path = get_synced_station_dir_path(station_name)
+        synced_dir_path = get_recorder_dir_path(station_dir_path)
+
+        station_dir_path = get_archiver_station_dir_path(station_name)
+        archiver_dir_path = get_recorder_dir_path(station_dir_path)
         
         return Bunch(
-            incoming_recording_dir_path=active_dir_path / 'Incoming',
-            archived_recording_dir_path=active_dir_path / 'Archived',
-            retired_recording_dir_path=retired_dir_path / 'Archived')
+            synced_recording_dir_path=synced_dir_path / 'Incoming',
+            incoming_recording_dir_path=archiver_dir_path / 'Incoming',
+            archived_recording_dir_path=archiver_dir_path / 'Archived')
+    
 
+    def get_detector_paths(station_name, detector_name):
 
-    def get_detector_paths(
-            active_clip_dir_path, retired_clip_dir_path, detector_name):
+        def get_detector_dir_path(station_dir_path):
+            return station_dir_path / 'Clips' / detector_name
+        
+        station_dir_path = get_synced_station_dir_path(station_name)
+        synced_dir_path = get_detector_dir_path(station_dir_path)
 
-        active_dir_path = active_clip_dir_path / detector_name
-        retired_dir_path = retired_clip_dir_path / detector_name
+        station_dir_path = get_archiver_station_dir_path(station_name)
+        archiver_dir_path = get_detector_dir_path(station_dir_path)
 
         return Bunch(
-            incoming_clip_dir_path=active_dir_path / 'Incoming',
-            created_clip_dir_path=active_dir_path / 'Created',
-            archived_clip_dir_path=active_dir_path / 'Archived',
-            retired_clip_dir_path=retired_dir_path / 'Archived')
-
+            synced_clip_dir_path=synced_dir_path / 'Incoming',
+            incoming_clip_dir_path=archiver_dir_path / 'Incoming',
+            created_clip_dir_path=archiver_dir_path / 'Created',
+            archived_clip_dir_path=archiver_dir_path / 'Archived')
+    
 
     def get_station_paths(station_name, recorder_names, detector_names):
 
-        station_dir_name = f'{_PROJECT_NAME} - {station_name}'
-        station_dir_path = _ACTIVE_DATA_DIR_PATH / station_dir_name
+        synced_station_dir_path = get_synced_station_dir_path(station_name)
 
-        active_recording_dir_path = station_dir_path / 'Recordings'
-        retired_recording_dir_path = \
-            _RETIRED_DATA_DIR_PATH / station_name / 'Recordings'
         recorder_paths = {
-            recorder_name: get_recorder_paths(
-                active_recording_dir_path, retired_recording_dir_path,
-                recorder_name)
+            recorder_name: get_recorder_paths(station_name, recorder_name)
             for recorder_name in recorder_names
         }
         
-        active_clip_dir_path = station_dir_path / 'Clips'
-        retired_clip_dir_path = \
-            _RETIRED_DATA_DIR_PATH / station_name / 'Clips'
         detector_paths = {
-            detector_name: get_detector_paths(
-                active_clip_dir_path, retired_clip_dir_path, detector_name)
+            detector_name: get_detector_paths(station_name, detector_name)
             for detector_name in detector_names
         }
 
         return Bunch(
-            station_dir_path=station_dir_path,
+            synced_station_dir_path=synced_station_dir_path,
             recorders=recorder_paths,
             detectors=detector_paths)
+
 
     station_paths = {
         station_name: 
@@ -238,8 +243,7 @@ app_settings = Bunch(
     # recordings
     recorder_names=_RECORDER_NAMES,
     recording_file_wait_period=_FILE_WAIT_PERIOD,
-    recording_file_retirement_wait_period=_FILE_RETIREMENT_WAIT_PERIOD,
-
+    
     # clips
     process_old_bird_clips=_PROCESS_OLD_BIRD_CLIPS,
     delete_old_bird_clips=_DELETE_OLD_BIRD_CLIPS,
@@ -251,8 +255,7 @@ app_settings = Bunch(
     old_bird_clip_device_data=_get_old_bird_clip_device_data(),
     detector_names=_detector_names,
     clip_file_wait_period=_FILE_WAIT_PERIOD,
-    clip_file_retirement_wait_period=_FILE_RETIREMENT_WAIT_PERIOD,
-
+    
     # paths
     paths=_get_paths(_STATION_NAMES, _RECORDER_NAMES, _detector_names),
 

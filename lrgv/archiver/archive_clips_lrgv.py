@@ -80,7 +80,7 @@ logger = logging.getLogger(__name__)
 
 
 '''
-Processor hierarchy:
+Old Processor hierarchy:
 
 Archiver (e.g. LRGV)
     StationArchiver (e.g. Alamo)
@@ -88,7 +88,7 @@ Archiver (e.g. LRGV)
             RecordingMetadataArchiver
                 RecordingLister
                 VesperRecordingCreator
-             RecordingRetirer
+            RecordingRetirer
                 RecordingLister
                 RecordingMover
         OldBirdClipConverter
@@ -106,6 +106,37 @@ Archiver (e.g. LRGV)
                 ClipMover
             ClipRetirer
                 ClipLister
+                ClipMover
+'''
+
+
+'''
+New Processor hierarchy:
+
+Archiver (e.g. LRGV)
+    StationArchiver (e.g. Alamo)
+        RecordingArchiver (e.g. Vesper Recorder)
+            SyncedRecordingMover
+                RecordingLister
+                RecordingMover
+            RecordingMetadataArchiver
+                RecordingLister
+                VesperRecordingCreator
+        OldBirdClipConverter
+        ClipArchiver (e.g. Dick or Nighthawk)
+            SyncedClipMover
+                ClipLister
+                ClipMover
+            ClipMetadataArchiver
+                ClipLister
+                VesperClipCreator
+            ClipAudioFileS3Archiver
+                ClipLister
+                ClipAudioFileS3Uploader
+                ClipMover
+            ClipAudioFileLocalArchiver
+                ClipLister
+                ClipAudioFileCopier
                 ClipMover
 '''
 
@@ -149,19 +180,20 @@ class StationArchiver(Graph):
 
     def _create_processors(self):
 
-        # Archive recordings that appear in recorders' `Incoming` recording
-        # directories.
+        # Archive recordings that appear in recorders' synced `Incoming`
+        # recording directories.
         recording_archivers = tuple(
             self._create_recording_archiver(n)
             for n in app_settings.recorder_names)
         
-        # Archive clips that appear in detectors' `Incoming` clip directories.
+        # Archive clips that appear in detectors' synced `Incoming` clip
+        # directories.
         clip_archivers = tuple(
             self._create_clip_archiver(n)
             for n in app_settings.detector_names)
 
-        # Delete clips that appear in detectors' `Incoming` clip directories
-        # without archiving them.
+        # Delete clips that appear in detectors' synced `Incoming` clip
+        # directories without archiving them.
         # clip_deleters = tuple(
         #     self._create_clip_deleter(n)
         #     for n in app_settings.detector_names)
@@ -198,8 +230,6 @@ class StationArchiver(Graph):
         settings = Bunch(
             recorder_paths=recorder_paths,
             recording_file_wait_period=s.recording_file_wait_period,
-            recording_file_retirement_wait_period=
-                s.recording_file_retirement_wait_period,
             vesper=s.vesper)
 
         return RecordingArchiver(settings, self, recorder_name)
@@ -216,8 +246,6 @@ class StationArchiver(Graph):
             archive_remote=s.archive_remote,
             detector_paths=detector_paths,
             clip_file_wait_period=s.clip_file_wait_period,
-            clip_file_retirement_wait_period=
-                s.clip_file_retirement_wait_period,
             vesper=s.vesper)
         
         if s.archive_remote:
@@ -249,7 +277,7 @@ class StationArchiver(Graph):
             station_paths = s.paths.stations[station_name]
 
             settings = Bunch(
-                source_clip_dir_path=station_paths.station_dir_path,
+                source_clip_dir_path=station_paths.synced_station_dir_path,
                 clip_file_name_re=app_settings.old_bird_clip_file_name_re,
                 clip_file_wait_period=s.clip_file_wait_period)
                 
@@ -269,7 +297,7 @@ class StationArchiver(Graph):
                 recorder_name=recorder_name,
                 mic_output_name=mic_output_name,
                 station_time_zone=s.station_time_zone,
-                source_clip_dir_path=station_paths.station_dir_path,
+                source_clip_dir_path=station_paths.synced_station_dir_path,
                 short_detector_name=s.old_bird_short_detector_name,
                 full_detector_name=s.old_bird_full_detector_name,
                 clip_file_name_re=s.old_bird_clip_file_name_re,
@@ -287,9 +315,9 @@ class RecordingArchiver(Graph):
 
     def _create_processors(self):
         s = self.settings
+        mover = SyncedRecordingMover(s, self)
         metadata_archiver = RecordingMetadataArchiver(s, self)
-        retirer = RecordingRetirer(s, self)
-        return metadata_archiver, retirer
+        return mover, metadata_archiver
 
     
     def _process(self, input_data):
@@ -308,6 +336,30 @@ class RecordingArchiver(Graph):
                 f'was: {e}')
             
             
+class SyncedRecordingMover(LinearGraph):
+
+    """
+    Moves recordings that appear in a detector's synced `Incoming`
+    recording directory to the corresponding unsynced archiver `Incoming`
+    recording directory.
+    """
+
+    def _create_processors(self):
+        
+        s = self.settings
+
+        settings = Bunch(
+            recording_dir_path=s.recorder_paths.synced_recording_dir_path,
+            recording_file_wait_period=s.recording_file_wait_period)
+        recording_lister = RecordingLister(settings, self)
+
+        settings = Bunch(
+            destination_dir_path=s.recorder_paths.incoming_recording_dir_path)
+        recording_mover = RecordingMover(settings, self)
+
+        return recording_lister, recording_mover
+    
+    
 class RecordingMetadataArchiver(LinearGraph):
 
 
@@ -327,31 +379,6 @@ class RecordingMetadataArchiver(LinearGraph):
         recording_creator = VesperRecordingCreator(settings, self)
 
         return recording_lister, recording_creator
-    
-
-class RecordingRetirer(LinearGraph):
-
-    """
-    Moves recordings that appear in a detector's `Archived` recording
-    directory to the detector's `Retired` recording directory. The
-    `Retired` directory is not a SugarSync directory, so after recordings
-    are moved there SugarSync no longer has to synchronize them.
-    """
-
-    def _create_processors(self):
-        
-        s = self.settings
-
-        settings = Bunch(
-            recording_dir_path=s.recorder_paths.archived_recording_dir_path,
-            recording_file_wait_period=s.recording_file_retirement_wait_period)
-        recording_lister = RecordingLister(settings, self)
-
-        settings = Bunch(
-            destination_dir_path=s.recorder_paths.retired_recording_dir_path)
-        recording_mover = RecordingMover(settings, self)
-
-        return recording_lister, recording_mover
 
 
 class ClipArchiver(Graph):
@@ -360,6 +387,8 @@ class ClipArchiver(Graph):
     def _create_processors(self):
 
         s = self.settings
+
+        mover = SyncedClipMover(settings, self)
 
         metadata_archiver = ClipMetadataArchiver(s, self)
 
@@ -386,9 +415,7 @@ class ClipArchiver(Graph):
             detector_paths=s.detector_paths,
             clip_file_wait_period=s.clip_file_retirement_wait_period)
         
-        retirer = ClipRetirer(settings, self)
-
-        return metadata_archiver, audio_file_archiver, retirer
+        return mover, metadata_archiver, audio_file_archiver
 
     
     def _process(self, input_data):
@@ -405,6 +432,29 @@ class ClipArchiver(Graph):
             logger.warning(
                 f'Processor "{self.path}" raised exception. Message '
                 f'was: {e}')
+
+
+class SyncedClipMover(LinearGraph):
+
+    """
+    Moves clips that appear in a detector's synced `Incoming` clip directory
+    to the corresponding unsynced archiver `Incoming` clip directory.
+    """
+
+    def _create_processors(self):
+        
+        s = self.settings
+
+        settings = Bunch(
+            clip_dir_path=s.detector_paths.synced_clip_dir_path,
+            clip_file_wait_period=s.clip_file_wait_period)
+        clip_lister = ClipLister(settings, self)
+
+        settings = Bunch(
+            destination_dir_path=s.detector_paths.incoming_clip_dir_path)
+        clip_mover = ClipMover(settings, self)
+
+        return clip_lister, clip_mover
 
 
 class ClipMetadataArchiver(LinearGraph):
@@ -470,31 +520,6 @@ class ClipAudioFileLocalArchiver(LinearGraph):
 
         return clip_lister, audio_file_copier, clip_mover
             
-
-class ClipRetirer(LinearGraph):
-
-    """
-    Moves clips that appear in a detector's `Archived` clip directory
-    to the detector's `Retired` clip directory. The `Retired` directory
-    is not a SugarSync directory, so after clips are moved there
-    SugarSync no longer has to synchronize them.
-    """
-
-    def _create_processors(self):
-        
-        s = self.settings
-
-        settings = Bunch(
-            clip_dir_path=s.detector_paths.archived_clip_dir_path,
-            clip_file_wait_period=s.clip_file_wait_period)
-        clip_lister = ClipLister(settings, self)
-
-        settings = Bunch(
-            destination_dir_path=s.detector_paths.retired_clip_dir_path)
-        clip_mover = ClipMover(settings, self)
-
-        return clip_lister, clip_mover
-
 
 if __name__ == '__main__':
     main()
