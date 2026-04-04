@@ -28,7 +28,7 @@ import time
 PROJECT_NAME = 'LRGV'
 
 TEST_DATA_DIR_PATH = Path(
-    '/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2025/Archiver Test Data/')
+    '/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Archiver Test Data/')
 
 DATA_SOURCE_DIR_PATH = TEST_DATA_DIR_PATH / 'Test Station Data Source'
 
