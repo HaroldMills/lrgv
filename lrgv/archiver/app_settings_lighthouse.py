@@ -42,7 +42,8 @@ if _MODE == 'Test':
 elif _MODE == 'Production':
     _ARCHIVE_DIR_PATH = None
     _STATION_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Station Data'
-    _STATION_NAMES = _ALL_STATION_NAMES
+    _STATION_NAMES = (
+        'BBBO', 'Kendall', 'Lyndonville', 'Station 1', 'Station 5', 'Wilson')
 
 _ACTIVE_DATA_DIR_PATH = _STATION_DATA_DIR_PATH / 'Active'
 _RETIRED_DATA_DIR_PATH = _STATION_DATA_DIR_PATH / 'Retired'
