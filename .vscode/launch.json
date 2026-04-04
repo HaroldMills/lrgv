@@ -216,6 +216,19 @@
             "console": "integratedTerminal",
         },
         {
+            "name": "Patch Harlingen Recording Metadata Files",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/lrgv/scripts/replace_string_in_json_files.py",
+            "args": [
+                "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Station Data/Active/LRGV - Harlingen/Recordings/Vesper Recorder/Incoming",
+                "21c 2 Vesper Output",
+                "21c 2 Output"
+            ],
+            "python": "/Users/harold/miniconda3/envs/lrgv/bin/python",
+            "console": "integratedTerminal",
+        },
+        {
             "name": "Serve Test Archive",
             "type": "debugpy",
             "request": "launch",
