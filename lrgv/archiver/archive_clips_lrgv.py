@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 #    Old Bird detector clips.
 #
 # 3. Open a terminal and cd to
-#    "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Archiver Test Data/Vesper Archive".
+#    "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Archiver Testbed/Vesper Archive".
 #
 # 4. Initialize and serve the test archive with:
 #
