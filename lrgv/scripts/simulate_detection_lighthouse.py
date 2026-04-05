@@ -4,20 +4,17 @@ import shutil
 import time
 
 
-# The source, active, and retired test data directory hierarchies parallel
-# the station laptop data directory hierarchy and look like:
+# The station data source, and station data test data directory hierarchies
+# parallel the synced station laptop data directory hierarchy and look like:
 #
 #     <root dir>
 #         <station name>
 #             Clips
 #                 <detector name>
 #                     Incoming
-#                     Created
-#                     Archived
 #             Recordings
 #                 <recorder name>
 #                     Incoming
-#                     Archived
 #
 # For a given station, Old Bird detector clips appear in the station
 # directory <station name>, while other detector clips appear in the
@@ -27,19 +24,15 @@ import time
 
 PROJECT_NAME = 'Lighthouse'
 
-TEST_DATA_DIR_PATH = Path(
+TESTBED_DIR_PATH = Path(
     '/Users/harold/Desktop/NFC/Data/Old Bird/Lighthouse/2026/'
-    'Archiver Test Data/')
+    'Archiver Testbed/')
 
-DATA_SOURCE_DIR_PATH = TEST_DATA_DIR_PATH / 'Test Station Data Source'
+DATA_SOURCE_DIR_PATH = TESTBED_DIR_PATH / 'Station Data Source'
 
-DATA_DIR_PATH = TEST_DATA_DIR_PATH / 'Test Station Data'
+STATION_DATA_DIR_PATH = TESTBED_DIR_PATH / 'Station Data'
 
-ACTIVE_DATA_DIR_PATH = DATA_DIR_PATH / 'Active'
-
-RETIRED_DATA_DIR_PATH = DATA_DIR_PATH / 'Retired'
-
-DATA_DIR_PATHS = (ACTIVE_DATA_DIR_PATH, RETIRED_DATA_DIR_PATH)
+ARCHIVER_DATA_DIR_PATH = TESTBED_DIR_PATH / 'Archiver Data'
 
 RECORDING_DIR_NAME = 'Recordings'
 
@@ -82,9 +75,13 @@ chain = itertools.chain.from_iterable
 
 def main():
 
-    print(f'Clearing test data directory...')
-    clear_dir(DATA_DIR_PATH)
-    # clear_dirs()
+    print(f'Clearing test station data directory...')
+    clear_dir(STATION_DATA_DIR_PATH)
+
+    print(f'Clearing test archiver data directory...')
+    clear_dir(ARCHIVER_DATA_DIR_PATH)
+
+    time.sleep(5)
 
     simulate_recording()
     simulate_detection()
@@ -102,34 +99,6 @@ def clear_dir(dir_path):
             elif path.is_dir():
                 clear_dir(path) 
                 path.rmdir()
-
-
-def clear_dirs():
-
-    def clear_dir(dir_path):
-        if dir_path.exists():
-            for path in dir_path.glob('*'):
-                if path.is_file():
-                    path.unlink()
-        
-    for data_dir_path in DATA_DIR_PATHS:
-
-        for station_name in ALL_STATION_NAMES:
-
-            station_dir_name = get_station_dir_name(station_name)
-            station_dir_path = data_dir_path / station_dir_name
-            
-            clear_dir(station_dir_path)
-
-            clip_dir_path = station_dir_path / CLIP_DIR_NAME
-            
-            for detector_name in ALL_DETECTOR_NAMES:
-
-                detector_dir_path = clip_dir_path / detector_name
-
-                for dir_name in DETECTOR_CLIP_DIR_NAMES:
-                    dir_path = detector_dir_path / dir_name
-                    clear_dir(dir_path)
 
 
 def get_station_dir_name(station_name):
@@ -163,7 +132,7 @@ def get_recording_metadata_file_paths():
 
 def copy_recording_metadata_file(file_path):
     relative_path = file_path.relative_to(DATA_SOURCE_DIR_PATH)
-    to_dir_path = ACTIVE_DATA_DIR_PATH / relative_path.parent
+    to_dir_path = STATION_DATA_DIR_PATH / relative_path.parent
     copy_file(file_path, to_dir_path)
 
 
@@ -230,7 +199,7 @@ def get_other_clip_audio_file_paths():
 def copy_clip_files(audio_file_path):
 
     relative_path = audio_file_path.relative_to(DATA_SOURCE_DIR_PATH)
-    to_dir_path = ACTIVE_DATA_DIR_PATH / relative_path.parent
+    to_dir_path = STATION_DATA_DIR_PATH / relative_path.parent
 
     copy_file(audio_file_path, to_dir_path)
 
