@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 #    Old Bird detector clips.
 #
 # 3. Open a terminal and cd to
-#    "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Archiver Test Data/Test Archive".
+#    "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Archiver Test Data/Vesper Archive".
 #
 # 4. Initialize and serve the test archive with:
 #
@@ -389,6 +389,10 @@ class ClipArchiver(Graph):
 
         s = self.settings
 
+        settings = Bunch(
+            detector_paths=s.detector_paths,
+            clip_file_wait_period=s.clip_file_wait_period)
+        
         mover = SyncedClipMover(settings, self)
 
         metadata_archiver = ClipMetadataArchiver(s, self)
@@ -412,10 +416,6 @@ class ClipArchiver(Graph):
             
             audio_file_archiver = ClipAudioFileLocalArchiver(settings, self)
 
-        settings = Bunch(
-            detector_paths=s.detector_paths,
-            clip_file_wait_period=s.clip_file_retirement_wait_period)
-        
         return mover, metadata_archiver, audio_file_archiver
 
     
