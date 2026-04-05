@@ -9,8 +9,8 @@ from lrgv.util.bunch import Bunch
 
 
 # App mode, either 'Test' or 'Production'.
-_MODE = 'Test'
-# _MODE = 'Production'
+# _MODE = 'Test'
+_MODE = 'Production'
 
 _PROJECT_NAME = 'Lighthouse'
 
