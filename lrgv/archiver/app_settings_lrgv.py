@@ -72,7 +72,7 @@ _OLD_BIRD_DETECTOR_RUN_TIME = 8           # hours
 
 _NON_OLD_BIRD_DETECTOR_NAMES = ('Nighthawk',)
 
-_FILE_WAIT_PERIOD = 60                  # seconds
+_FILE_WAIT_PERIOD = 30                  # seconds
 
 _SECRET_FILE_PATH = Path(__file__).parent / 'secrets/secrets_lrgv.env'
 
