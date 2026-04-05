@@ -27,11 +27,11 @@ PROJECT_NAME = 'LRGV'
 TEST_DATA_DIR_PATH = Path(
     '/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Archiver Test Data/')
 
-DATA_SOURCE_DIR_PATH = TEST_DATA_DIR_PATH / 'Test Station Data Source'
+DATA_SOURCE_DIR_PATH = TEST_DATA_DIR_PATH / 'Station Data Source'
 
-STATION_DATA_DIR_PATH = TEST_DATA_DIR_PATH / 'Test Station Data'
+STATION_DATA_DIR_PATH = TEST_DATA_DIR_PATH / 'Station Data'
 
-ARCHIVER_DATA_DIR_PATH = TEST_DATA_DIR_PATH / 'Test Archiver Data'
+ARCHIVER_DATA_DIR_PATH = TEST_DATA_DIR_PATH / 'Archiver Data'
 
 RECORDING_DIR_NAME = 'Recordings'
 

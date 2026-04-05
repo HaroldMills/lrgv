@@ -30,9 +30,9 @@ _ALL_STATION_NAMES = (
 
 if _MODE == 'Test':
     _TEST_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Archiver Test Data'
-    _ARCHIVE_DIR_PATH = _TEST_DATA_DIR_PATH / 'Test Archive'
-    _STATION_DATA_DIR_PATH = _TEST_DATA_DIR_PATH / 'Test Station Data'
-    _ARCHIVER_DATA_DIR_PATH = _TEST_DATA_DIR_PATH / 'Test Archiver Data'
+    _ARCHIVE_DIR_PATH = _TEST_DATA_DIR_PATH / 'Vesper Archive'
+    _STATION_DATA_DIR_PATH = _TEST_DATA_DIR_PATH / 'Station Data'
+    _ARCHIVER_DATA_DIR_PATH = _TEST_DATA_DIR_PATH / 'Archiver Data'
     _STATION_NAMES = ('Alamo', 'Port Isabel')
 
 elif _MODE == 'Production':
@@ -55,8 +55,8 @@ _RECORDER_NAMES = ('Vesper Recorder',)
 
 _PROCESS_OLD_BIRD_CLIPS = False
 _DELETE_OLD_BIRD_CLIPS = True
-_OLD_BIRD_SHORT_DETECTOR_NAME = 'Tseep'
-_OLD_BIRD_FULL_DETECTOR_NAME = 'Old Bird Tseep Detector 1.0'
+_OLD_BIRD_SHORT_DETECTOR_NAME = 'Dick'
+_OLD_BIRD_FULL_DETECTOR_NAME = 'Old Bird Dickcissel Detector 1.0'
 _OLD_BIRD_CLIP_FILE_NAME_RE = (
     r'^'
     f'{_OLD_BIRD_SHORT_DETECTOR_NAME}_'
