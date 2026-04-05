@@ -47,6 +47,12 @@ logger = logging.getLogger(__name__)
 #       but also by the Lighthouse project, and might be used by
 #       other projects in the future.
 
+# TODO: Currently there is a bunch of code that is duplicated in the
+#       module pairs (`app_settings_lrgv`, `app_settings_lighthouse`),
+#       (`archive_clips_lrgv`, `archive_clips_lighthouse`), and
+#       (`simulate_detection_lrgv`, `simulate_detection_lighthouse`).
+#       Consider refactoring to eliminate this duplication.
+
 # TODO: Consider creating a single `archive_clips` script that could
 #       be used for LRGV, Lighthouse, and other projects. The script
 #       would ideally be configured by a YAML settings file that would
@@ -81,38 +87,7 @@ logger = logging.getLogger(__name__)
 
 
 '''
-Old Processor hierarchy:
-
-Archiver (e.g. LRGV)
-    StationArchiver (e.g. Alamo)
-        RecordingArchiver (e.g. Vesper Recorder)
-            RecordingMetadataArchiver
-                RecordingLister
-                VesperRecordingCreator
-            RecordingRetirer
-                RecordingLister
-                RecordingMover
-        OldBirdClipConverter
-        ClipArchiver (e.g. Dick or Nighthawk)
-            ClipMetadataArchiver
-                ClipLister
-                VesperClipCreator
-            ClipAudioFileS3Archiver
-                ClipLister
-                ClipAudioFileS3Uploader
-                ClipMover
-            ClipAudioFileLocalArchiver
-                ClipLister
-                ClipAudioFileCopier
-                ClipMover
-            ClipRetirer
-                ClipLister
-                ClipMover
-'''
-
-
-'''
-New Processor hierarchy:
+Processor hierarchy:
 
 Archiver (e.g. LRGV)
     StationArchiver (e.g. Alamo)
