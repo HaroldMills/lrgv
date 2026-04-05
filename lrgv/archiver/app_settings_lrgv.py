@@ -29,10 +29,10 @@ _ALL_STATION_NAMES = (
 )
 
 if _MODE == 'Test':
-    _TEST_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Archiver Test Data'
-    _ARCHIVE_DIR_PATH = _TEST_DATA_DIR_PATH / 'Vesper Archive'
-    _STATION_DATA_DIR_PATH = _TEST_DATA_DIR_PATH / 'Station Data'
-    _ARCHIVER_DATA_DIR_PATH = _TEST_DATA_DIR_PATH / 'Archiver Data'
+    _TESTBED_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Archiver Testbed'
+    _ARCHIVE_DIR_PATH = _TESTBED_DIR_PATH / 'Vesper Archive'
+    _STATION_DATA_DIR_PATH = _TESTBED_DIR_PATH / 'Station Data'
+    _ARCHIVER_DATA_DIR_PATH = _TESTBED_DIR_PATH / 'Archiver Data'
     _STATION_NAMES = ('Alamo', 'Port Isabel')
 
 elif _MODE == 'Production':

@@ -24,14 +24,14 @@ import time
 
 PROJECT_NAME = 'LRGV'
 
-TEST_DATA_DIR_PATH = Path(
-    '/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Archiver Test Data/')
+TESTBED_DIR_PATH = Path(
+    '/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Archiver Testbed/')
 
-DATA_SOURCE_DIR_PATH = TEST_DATA_DIR_PATH / 'Station Data Source'
+DATA_SOURCE_DIR_PATH = TESTBED_DIR_PATH / 'Station Data Source'
 
-STATION_DATA_DIR_PATH = TEST_DATA_DIR_PATH / 'Station Data'
+STATION_DATA_DIR_PATH = TESTBED_DIR_PATH / 'Station Data'
 
-ARCHIVER_DATA_DIR_PATH = TEST_DATA_DIR_PATH / 'Archiver Data'
+ARCHIVER_DATA_DIR_PATH = TESTBED_DIR_PATH / 'Archiver Data'
 
 RECORDING_DIR_NAME = 'Recordings'
 
