@@ -221,7 +221,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/lrgv/scripts/replace_string_in_json_files.py",
             "args": [
-                "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Station Data/Active/LRGV - Harlingen/Recordings/Vesper Recorder/Incoming",
+                "/Users/harold/Desktop/NFC/Data/Old Bird/LRGV/2026/Synced Station Data/LRGV - Harlingen/Recordings/Vesper Recorder/Incoming",
                 "21c 2 Vesper Output",
                 "21c 2 Output"
             ],
