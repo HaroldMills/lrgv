@@ -105,6 +105,18 @@ class VesperRecordingCreator(SimpleSink):
 
         metadata = recording.metadata_file_contents
 
+        # Patch recording metadata for LRGV 2026 Harlington station.
+        # Due to a SugarSync problem, that station is running an old
+        # version of the script that creates recording metadata files.
+        # That version of the script specifies the wrong name for a
+        # recording's mic output. This patch can be removed when
+        # Harlingen is syncing the LRGV station software correctly
+        # again.
+        r = metadata['recordings'][0]
+        if r['station'] == 'Harlingen' and \
+                r['mic_outputs'][0] == '21c 2 Vesper Output':
+            r['mic_outputs'][0] = '21c 2 Output'
+
         response = \
             _post(self._session, self._create_objects_url, json=metadata)
 
