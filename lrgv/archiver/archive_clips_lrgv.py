@@ -85,7 +85,9 @@ logger = logging.getLogger(__name__)
 #       clip creation and audio file uploading so audio is visible in
 #       a clip album sooner.
 
-
+# TODO: There is currently duplicate code that creates parent directories
+#       for files to be written and that moves files to those directories.
+#       Consider refactoring to eliminate this duplication.
 '''
 Processor hierarchy:
 
