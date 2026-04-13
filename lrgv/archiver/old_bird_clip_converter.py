@@ -32,9 +32,18 @@ class OldBirdClipConverter(LinearGraph):
             file_name_re=s.clip_file_name_re,
             recursive=False,
             file_wait_period=s.clip_file_wait_period)
+        
         lister = FileLister(settings, self)
 
         paths = s.station_paths.detectors[s.short_detector_name]
+
+        # As of this writing, the Old Bird clip converter is the only
+        # processor that uses the `Rejected` clip directory. If in the
+        # future we want to use it more widely we can add a
+        # `paths.rejected_clip_dir_path` setting and use it instead of
+        # the following.
+        rejected_dir_path = paths.incoming_clip_dir_path.parent / 'Rejected'
+
         settings = Bunch(
             station_name=s.station_name,
             recorder_name=s.recorder_name,
@@ -44,7 +53,9 @@ class OldBirdClipConverter(LinearGraph):
             detector_run_time=s.detector_run_time,
             full_detector_name=s.full_detector_name,
             destination_dir_path=paths.incoming_clip_dir_path,
+            rejected_dir_path=rejected_dir_path,
             clip_classification=s.clip_classification)
+        
         mover = _ClipFileMover(settings, self)
 
         return lister, mover
@@ -75,6 +86,16 @@ class _ClipFileMover(SimpleSink):
             clip_start_time, s.detector_start_time, s.station_time_zone)
         recording_length = \
             int(round(s.detector_run_time * 3600 * sample_rate))
+        
+        clip_dur = TimeDelta(seconds=clip_length / sample_rate)
+        clip_end_time = clip_start_time + clip_dur
+
+        recording_dur = TimeDelta(seconds=recording_length / sample_rate)
+        recording_end_time = recording_start_time + recording_dur
+
+        if clip_end_time > recording_end_time:
+            self._reject_clip(audio_file)
+            return
 
         # Get clip annotations.
         if s.clip_classification is None:
@@ -104,8 +125,8 @@ class _ClipFileMover(SimpleSink):
         except Exception as e:
             raise ArchiverError(
                 f'Processor "{self.path}" could not create one or more '
-                f'parent directories for clip metadata file '
-                f'"{metadata_file_path}". Error message was: {e}')
+                f'parent directories for file "{metadata_file_path}". '
+                f'Error message was: {e}')
 
         # Write metadata file.
         with open(metadata_file_path, 'wt') as file:
@@ -121,6 +142,38 @@ class _ClipFileMover(SimpleSink):
                 f'Processor "{self.path}" could not move file '
                 f'"{audio_file.path}" to "{new_audio_file_path}". '
                 f'Error message was: {e}')
+        
+
+    def _reject_clip(self, audio_file):
+
+        s = self.settings
+
+        rejected_file_path = s.rejected_dir_path / audio_file.path.name
+
+        # Create rejected clip parent directories if needed.
+        try:
+            rejected_file_path.parent.mkdir(
+                mode=0o755, parents=True, exist_ok=True)
+        except Exception as e:
+            raise ArchiverError(
+                f'Processor "{self.path}" could not create one or more '
+                f'parent directories for file "{rejected_file_path}". '
+                f'Error message was: {e}')
+
+        # Move rejected clip.
+        try:
+            audio_file.path.rename(rejected_file_path)
+        except Exception as e:
+            raise ArchiverError(
+                f'Processor "{self.path}" could not move file '
+                f'"{audio_file.path}" to "{rejected_file_path}". '
+                f'Error message was: {e}')
+
+        _logger.warning(
+            f'Processor "{self.path}" rejected clip "{audio_file.path}", '
+            f'which ends after the recording that is supposed to contain '
+            f'it. The clip will not be archived and has been moved to '
+            f'"{rejected_file_path}".')
 
 
 def _get_clip_start_time(match, station_time_zone):
