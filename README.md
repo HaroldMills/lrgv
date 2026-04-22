@@ -11,5 +11,3 @@ the archiver may run on the station laptops instead.
 The name of this package is likely to change in the future. It was
 originally named for the LRGV (Lower Rio Grande Valley) project, but
 is now used for other projects as well.
-
-bobo
