@@ -44,9 +44,19 @@ elif _MODE == 'Production':
     _STATION_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Synced Station Data'
     _ARCHIVER_DATA_DIR_PATH = _ROOT_DATA_DIR_PATH / 'Archiver Data'
     _STATION_NAMES = (
-        'BBBO', 'Barker', 'Golden Hill', 'Hamlin Beach', 'Kendall',
-        'Lakeside', 'Lyndonville', 'Newfane', 'Station 1', 'Station 5',
-        'Wilson')
+        'BBBO',
+        'Barker',
+        'Golden Hill',
+        'Hamlin Beach',
+        'Hilton',
+        'Kendall',
+        'Lakeside',
+        'Lyndonville',
+        'Newfane',
+        'Station 1',
+        'Station 5',
+        'Wilson',
+    )
 
 _ARCHIVE_REMOTE = _ARCHIVE_DIR_PATH is None
 
